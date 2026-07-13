@@ -21,32 +21,35 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--light-bg); color: var(--dark-navy); }
+        body { background-color: var(--light-bg); color: var(--dark-navy); min-height: 100vh; }
 
-        /* FIXED INTERACTION LAYER: Independent Navbar stack flow */
+        /* RE-ENGINEERED BLOCK NAVBAR: Zero overlay interference */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.25rem 8%;
             background: white;
-            position: relative;
-            z-index: 99999;
             border-bottom: 2px solid var(--health-teal);
+            position: relative;
         }
 
         .logo { font-size: 1.5rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; }
         .logo span { color: var(--health-teal); }
         
+        /* High visibility and standalone clickable zone */
         .staff-link-btn {
             border: 2px solid var(--warning);
-            padding: 0.6rem 1.2rem;
+            padding: 0.6rem 1.4rem;
             border-radius: 50px;
-            color: var(--warning) !important;
+            color: var(--warning);
             background: #fffbeb;
             font-weight: 700;
             cursor: pointer;
+            outline: none;
+            display: inline-block;
         }
+        .staff-link-btn:hover { background: var(--warning); color: white; }
 
         .hero-section { padding: 4rem 8%; text-align: center; background: linear-gradient(135deg, #fff 0%, #f0fdfa 100%); }
         .hero-section h1 { font-family: 'Plus Jakarta Sans'; font-size: 3rem; margin-bottom: 1rem; }
@@ -73,7 +76,7 @@
         .delivery-info-box { background: rgba(13, 148, 136, 0.08); border-left: 4px solid var(--health-teal); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; color: #0f766e; }
         .submit-btn { width: 100%; background: var(--health-teal); color: white; padding: 1.1rem; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
 
-        /* RECEIPT SYSTEM */
+        /* RECEIPT CARD ELEMENT STYLE */
         .receipt-card {
             max-width: 600px;
             margin: 2rem auto;
@@ -89,7 +92,7 @@
         .receipt-row strong { color: var(--slate-gray); }
         .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
 
-        /* DASHBOARD SECTION LAYOUT CONTROL FIX */
+        /* DASHBOARD GRID FLOW FIX */
         #employee-dashboard { 
             display: none; 
             background: #f8fafc; 
@@ -121,11 +124,12 @@
 </head>
 <body>
 
-    <!-- CUSTOMER VIEW FRAME -->
+    <!-- CUSTOMER DEPLOYMENT LAYOUT -->
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
-            <button type="button" id="direct-staff-btn" class="staff-link-btn">Staff Dashboard 🔑</button>
+            <!-- INLINE FIX: Pure DOM control over button context avoids routing freeze -->
+            <button type="button" onclick="switchToStaffView()" class="staff-link-btn">Staff Dashboard 🔑</button>
         </header>
 
         <section class="hero-section">
@@ -194,11 +198,11 @@
         </section>
     </div>
 
-    <!-- EMPLOYEE MANAGEMENT PORTAL CONTAINER -->
+    <!-- EMPLOYEE MANAGEMENT CONTROLLER INTERFACE -->
     <div id="employee-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
-            <button id="portal-logout-action" class="logout-btn">Exit Portal</button>
+            <button onclick="switchToCustomerView()" class="logout-btn">Exit Portal</button>
         </header>
 
         <main class="dash-main">
@@ -240,34 +244,26 @@
     </div>
 
     <script>
+        // GLOBAL HIGH-VELOCITY VIEW STATE CONTROL CONTROLLERS (Bypasses DOM loading lag)
+        function switchToStaffView() {
+            document.getElementById('customer-view').style.display = 'none';
+            document.getElementById('employee-dashboard').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function switchToCustomerView() {
+            document.getElementById('employee-dashboard').style.display = 'none';
+            document.getElementById('customer-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            const customerView = document.getElementById('customer-view');
-            const employeeDashboard = document.getElementById('employee-dashboard');
-            const directStaffBtn = document.getElementById('direct-staff-btn');
-            const portalLogoutAction = document.getElementById('portal-logout-action');
             const orderForm = document.getElementById('order-submission-form');
             const adminOrdersLog = document.getElementById('admin-orders-log');
             const paymentModalBox = document.getElementById('payment-modal-box');
             const closeModalAction = document.getElementById('close-modal-action');
 
             let customerInMemoryState = {};
-
-            // STRICT TOGGLE SWITCH REPAIR: Clean screen swaps without event interruptions
-            function openStaffPanel(e) {
-                if(e) e.preventDefault();
-                customerView.style.display = 'none';
-                employeeDashboard.style.display = 'block';
-                window.scrollTo(0, 0);
-            }
-
-            directStaffBtn.addEventListener('click', openStaffPanel);
-            directStaffBtn.addEventListener('touchstart', openStaffPanel);
-
-            portalLogoutAction.addEventListener('click', () => {
-                employeeDashboard.style.display = 'none';
-                customerView.style.display = 'block';
-                window.scrollTo(0, 0);
-            });
 
             window.calculateLiveRevenue = function() {
                 let currentDayTotal = 0;
@@ -346,7 +342,7 @@
                     calculateLiveRevenue();
                     generateCustomerReceipt(billVal, deliveryMode);
 
-                    // FIXED TARGET BUSINESS LOGIC: Strict routing to customized personal UPI account
+                    // FIXED PERSONAL BANK ROUTING PROTOCOL
                     const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
@@ -373,5 +369,8 @@
                     <div class="receipt-row"><strong>Fulfillment Type:</strong> <span style="font-weight:700; color:var(--health-teal);">${modeText}</span></div>
                     <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
                     <div class="receipt-row" style="font-size: 1.3rem; font-weight: 800;">
-                        <span>TOT
+                        <span>TOTAL PAID:</span>
+                        <span style="color: var(--health-teal);">₹ ${finalBill.toFixed(2)}</span>
+                    </div>
+                    <p style="text-align:center; font-size:0.75rem; col
     
