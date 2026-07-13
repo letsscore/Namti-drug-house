@@ -56,7 +56,7 @@
             width: 100%;
             top: 0;
             left: 0;
-            z-index: 9999; /* Higher priority layer stack execution */
+            z-index: 9999;
             border-bottom: 2px solid var(--health-teal);
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
         }
@@ -85,18 +85,19 @@
 
         .nav-links a:hover { color: var(--health-teal); }
 
-        /* Dedicated Button Overrides to Fix Click Tapping Constraints */
+        /* Direct Anchored Button Style */
         .staff-link-btn {
             border: 1px solid var(--warning);
             padding: 0.5rem 1rem;
             border-radius: 50px;
-            color: var(--warning);
+            color: var(--warning) !important;
             background: rgba(245, 158, 11, 0.05);
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
             transition: var(--transition);
             display: inline-block;
+            text-decoration: none;
         }
         .staff-link-btn:hover { 
             background: rgba(245, 158, 11, 0.15);
@@ -121,7 +122,7 @@
             display: flex;
             align-items: center;
             background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,253,250,0.5) 100%);
-            padding: 140px 8% 4rem; /* Bumped up top padding to make sure layout components don't clash */
+            padding: 140px 8% 4rem;
         }
 
         .hero-content { max-width: 650px; }
@@ -200,11 +201,17 @@
             border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; font-weight: 600;
         }
 
-        /* Views management layout toggles */
-        .hidden-view { display: none !important; }
-
-        /* Operational Staff Dashboard Layout */
-        #employee-dashboard { background: #f8fafc; min-height: 100vh; }
+        /* Hidden Dashboard Portal (Triggered Explicitly via Password Route) */
+        #employee-dashboard { 
+            display: none; 
+            background: #f8fafc; 
+            min-height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10000;
+        }
         .dash-nav {
             display: flex; justify-content: space-between; align-items: center;
             padding: 1rem 4%; background: var(--dark-navy); color: white;
@@ -259,8 +266,8 @@
                     <li><a href="#home">Home</a></li>
                     <li><a href="#gallery-section">Store Photos</a></li>
                     <li><a href="#order-form-section">Order Medicine</a></li>
-                    <!-- Changed from an interactive link to a hardcoded secure inline-invoked script button -->
-                    <li><button type="button" onclick="triggerStaffGatewayGate()" class="staff-link-btn">Staff Login 🔑</button></li>
+                    <!-- Bulletproof anchored link trigger bypasses browser caching limits entirely -->
+                    <li><a href="#employee-dashboard" id="staff-gate-anchor" class="staff-link-btn">Staff Login 🔑</a></li>
                 </ul>
             </nav>
             <a href="#order-form-section" class="nav-btn">Order Online Now</a>
@@ -338,10 +345,10 @@
 
 
     <!-- EMPLOYEE MANAGEMENT PORTAL VIEW -->
-    <div id="employee-dashboard" class="hidden-view">
+    <div id="employee-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE <span>— Operational Counter Log</span></h2>
-            <button onclick="closeStaffPortal()" class="logout-btn">Exit Portal</button>
+            <button id="portal-logout-action" class="logout-btn">Exit Portal</button>
         </header>
 
         <div class="dash-container">
@@ -401,10 +408,11 @@
 
     <!-- CODE INTERACTION ROUTER CONTROL -->
     <script>
-        // High-priority global explicit script trigger (Guarantees execution even on old browser caches)
-        function triggerStaffGatewayGate() {
-            const tokenPin = prompt("Enter Namti Drug House Staff Passcode Pin:");
-            if (tokenPin === "namti123") {
-                document.getElementById('customer-view').classList.add('hidden-view');
-                document.getElementById('employee-dashboard').classList.r          
+        document.addEventListener('DOMContentLoaded', () => {
+            const customerView = document.getElementById('customer-view');
+            const employeeDashboard = document.getElementById('employee-dashboard');
+            const staffGateAnchor = document.getElementById('staff-gate-anchor');
+            const portalLogoutAction = document.getElementById('portal-logout-action');
+            
+            const orderForm = document.getElementById          
     
