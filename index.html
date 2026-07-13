@@ -23,14 +23,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--light-bg); color: var(--dark-navy); }
 
-        /* FIXED NAVBAR FIX: Ensured clickable staff button */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.25rem 8%;
             background: white;
-            position: relative; /* Fixed se relative kiya taaki click block na ho */
+            position: relative;
             z-index: 999;
             border-bottom: 2px solid var(--health-teal);
         }
@@ -47,9 +46,7 @@
             background: #fffbeb;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .staff-link-btn:hover { background: var(--warning); color: white !important; }
 
         .hero-section { padding: 4rem 8%; text-align: center; background: linear-gradient(135deg, #fff 0%, #f0fdfa 100%); }
         .hero-section h1 { font-family: 'Plus Jakarta Sans'; font-size: 3rem; margin-bottom: 1rem; }
@@ -76,13 +73,23 @@
         .delivery-info-box { background: rgba(13, 148, 136, 0.08); border-left: 4px solid var(--health-teal); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; color: #0f766e; }
         .submit-btn { width: 100%; background: var(--health-teal); color: white; padding: 1.1rem; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
 
-        /* DASHBOARD TOGGLE FIX: Standard block structure instead of broken fixed screens */
-        #employee-dashboard { 
-            display: none; 
-            background: #f8fafc; 
-            min-height: 100vh;
-            padding: 2rem 4%;
+        /* RECEIPT CARD ELEMENT STYLE */
+        .receipt-card {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border: 2px dashed var(--health-teal);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            display: none;
         }
+        .receipt-header { border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem; text-align: center; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+        .receipt-row strong { color: var(--slate-gray); }
+        .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
+
+        #employee-dashboard { display: none; background: #f8fafc; min-height: 100vh; padding: 2rem 4%; }
         .dash-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--dark-navy); color: white; border-radius: 12px; margin-bottom: 2rem; }
         .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
@@ -99,10 +106,7 @@
 
         .bill-input { width: 90px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; text-align: center; }
         .sms-trigger-btn { background: #25d366; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        
-        /* Prescription View Link Style */
         .rx-link { color: #0284c7; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 5px; }
-        .rx-link:hover { text-decoration: underline; }
 
         .payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 2000; align-items: center; justify-content: center; }
         .modal-card { background: white; padding: 2.5rem; border-radius: 20px; text-align: center; max-width: 450px; }
@@ -126,7 +130,7 @@
             <p>Order medicines online and check automatic route validations instantly.</p>
         </section>
 
-        <section class="contact-section">
+        <section class="contact-section" id="customer-form-container">
             <div class="form-card">
                 <h2>Digital Prescriptions Counter</h2>
                 <div class="delivery-info-box">
@@ -166,7 +170,6 @@
                         <textarea id="medicine-details" rows="3" placeholder="Enter medicines..." required></textarea>
                     </div>
 
-                    <!-- NEW: Prescription Photo Attachment Field -->
                     <div class="input-group">
                         <label>Upload Prescription Photo (Rx)</label>
                         <input type="file" id="prescription-photo" accept="image/*">
@@ -176,9 +179,24 @@
                 </form>
             </div>
         </section>
+
+        <!-- DYNAMIC DIGITAL INVOICE RECEIPT GENERATOR CARD -->
+        <section class="receipt-card" id="digital-receipt-section">
+            <div class="receipt-header">
+                <h2 style="color: var(--health-teal);">NAMTI DRUG HOUSE</h2>
+                <p style="font-size: 0.85rem; color: var(--slate-gray);">Digital Transaction E-Receipt</p>
+                <p style="font-size: 0.8rem; color: var(--slate-gray); margin-top: 5px;" id="receipt-date"></p>
+            </div>
+            
+            <div id="receipt-details-body">
+                <!-- Data injection point via JS -->
+            </div>
+            
+            <button class="print-btn" onclick="window.print()">🖨 Print Invoice Receipt</button>
+        </section>
     </div>
 
-    <!-- EMPLOYEE MANAGEMENT PORTAL DIAGNOSTICS FIXED -->
+    <!-- EMPLOYEE MANAGEMENT PORTAL -->
     <div id="employee-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
@@ -220,8 +238,8 @@
     <div id="payment-modal-box" class="payment-modal">
         <div class="modal-card">
             <h3 style="color: var(--health-teal);">✔ Sent Successfully</h3>
-            <p style="margin-top: 1rem; color: var(--slate-gray);">Data transmitted to admin counter queue.</p>
-            <button type="button" class="close-modal-btn" id="close-modal-action">Close</button>
+            <p style="margin-top: 1rem; color: var(--slate-gray);">Data transmitted to admin counter queue. Keep checking this window to see your processed receipt once payment confirmation link completes.</p>
+            <button type="button" class="close-modal-btn" id="close-modal-action">Close & Check Status</button>
         </div>
     </div>
 
@@ -236,7 +254,9 @@
             const paymentModalBox = document.getElementById('payment-modal-box');
             const closeModalAction = document.getElementById('close-modal-action');
 
-            // 100% FIXED: Instant View Switching Logic
+            // Shared Global state to hold customer tracking details mapping local receipts
+            let customerInMemoryState = {};
+
             directStaffBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 customerView.style.display = 'none';
@@ -250,7 +270,6 @@
                 window.scrollTo(0, 0);
             });
 
-            // Live Revenue Counter
             window.calculateLiveRevenue = function() {
                 let currentDayTotal = 0;
                 document.querySelectorAll('#admin-orders-log tr').forEach(row => {
@@ -263,7 +282,6 @@
                 document.getElementById('total-revenue-display').textContent = `Total Successful Orders: ₹ ${currentDayTotal.toFixed(2)}`;
             };
 
-            // Form Submit Logic with Image Data Conversion
             orderForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = document.getElementById('cust-name').value;
@@ -275,12 +293,13 @@
                 const photoFile = document.getElementById('prescription-photo').files[0];
 
                 let photoUrlHTML = `<span style="color:gray; font-size:0.8rem;">No Photo uploaded</span>`;
-                
                 if (photoFile) {
-                    // Temporarily creating local object URL to view image directly in browser session
                     const tempUrl = URL.createObjectURL(photoFile);
                     photoUrlHTML = `<a href="${tempUrl}" target="_blank" class="rx-link">📄 View Prescription</a>`;
                 }
+
+                // Cache active reference markers locally 
+                customerInMemoryState = { name, phone, village, pincode, district, medicineDetails };
 
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
@@ -316,7 +335,6 @@
                     }
 
                     let deliveryMode = "";
-                    // Delivery Rules
                     if (targetPin === "785684" && billVal >= 1999) {
                         statusBadge.className = "badge badge-delivery status-field";
                         statusBadge.textContent = "Confirmed: Home Delivery";
@@ -328,14 +346,33 @@
                     }
 
                     calculateLiveRevenue();
+
+                    // Instantly trigger and build receipt at customer interface window container
+                    generateCustomerReceipt(billVal, deliveryMode);
+
                     const upiDeepLink = `upi://pay?pa=namtidrughouse@upi&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
                     window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(cleanMsg)}`;
                 });
             }
-        });
-    </script>
-</body>
-    </html>
+
+            function generateCustomerReceipt(finalBill, modeText) {
+                const receiptSection = document.getElementById('digital-receipt-section');
+                const receiptBody = document.getElementById('receipt-details-body');
+                const formContainer = document.getElementById('customer-form-container');
+                const dateDisplay = document.getElementById('receipt-date');
+
+                // Set Current Timestamp
+                const now = new Date();
+                dateDisplay.textContent = `Date: ${now.toLocaleDateString()} | Time: ${now.toLocaleTimeString()}`;
+
+                receiptBody.innerHTML = `
+                    <div class="receipt-row"><strong>Customer Name:</strong> <span>${customerInMemoryState.name || 'N/A'}</span></div>
+                    <div class="receipt-row"><strong>Mobile No:</strong> <span>${customerInMemoryState.phone || 'N/A'}</span></div>
+                    <div class="receipt-row"><strong>Delivery Area:</strong> <span>${customerInMemoryState.village || 'N/A'}, ${customerInMemoryState.district || ''}</span></div>
+                    <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
+                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
+                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerInMemoryState.medicineDetails || 'N/A'}</span></div>
+                    <div class="
     
