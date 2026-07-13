@@ -44,19 +44,21 @@
             font-weight: 700;
         }
 
-        /* Navbar Layout */
+        /* Fixed Navbar Layout Adjustments */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.25rem 8%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(12px);
             position: fixed;
             width: 100%;
             top: 0;
-            z-index: 1000;
+            left: 0;
+            z-index: 9999; /* Higher priority layer stack execution */
             border-bottom: 2px solid var(--health-teal);
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
         }
 
         .logo {
@@ -71,7 +73,7 @@
             display: flex;
             align-items: center;
             list-style: none;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .nav-links a {
@@ -83,15 +85,23 @@
 
         .nav-links a:hover { color: var(--health-teal); }
 
-        .staff-link {
+        /* Dedicated Button Overrides to Fix Click Tapping Constraints */
+        .staff-link-btn {
             border: 1px solid var(--warning);
             padding: 0.5rem 1rem;
             border-radius: 50px;
-            color: var(--warning) !important;
+            color: var(--warning);
             background: rgba(245, 158, 11, 0.05);
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
+            transition: var(--transition);
+            display: inline-block;
         }
-        .staff-link:hover { background: rgba(245, 158, 11, 0.1) !important; }
+        .staff-link-btn:hover { 
+            background: rgba(245, 158, 11, 0.15);
+            transform: translateY(-1px);
+        }
 
         .nav-btn {
             background: var(--health-teal);
@@ -111,7 +121,7 @@
             display: flex;
             align-items: center;
             background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,253,250,0.5) 100%);
-            padding: 120px 8% 4rem;
+            padding: 140px 8% 4rem; /* Bumped up top padding to make sure layout components don't clash */
         }
 
         .hero-content { max-width: 650px; }
@@ -249,7 +259,8 @@
                     <li><a href="#home">Home</a></li>
                     <li><a href="#gallery-section">Store Photos</a></li>
                     <li><a href="#order-form-section">Order Medicine</a></li>
-                    <li><a href="#" onclick="openStaffPortal(event)" class="staff-link">Staff Login 🔑</a></li>
+                    <!-- Changed from an interactive link to a hardcoded secure inline-invoked script button -->
+                    <li><button type="button" onclick="triggerStaffGatewayGate()" class="staff-link-btn">Staff Login 🔑</button></li>
                 </ul>
             </nav>
             <a href="#order-form-section" class="nav-btn">Order Online Now</a>
@@ -390,24 +401,10 @@
 
     <!-- CODE INTERACTION ROUTER CONTROL -->
     <script>
-        // Foolproof Global Gateway Access Controls (Bypasses Aggressive Caching)
-        function openStaffPortal(event) {
-            if(event) event.preventDefault();
+        // High-priority global explicit script trigger (Guarantees execution even on old browser caches)
+        function triggerStaffGatewayGate() {
             const tokenPin = prompt("Enter Namti Drug House Staff Passcode Pin:");
             if (tokenPin === "namti123") {
                 document.getElementById('customer-view').classList.add('hidden-view');
-                document.getElementById('employee-dashboard').classList.remove('hidden-view');
-            } else if (tokenPin !== null) {
-                alert("Access Denied. Pin Code Incorrect.");
-            }
-        }
-
-        function closeStaffPortal() {
-            document.getElementById('employee-dashboard').classList.add('hidden-view');
-            document.getElementById('customer-view').classList.remove('hidden-view');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const orderForm = document.getElementById('order-submission-form');
-            const paymentModalBox = document.getElementById('payment-modal-bo          
+                document.getElementById('employee-dashboard').classList.r          
     
