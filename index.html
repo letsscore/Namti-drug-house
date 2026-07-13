@@ -23,7 +23,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--light-bg); color: var(--dark-navy); min-height: 100vh; }
 
-        /* FIXED: Added explicit height, isolated stacking context, and forced pointer inheritance */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -39,30 +38,29 @@
         .logo { font-size: 1.3rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; color: #0f172a; }
         .logo span { color: var(--health-teal); }
         
-        /* FIXED: Clear target dimensions with high stacking z-index and forced cursor action */
+        /* FIXED BUTTON BLOCK */
         .staff-touch-zone {
             display: inline-block !important;
             position: relative !important;
             z-index: 1000000 !important;
             pointer-events: auto !important;
-            background: #fffbeb !important;
-            border: 2px solid var(--warning) !important;
-            padding: 0.6rem 1.2rem;
+            background: #f59e0b !important; /* Fixed Amber background matching your screenshot */
+            border: none !important;
+            padding: 0.6rem 1.4rem;
             border-radius: 50px;
-            color: #d97706 !important;
+            color: #ffffff !important; /* White text */
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer !important;
             user-select: none;
             -webkit-tap-highlight-color: rgba(0,0,0,0);
             text-align: center;
+            text-decoration: none;
         }
         .staff-touch-zone:active {
-            background: var(--warning) !important;
-            color: white !important;
+            opacity: 0.9;
         }
 
-        /* FIXED: Added clear isolation block to prevent overlapping next elements upward */
         .hero-section { 
             position: relative;
             z-index: 1;
@@ -115,7 +113,6 @@
         .receipt-row strong { color: var(--slate-gray); }
         .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
 
-        /* DASHBOARD GRID CSS ENGINE */
         #employee-dashboard { 
             display: none; 
             background: #f8fafc; 
@@ -147,14 +144,14 @@
 </head>
 <body>
 
-    <!-- CUSTOMER ENTRY INTERFACE LAYER -->
+    <!-- CUSTOMER VIEW -->
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
-            <!-- INLINE REDIRECTS WITH BACKUP TAP REGISTERERS -->
-            <div onclick="window.switchToStaffView()" ontouchstart="window.switchToStaffView()" class="staff-touch-zone">
+            <!-- FIXED EXPLICIT TEXT NODE -->
+            <button onclick="switchToStaffView()" ontouchstart="switchToStaffView()" class="staff-touch-zone">
                 Staff Dashboard 🔑
-            </div>
+            </button>
         </header>
 
         <section class="hero-section">
@@ -212,7 +209,7 @@
             </div>
         </section>
 
-        <!-- E-RECEIPT -->
+        <!-- DIGITAL RECEIPT -->
         <section class="receipt-card" id="digital-receipt-section">
             <div class="receipt-header">
                 <h2 style="color: var(--health-teal);">NAMTI DRUG HOUSE</h2>
@@ -224,11 +221,11 @@
         </section>
     </div>
 
-    <!-- MAIN STAFF MANAGEMENT INTERFACE BOARD -->
+    <!-- STAFF VIEW PANEL -->
     <div id="employee-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
-            <button onclick="window.switchToCustomerView()" ontouchstart="window.switchToCustomerView()" class="logout-btn">Exit Portal</button>
+            <button onclick="switchToCustomerView()" ontouchstart="switchToCustomerView()" class="logout-btn">Exit Portal</button>
         </header>
 
         <main class="dash-main">
@@ -270,7 +267,7 @@
     </div>
 
     <script>
-        // CORE GLOBAL PLATFORM WINDOW OVERRIDES (Directly wired to bypass framework interception)
+        // ROUTING ENGINES
         window.switchToStaffView = function() {
             document.getElementById('customer-view').style.display = 'none';
             document.getElementById('employee-dashboard').style.display = 'block';
@@ -368,7 +365,7 @@
                     calculateLiveRevenue();
                     generateCustomerReceipt(billVal, deliveryMode);
 
-                    // UPI SECURE MAPPING BACKEND
+                    // UPI SECURE PAYMENT ROUTE
                     const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
@@ -388,5 +385,8 @@
                 receiptBody.innerHTML = `
                     <div class="receipt-row"><strong>Customer Name:</strong> <span>${customerInMemoryState.name || 'N/A'}</span></div>
                     <div class="receipt-row"><strong>Mobile No:</strong> <span>${customerInMemoryState.phone || 'N/A'}</span></div>
-                    <div class="receipt-row"><strong>Delivery Area:</strong> <span>${customerInMemoryState.villa
+                    <div class="receipt-row"><strong>Delivery Area:</strong> <span>${customerInMemoryState.village || 'N/A'}, ${customerInMemoryState.district || ''}</span></div>
+                    <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
+                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
+                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${
     
