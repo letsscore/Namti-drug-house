@@ -89,6 +89,7 @@
             border-radius: 50px;
             color: var(--warning) !important;
             background: rgba(245, 158, 11, 0.05);
+            cursor: pointer;
         }
         .staff-link:hover { background: rgba(245, 158, 11, 0.1) !important; }
 
@@ -184,11 +185,6 @@
             background: white; padding: 2.5rem; border-radius: 20px; text-align: center;
             max-width: 450px; width: 90%; box-shadow: var(--shadow);
         }
-        .qr-placeholder {
-            width: 180px; height: 180px; margin: 1.5rem auto;
-            background: url('https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=namtidrughouse@upi') no-repeat center/cover;
-            border: 4px solid var(--light-bg); border-radius: 12px;
-        }
         .close-modal-btn {
             background: var(--dark-navy); color: white; padding: 0.6rem 1.5rem;
             border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; font-weight: 600;
@@ -200,7 +196,7 @@
         /* Operational Staff Dashboard Layout */
         #employee-dashboard { background: #f8fafc; min-height: 100vh; }
         .dash-nav {
-            display: flex justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             padding: 1rem 4%; background: var(--dark-navy); color: white;
         }
         .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }
@@ -231,6 +227,7 @@
         .badge-danger { background: #fee2e2; color: #dc2626; }
 
         .action-select { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; font-weight: 500; }
+        .bill-input { width: 90px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); text-align: center; }
         .sms-trigger-btn {
             background: var(--health-teal); color: white; border: none; padding: 0.5rem 1rem;
             border-radius: 6px; font-weight: 600; cursor: pointer; transition: var(--transition);
@@ -252,16 +249,16 @@
                     <li><a href="#home">Home</a></li>
                     <li><a href="#gallery-section">Store Photos</a></li>
                     <li><a href="#order-form-section">Order Medicine</a></li>
-                    <li><a href="#" id="staff-portal-gate" class="staff-link">Staff Login 🔑</a></li>
+                    <li><a href="#" onclick="openStaffPortal(event)" class="staff-link">Staff Login 🔑</a></li>
                 </ul>
             </nav>
-            <a href="#order-form-section" class="nav-btn">Instant UPI Order</a>
+            <a href="#order-form-section" class="nav-btn">Order Online Now</a>
         </header>
 
         <section id="home" class="hero-section">
             <div class="hero-content">
                 <h1>Professional Pharmacy Care.<br><span>Direct To Your Doorstep.</span></h1>
-                <p>Submit your orders seamlessly via instant UPI verification payment. Enjoy instant self-collection or automated radius home deliveries for larger medical orders.</p>
+                <p>Submit your medicine list or upload a prescription instantly. Our pharmacist will verify the order items, calculate the cost, and send you a link/SMS to confirm logistics rules.</p>
                 <div>
                     <a href="#order-form-section" class="btn primary-btn">Start Order Request</a>
                 </div>
@@ -273,7 +270,6 @@
             <h2>Our Professional Pharmacy Facility</h2>
             <p>Serving our local community with genuine medicines, temperature-controlled storage, and qualified pharmacists.</p>
             <div class="gallery-grid">
-                <!-- Replace 'src' below with your actual uploaded image URLs later -->
                 <div class="gallery-card">📸 Pharmacy Front Counter View</div>
                 <div class="gallery-card">💊 Medicine Storage Vault</div>
                 <div class="gallery-card">🏢 Store Front Board View</div>
@@ -283,13 +279,13 @@
         <section id="order-form-section" class="contact-section">
             <div class="form-card">
                 <h2>Digital Prescriptions Counter</h2>
-                <p>Complete your payment instant-checkout below.</p>
+                <p>Submit your order parameters to our pharmacy counter below.</p>
                 
                 <div class="delivery-info-box">
-                    <strong>🚛 Delivery & Collection Guidelines:</strong><br>
-                    • Orders below ₹1,000: 🧾 **Self-Collect at Pharmacy** Counter.<br>
-                    • Orders above ₹1,000: 🏡 **Free Home Delivery within 2 Days** (5km radius).<br>
-                    • Orders above ₹1,999: 🚀 **Express Same-Day Home Delivery** (5km radius).
+                    <strong>🚛 Store Delivery Threshold Guidelines:</strong><br>
+                    • Final bill below ₹1,000: 🧾 **Self-Collect at Pharmacy Counter**.<br>
+                    • Final bill above ₹1,000: 🏡 **Free Home Delivery inside 2 Days** (5km radius).<br>
+                    • Final bill above ₹1,999: 🚀 **Express Same-Day Home Delivery** (5km radius).
                 </div>
 
                 <form id="order-submission-form">
@@ -303,30 +299,23 @@
                     </div>
                     <div class="input-group">
                         <label>Medicines Needed (Name & Strip Quantity)</label>
-                        <textarea id="medicine-details" rows="3" placeholder="Example: Pantocid 40mg - 2 strips" required></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label>Total Estimate Amount (₹)</label>
-                        <input type="number" id="order-amount" placeholder="Enter total amount in Rs." min="1" required>
+                        <textarea id="medicine-details" rows="4" placeholder="Example:&#10;1. Pantocid 40mg - 2 strips&#10;2. Paracetamol 650mg - 1 strip" required></textarea>
                     </div>
                     <div class="input-group">
                         <label>Upload Prescription Image (Optional)</label>
                         <input type="file" id="prescription-img" accept="image/*">
                     </div>
-                    <button type="submit" class="submit-btn">Pay via UPI & Place Order</button>
+                    <button type="submit" class="submit-btn">Submit Order Request</button>
                 </form>
             </div>
         </section>
 
-        <!-- UPI DYNAMIC CHECKOUT POPUP DIALOG -->
+        <!-- POPUP DIALOG FOR CUSTOMER CONFIRMATION -->
         <div id="payment-modal-box" class="payment-modal">
             <div class="modal-card">
-                <h3 style="color: var(--health-teal);">✔ Processing Instant UPI Payment</h3>
-                <p id="modal-delivery-type" style="margin-top: 0.5rem; font-weight: 600; color: var(--dark-navy);"></p>
-                <div class="qr-placeholder"></div>
-                <p><strong>Scan QR Code via PhonePe / GPay / Paytm</strong></p>
-                <p id="modal-amount-display" style="font-size: 1.2rem; color: var(--health-teal); font-weight: bold; margin-top: 0.5rem;"></p>
-                <button type="button" class="close-modal-btn" id="close-modal-action">Payment Done - Track Order</button>
+                <h3 style="color: var(--health-teal);">✔ Order Request Transmitted Successfully</h3>
+                <p style="margin-top: 1rem; color: var(--dark-navy); line-height: 1.5;">Our pharmacists at Namti Chariali are checking item availability right now. You will receive an SMS text alert on your mobile containing the exact bill amount and delivery allocation status shortly.</p>
+                <button type="button" class="close-modal-btn" id="close-modal-action">Got It, Thanks!</button>
             </div>
         </div>
 
@@ -339,9 +328,9 @@
 
     <!-- EMPLOYEE MANAGEMENT PORTAL VIEW -->
     <div id="employee-dashboard" class="hidden-view">
-        <header class="dash-nav" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 4%; background: var(--dark-navy); color: white;">
-            <h2>NAMTI DRUG HOUSE <span>— Operational Counter</span></h2>
-            <button id="portal-logout-action" class="logout-btn">Exit Portal</button>
+        <header class="dash-nav">
+            <h2>NAMTI DRUG HOUSE <span>— Operational Counter Log</span></h2>
+            <button onclick="closeStaffPortal()" class="logout-btn">Exit Portal</button>
         </header>
 
         <div class="dash-container">
@@ -353,8 +342,8 @@
 
             <main class="dash-main">
                 <div class="card">
-                    <h2>Live Orders Dashboard</h2>
-                    <p style="color: var(--slate-gray); margin-bottom: 1.5rem;">Review client medicine demands, verify instantaneous payments, manage stock availability, and trigger live status SMS alerts.</p>
+                    <h2>Live Orders Dashboard Queue</h2>
+                    <p style="color: var(--slate-gray); margin-bottom: 1.5rem;">Review client medicine demands, type in the calculated total bill amount, configure stock statuses, and dispatch alerts.</p>
                     
                     <div style="overflow-x: auto;">
                         <table class="order-table">
@@ -362,7 +351,7 @@
                                 <tr>
                                     <th>Customer Info</th>
                                     <th>Medicines Requested</th>
-                                    <th>Amount & Logistics</th>
+                                    <th>Calculate Bill (₹)</th>
                                     <th>Stock Availability</th>
                                     <th>Fulfillment Status</th>
                                     <th>Actions Portal</th>
@@ -376,7 +365,9 @@
                                         <span style="font-size: 0.85rem; color: var(--slate-gray);">+91 98765 43210</span>
                                     </td>
                                     <td><span style="font-family: monospace; white-space: pre-line;">Amoxicillin 500mg - 1 Strip</span></td>
-                                    <td><strong>₹1,250</strong><br><span style="font-size: 0.8rem; color: var(--primary);">🏡 2-Day Delivery</span></td>
+                                    <td>
+                                        <input type="number" class="bill-input" value="1250" placeholder="Enter ₹">
+                                    </td>
                                     <td>
                                         <select class="action-select stock-toggle">
                                             <option value="Available" selected>🟢 Fully In Stock</option>
@@ -384,9 +375,9 @@
                                             <option value="Unavailable">🔴 Out of Stock</option>
                                         </select>
                                     </td>
-                                    <td><span class="badge badge-pending status-field">Paid & Pending Review</span></td>
+                                    <td><span class="badge badge-pending status-field">Awaiting Pharmacy Review</span></td>
                                     <td>
-                                        <button class="sms-trigger-btn">Send SMS 💬</button>
+                                        <button class="sms-trigger-btn">Send Bill & SMS 💬</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -399,12 +390,24 @@
 
     <!-- CODE INTERACTION ROUTER CONTROL -->
     <script>
+        // Foolproof Global Gateway Access Controls (Bypasses Aggressive Caching)
+        function openStaffPortal(event) {
+            if(event) event.preventDefault();
+            const tokenPin = prompt("Enter Namti Drug House Staff Passcode Pin:");
+            if (tokenPin === "namti123") {
+                document.getElementById('customer-view').classList.add('hidden-view');
+                document.getElementById('employee-dashboard').classList.remove('hidden-view');
+            } else if (tokenPin !== null) {
+                alert("Access Denied. Pin Code Incorrect.");
+            }
+        }
+
+        function closeStaffPortal() {
+            document.getElementById('employee-dashboard').classList.add('hidden-view');
+            document.getElementById('customer-view').classList.remove('hidden-view');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            const customerView = document.getElementById('customer-view');
-            const employeeDashboard = document.getElementById('employee-dashboard');
-            
-            const staffPortalGate = document.getElementById('staff-portal-gate');
-            const portalLogoutAction = document.getElementById('portal-logout-action');
-            
-            const orderForm = document.getEl          
+            const orderForm = document.getElementById('order-submission-form');
+            const paymentModalBox = document.getElementById('payment-modal-bo          
     
