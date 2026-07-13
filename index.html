@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namti Drug House - Premium Pharmacy Portal</title>
+    <title>Namti Drug House - Live Digital Pharmacy Portal</title>
     <!-- Premium Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     
@@ -60,11 +60,7 @@
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
         }
 
-        .logo {
-            font-size: 1.5rem;
-            color: var(--dark-navy);
-        }
-
+        .logo { font-size: 1.5rem; color: var(--dark-navy); }
         .logo span { color: var(--health-teal); }
 
         .nav-links {
@@ -80,7 +76,6 @@
             font-weight: 500;
             transition: var(--transition);
         }
-
         .nav-links a:hover { color: var(--health-teal); }
 
         .staff-link-btn {
@@ -94,16 +89,6 @@
             text-decoration: none;
         }
 
-        .nav-btn {
-            background: var(--health-teal);
-            color: var(--white);
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
         .hero-section {
             min-height: 75vh;
             display: flex;
@@ -115,7 +100,7 @@
         .hero-content { max-width: 650px; }
         .hero-content h1 { font-size: 3.5rem; line-height: 1.15; margin-bottom: 1.5rem; }
         .hero-content h1 span { color: var(--health-teal); }
-        .hero-content p { font-size: 1.15rem; color: var(--slate-gray); mb: 2.5rem; line-height: 1.6; margin-bottom: 2rem; }
+        .hero-content p { font-size: 1.15rem; color: var(--slate-gray); line-height: 1.6; margin-bottom: 2rem; }
 
         .btn {
             padding: 1rem 2.25rem;
@@ -127,13 +112,9 @@
         }
         .primary-btn { background: var(--health-teal); color: var(--white); }
 
-        .gallery-section { padding: 4rem 8%; background: var(--white); text-align: center; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .gallery-card { background: var(--light-bg); border-radius: 12px; height: 180px; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--slate-gray); font-weight: 600; }
-
         .contact-section { padding: 5rem 8%; background: var(--light-bg); }
         .form-card {
-            max-width: 650px;
+            max-width: 700px;
             margin: 0 auto;
             background: var(--white);
             padding: 3rem;
@@ -142,10 +123,17 @@
             border: 1px solid var(--border);
         }
 
-        .input-group { margin-bottom: 1.5rem; }
+        .input-group { margin-bottom: 1.25rem; }
         .input-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
-        .input-group input, .input-group textarea {
-            width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem;
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%; padding: 0.85rem; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; background: #fafafa;
+        }
+        
+        /* Form Row Design for Address parameters */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
 
         .delivery-info-box {
@@ -158,21 +146,8 @@
             border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
         }
 
-        /* NEW FIXED: Dedicated Visible Staff Login Area Box */
-        .login-box-section {
-            padding: 5rem 8%;
-            background: #f1f5f9;
-            border-top: 2px dashed var(--border);
-        }
-        .login-card {
-            max-width: 400px;
-            margin: 0 auto;
-            background: var(--white);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
+        .login-box-section { padding: 5rem 8%; background: #f1f5f9; border-top: 2px dashed var(--border); }
+        .login-card { max-width: 400px; margin: 0 auto; background: var(--white); padding: 2.5rem; border-radius: 16px; box-shadow: var(--shadow); text-align: center; }
 
         .payment-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -180,7 +155,6 @@
             align-items: center; justify-content: center;
         }
         .modal-card { background: white; padding: 2.5rem; border-radius: 20px; text-align: center; max-width: 450px; width: 90%; }
-        
         .close-modal-btn { background: var(--dark-navy); color: white; padding: 0.6rem 1.5rem; border: none; border-radius: 8px; margin-top: 1rem; cursor: pointer; }
 
         /* Full Screen Dashboard View Panel */
@@ -198,20 +172,21 @@
         .dash-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 4%; background: var(--dark-navy); color: white; }
         .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
-        .dash-main { padding: 2rem 4%; }
+        .dash-main { padding: 2rem 2%; }
         .card { background: white; padding: 2rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
         
-        .order-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
-        .order-table th, .order-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .order-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
+        .order-table th, .order-table td { padding: 1rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
         
-        .badge { padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
+        .badge { padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
         .badge-pending { background: #ffedd5; color: #ea580c; }
         .badge-success { background: #dcfce7; color: #16a34a; }
         .badge-danger { background: #fee2e2; color: #dc2626; }
 
-        .action-select { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); }
-        .bill-input { width: 90px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); }
-        .sms-trigger-btn { background: var(--health-teal); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+        .action-select { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); width: 100%; }
+        .bill-input { width: 85px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; }
+        .sms-trigger-btn { background: #25d366; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
+        .sms-trigger-btn:hover { background: #128c7e; }
         
         footer { background: var(--dark-navy); color: var(--slate-gray); text-align: center; padding: 2.5rem; }
     </style>
@@ -226,7 +201,6 @@
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
                     <li><a href="#order-form-section">Order Medicine</a></li>
-                    <!-- Pure simple anchor HTML link - zero JS dependency to scroll -->
                     <li><a href="#login-gateway" class="staff-link-btn">Staff Login 🔑</a></li>
                 </ul>
             </nav>
@@ -235,7 +209,7 @@
         <section id="home" class="hero-section">
             <div class="hero-content">
                 <h1>Professional Pharmacy Care.<br><span>Direct To Your Doorstep.</span></h1>
-                <p>Submit your medicine list or upload a prescription instantly. Our pharmacist will verify items and send you updates.</p>
+                <p>Submit your medicine list, complete your address routing info, and upload a prescription. Our pharmacy counter logs everything in real-time.</p>
                 <a href="#order-form-section" class="btn primary-btn">Start Order Request</a>
             </div>
         </section>
@@ -243,39 +217,60 @@
         <section id="order-form-section" class="contact-section">
             <div class="form-card">
                 <h2>Digital Prescriptions Counter</h2>
-                <p style="margin-bottom: 1.5rem; color: var(--slate-gray);">Submit your order details below.</p>
+                <p style="margin-bottom: 1.5rem; color: var(--slate-gray);">Fill in your dynamic logistics details to complete validation rules.</p>
                 
                 <div class="delivery-info-box">
-                    <strong>Work Flow Rules:</strong> Bills > ₹1000 qualify for Home Delivery options.
+                    <strong>📍 Logistics Rules:</strong> Verified deliveries are dispatched based on pincode data instantly.
                 </div>
 
                 <form id="order-submission-form">
-                    <div class="input-group">
-                        <label>Customer Name</label>
-                        <input type="text" id="cust-name" required>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Customer Name</label>
+                            <input type="text" id="cust-name" placeholder="Full Name" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Mobile Number (For Live SMS & UPI)</label>
+                            <input type="tel" id="cust-phone" placeholder="10-digit number" pattern="[0-9]{10}" required>
+                        </div>
                     </div>
+
+                    <!-- NEW REQUIRED FIELD PARAMETERS: Village, Pincode, District -->
                     <div class="input-group">
-                        <label>Mobile Number</label>
-                        <input type="tel" id="cust-phone" required>
+                        <label>Village / Town / Area Name</label>
+                        <input type="text" id="cust-village" placeholder="Enter Village or Street Name" required>
                     </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Pincode</label>
+                            <input type="text" id="cust-pincode" placeholder="e.g., 785684" maxlength="6" pattern="[0-9]{6}" required>
+                        </div>
+                        <div class="input-group">
+                            <label>District</label>
+                            <input type="text" id="cust-district" placeholder="e.g., Sivasagar" required>
+                        </div>
+                    </div>
+
                     <div class="input-group">
-                        <label>Medicines List</label>
-                        <textarea id="medicine-details" rows="3" required></textarea>
+                        <label>Medicines List (Name & Quantity)</label>
+                        <textarea id="medicine-details" rows="3" placeholder="Enter medicines details here..." required></textarea>
                     </div>
+                    
                     <button type="submit" class="submit-btn">Submit Order Request</button>
                 </form>
             </div>
         </section>
 
-        <!-- NEW: Fallback HTML UI Form for Staff Gate -->
+        <!-- Dedicated Visible Staff Login Area Box -->
         <section id="login-gateway" class="login-box-section">
             <div class="login-card">
                 <h3 style="margin-bottom: 0.5rem;">Pharmacy Staff Portal</h3>
-                <p style="font-size: 0.85rem; color: var(--slate-gray); margin-bottom: 1.5rem;">Enter credential pass-pin to look into order dashboard logs.</p>
+                <p style="font-size: 0.85rem; color: var(--slate-gray); margin-bottom: 1.5rem;">Enter credential pass-pin to open the live orders log queue.</p>
                 
                 <div class="input-group" style="text-align: left;">
                     <label>Enter Passcode PIN</label>
-                    <input type="password" id="staff-pin-input" placeholder="e.g. namti123" style="text-align: center; font-weight: bold; letter-spacing: 2px;">
+                    <input type="password" id="staff-pin-input" placeholder="namti123" style="text-align: center; font-weight: bold; letter-spacing: 2px;">
                 </div>
                 <button type="button" id="submit-login-btn" class="submit-btn" style="padding: 0.75rem;">Verify & Enter Portal</button>
                 <p id="login-error-msg" style="color: var(--danger); font-size: 0.85rem; margin-top: 0.75rem; display: none; font-weight: 600;">Incorrect PIN Code!</p>
@@ -285,7 +280,7 @@
         <div id="payment-modal-box" class="payment-modal">
             <div class="modal-card">
                 <h3 style="color: var(--health-teal);">✔ Sent Successfully</h3>
-                <p style="margin-top: 1rem;">Pharmacists will verify your prescription database shortly.</p>
+                <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--slate-gray);">Your details along with Pincode route have been transmitted to the admin panel. Keep your phone active for SMS billing notifications.</p>
                 <button type="button" class="close-modal-btn" id="close-modal-action">Close</button>
             </div>
         </div>
@@ -309,17 +304,20 @@
                     <table class="order-table">
                         <thead>
                             <tr>
-                                <th>Customer Info</th>
+                                <th>Customer Base</th>
+                                <th>Location Address</th>
                                 <th>Medicines</th>
-                                <th>Bill (₹)</th>
-                                <th>Stock Status</th>
+                                <th>Bill Total (₹)</th>
+                                <th>Stock Flow</th>
                                 <th>Fulfillment</th>
-                                <th>Action Panel</th>
+                                <th>Action Panel Dispatch</th>
                             </tr>
                         </thead>
                         <tbody id="admin-orders-log">
+                            <!-- Baseline Sample Pre-loaded -->
                             <tr>
                                 <td><strong>Rahul Borah</strong><br><small>9876543210</small></td>
+                                <td>Namti Chariali<br><small>PIN: 785684 | Sivasagar</small></td>
                                 <td>Amoxicillin - 1 Strip</td>
                                 <td><input type="number" class="bill-input" value="1250"></td>
                                 <td>
@@ -330,7 +328,7 @@
                                     </select>
                                 </td>
                                 <td><span class="badge badge-pending status-field">Awaiting Review</span></td>
-                                <td><button class="sms-trigger-btn">Send SMS 💬</button></td>
+                                <td><button class="sms-trigger-btn">Send SMS & UPI Link 💬</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -353,12 +351,12 @@
             const closeModalAction = document.getElementById('close-modal-action');
             const adminOrdersLog = document.getElementById('admin-orders-log');
 
-            // Plain UI Login Input Logic instead of tricky pop-ups
+            // Gate access routing via clean form logic
             submitLoginBtn.addEventListener('click', () => {
                 const enteredPin = staffPinInput.value.trim();
                 if (enteredPin === "namti123") {
                     loginErrorMsg.style.display = 'none';
-                    staffPinInput.value = ''; // Reset input field
+                    staffPinInput.value = '';
                     customerView.style.display = 'none';
                     employeeDashboard.style.display = 'block';
                     window.scrollTo(0, 0);
@@ -373,15 +371,20 @@
                 window.scrollTo(0, 0);
             });
 
+            // Pipeline stream for user requests containing dynamic location data
             orderForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = document.getElementById('cust-name').value;
                 const phone = document.getElementById('cust-phone').value;
+                const village = document.getElementById('cust-village').value;
+                const pincode = document.getElementById('cust-pincode').value;
+                const district = document.getElementById('cust-district').value;
                 const medicineDetails = document.getElementById('medicine-details').value;
 
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
                     <td><strong>${name}</strong><br><small>${phone}</small></td>
+                    <td>${village}<br><small>PIN: ${pincode} | ${district}</small></td>
                     <td>${medicineDetails}</td>
                     <td><input type="number" class="bill-input" placeholder="₹"></td>
                     <td>
@@ -392,7 +395,7 @@
                         </select>
                     </td>
                     <td><span class="badge badge-pending status-field">New Request</span></td>
-                    <td><button class="sms-trigger-btn">Send SMS 💬</button></td>
+                    <td><button class="sms-trigger-btn">Send SMS & UPI Link 💬</button></td>
                 `;
                 adminOrdersLog.insertBefore(newRow, adminOrdersLog.firstChild);
                 attachSmsAction(newRow);
@@ -403,37 +406,16 @@
 
             closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
 
+            // REAL INTERACTIVE SMS AND LIVE UPI ROUTING PROTOCOL VIA PHONE WEB APIS
             function attachSmsAction(rowItem) {
                 const btn = rowItem.querySelector('.sms-trigger-btn');
                 if(!btn) return;
+                
                 btn.addEventListener('click', () => {
+                    const phoneText = rowItem.cells[0].querySelector('small').textContent;
+                    const customerName = rowItem.cells[0].querySelector('strong').textContent;
                     const billVal = rowItem.querySelector('.bill-input').value;
                     const stockStatus = rowItem.querySelector('.stock-toggle').value;
-                    const statusBadge = rowItem.querySelector('.status-field');
-                    
-                    if (!billVal && stockStatus !== "Unavailable") {
-                        alert("Please input the computed bill amount before sending SMS.");
-                        return;
-                    }
-
-                    if (stockStatus === "Available") {
-                        statusBadge.className = "badge badge-success";
-                        statusBadge.textContent = `Approved (₹${billVal})`;
-                    } else if (stockStatus === "Partial") {
-                        statusBadge.className = "badge badge-warning";
-                        statusBadge.textContent = `Partial (₹${billVal})`;
-                    } else {
-                        statusBadge.className = "badge badge-danger";
-                        statusBadge.textContent = "Unavailable";
-                    }
-                    alert("Automated Outbox Alert: SMS dispatched successfully to customer client device.");
-                });
-            }
-
-            document.querySelectorAll('#admin-orders-log tr').forEach(row => attachSmsAction(row));
-        });
-    </script>
-</body>
-                            </html>
+                    const statusBadge = rowItem.q
         
     
