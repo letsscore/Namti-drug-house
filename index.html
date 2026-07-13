@@ -265,146 +265,116 @@
             <button type="button" class="close-modal-btn" id="close-modal-action">Close</button>
         </div>
     </div>
-
-    <script>
-        // IMMUTABLE ENGINE INTERFACES BOUND ON FIRST PARSE LISTENER
-        function switchToStaffView() {
-            document.getElementById('customer-view').style.display = 'none';
-            document.getElementById('staff-dashboard').style.display = 'block';
+ <script>
+    // SOLID MULTI-VIEW ENGINE
+    const ViewManager = {
+        switchToStaff: function() {
+            document.getElementById('customer-view').classList.remove('active-view');
+            document.getElementById('staff-dashboard').classList.add('active-view');
+            window.scrollTo(0, 0);
+        },
+        switchToCustomer: function() {
+            document.getElementById('staff-dashboard').classList.remove('active-view');
+            document.getElementById('customer-view').classList.add('active-view');
             window.scrollTo(0, 0);
         }
+    };
 
-        function switchToCustomerView() {
-            document.getElementById('staff-dashboard').style.display = 'none';
-            document.getElementById('customer-view').style.display = 'block';
-            window.scrollTo(0, 0);
+    document.addEventListener('DOMContentLoaded', () => {
+        const orderForm = document.getElementById('order-submission-form');
+        const adminOrdersLog = document.getElementById('admin-orders-log');
+        const paymentModalBox = document.getElementById('payment-modal-box');
+        const closeModalAction = document.getElementById('close-modal-action');
+
+        // 1. DATA PERSISTENCE: Page load hote hi purana data load karein
+        const savedOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
+        
+        savedOrders.forEach(orderData => {
+            renderOrderRow(orderData, false); // false matlab abhi save mat karo
+        });
+        calculateLiveRevenue();
+
+        window.calculateLiveRevenue = function() {
+            let currentDayTotal = 0;
+            document.querySelectorAll('#admin-orders-log tr').forEach(row => {
+                const billInput = row.querySelector('.bill-input');
+                if (billInput && row.querySelector('.status-field').textContent.includes("Confirmed")) {
+                    currentDayTotal += parseFloat(billInput.value) || 0;
+                }
+            });
+            document.getElementById('total-revenue-display').textContent = `Total Successful Orders: ₹ ${currentDayTotal.toFixed(2)}`;
+        };
+
+        function renderOrderRow(data, shouldSave = true) {
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><strong>${data.name}</strong><br><small>${data.phone}</small></td>
+                <td>${data.village}<br><small data-pin="${data.pincode}">PIN: ${data.pincode} | ${data.district}</small></td>
+                <td>${data.medicines}<br>${data.photoHTML}</td>
+                <td><input type="number" class="bill-input" value="${data.bill || ''}" placeholder="₹" oninput="calculateLiveRevenue()"></td>
+                <td><span class="badge ${data.statusClass} status-field">${data.statusText}</span></td>
+                <td><button class="sms-trigger-btn">Process Order 💬</button></td>
+            `;
+            
+            adminOrdersLog.insertBefore(newRow, adminOrdersLog.firstChild);
+            attachSmsAction(newRow);
+
+            if (shouldSave) {
+                const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
+                currentOrders.unshift(data);
+                localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const orderForm = document.getElementById('order-submission-form');
-            const adminOrdersLog = document.getElementById('admin-orders-log');
-            const paymentModalBox = document.getElementById('payment-modal-box');
-            const closeModalAction = document.getElementById('close-modal-action');
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const photoFile = document.getElementById('prescription-photo').files[0];
+            let photoHTML = `<span style="color:gray; font-size:0.8rem;">No Photo</span>`;
+            if (photoFile) photoHTML = `<span style="color:green; font-size:0.8rem;">Prescription Attached</span>`;
 
-            let customerInMemoryState = {};
-
-            window.calculateLiveRevenue = function() {
-                let currentDayTotal = 0;
-                document.querySelectorAll('#admin-orders-log tr').forEach(row => {
-                    const statusText = row.querySelector('.status-field').textContent;
-                    if (statusText.includes("Confirmed")) {
-                        const numericBill = parseFloat(row.querySelector('.bill-input').value) || 0;
-                        currentDayTotal += numericBill;
-                    }
-                });
-                document.getElementById('total-revenue-display').textContent = `Total Successful Orders: ₹ ${currentDayTotal.toFixed(2)}`;
+            const orderData = {
+                name: document.getElementById('cust-name').value,
+                phone: document.getElementById('cust-phone').value,
+                village: document.getElementById('cust-village').value,
+                pincode: document.getElementById('cust-pincode').value,
+                district: document.getElementById('cust-district').value,
+                medicines: document.getElementById('medicine-details').value,
+                photoHTML: photoHTML,
+                statusText: "New Request",
+                statusClass: "badge-pending"
             };
 
-            orderForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const name = document.getElementById('cust-name').value;
-                const phone = document.getElementById('cust-phone').value;
-                const village = document.getElementById('cust-village').value;
-                const pincode = document.getElementById('cust-pincode').value;
-                const district = document.getElementById('cust-district').value;
-                const medicineDetails = document.getElementById('medicine-details').value;
-                const photoFile = document.getElementById('prescription-photo').files[0];
-
-                let photoUrlHTML = `<span style="color:gray; font-size:0.8rem;">No Photo uploaded</span>`;
-                if (photoFile) {
-                    const tempUrl = URL.createObjectURL(photoFile);
-                    photoUrlHTML = `<a href="${tempUrl}" target="_blank" class="rx-link">📄 View Prescription</a>`;
-                }
-
-                customerInMemoryState = { name, phone, village, pincode, district, medicineDetails };
-
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><strong>${name}</strong><br><small>${phone}</small></td>
-                    <td>${village}<br><small data-pin="${pincode}">PIN: ${pincode} | ${district}</small></td>
-                    <td>${medicineDetails}<br>${photoUrlHTML}</td>
-                    <td><input type="number" class="bill-input" placeholder="₹" oninput="calculateLiveRevenue()"></td>
-                    <td><span class="badge badge-pending status-field">New Request</span></td>
-                    <td><button class="sms-trigger-btn">Process Order 💬</button></td>
-                `;
-                
-                adminOrdersLog.insertBefore(newRow, adminOrdersLog.firstChild);
-                attachSmsAction(newRow);
-
-                paymentModalBox.style.display = 'flex';
-                orderForm.reset();
-            });
-
-            closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
-
-                        function attachSmsAction(rowItem) {
-                const btn = rowItem.querySelector('.sms-trigger-btn');
-                btn.addEventListener('click', () => {
-                    const phoneText = rowItem.cells[0].querySelector('small').textContent;
-                    const customerName = rowItem.cells[0].querySelector('strong').textContent;
-                    const targetPin = rowItem.cells[1].querySelector('small').getAttribute('data-pin');
-                    const billVal = parseFloat(rowItem.querySelector('.bill-input').value) || 0;
-                    const statusBadge = rowItem.querySelector('.status-field');
-                    
-                    if (!billVal) {
-                        alert("⚠️ Error: Please enter the Bill Amount first.");
-                        return;
-                    }
-
-                    let deliveryMode = "";
-                    if (targetPin === "785684" && billVal >= 1999) {
-                        statusBadge.className = "badge badge-delivery status-field";
-                        statusBadge.textContent = "Confirmed: Home Delivery";
-                        deliveryMode = "Home Delivery";
-                    } else {
-                        statusBadge.className = "badge badge-pickup status-field";
-                        statusBadge.textContent = "Confirmed: Self Collection";
-                        deliveryMode = "Self Collection";
-                    }
-
-                    calculateLiveRevenue();
-
-                    // Google Official Link Structure
-                    const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}\nMode: ${deliveryMode}\n\n👉 Pay Securely via Google Pay/PhonePe:\nhttps://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
-
-                    window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(cleanMsg)}`;
-
-                    generateCustomerReceipt(billVal, deliveryMode);
-                });
-            }
-
-
-
-            function generateCustomerReceipt(finalBill, modeText) {
-                const receiptSection = document.getElementById('digital-receipt-section');
-                const receiptBody = document.getElementById('receipt-details-body');
-                const formContainer = document.getElementById('customer-form-container');
-                const dateDisplay = document.getElementById('receipt-date');
-
-                const now = new Date();
-                dateDisplay.textContent = `Date: ${now.toLocaleDateString()} | Time: ${now.toLocaleTimeString()}`;
-
-                receiptBody.innerHTML = `
-                    <div class="receipt-row"><strong>Customer Name:</strong> <span>${customerInMemoryState.name || 'N/A'}</span></div>
-                    <div class="receipt-row"><strong>Mobile No:</strong> <span>${customerInMemoryState.phone || 'N/A'}</span></div>
-                    <div class="receipt-row"><strong>Delivery Area:</strong> <span>${customerInMemoryState.village || 'N/A'}, ${customerInMemoryState.district || ''}</span></div>
-                    <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
-                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
-                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerInMemoryState.medicineDetails || 'N/A'}</span></div>
-                    <div class="receipt-row"><strong>Fulfillment Type:</strong> <span style="font-weight:700; color:var(--health-teal);">${modeText}</span></div>
-                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
-                    <div class="receipt-row" style="font-size: 1.3rem; font-weight: 800;">
-                        <span>TOTAL PAID:</span>
-                        <span style="color: var(--health-teal);">₹ ${finalBill.toFixed(2)}</span>
-                    </div>
-                    <p style="text-align:center; font-size:0.75rem; color:var(--success); font-weight:700; margin-top:1.5rem;">✔ PAYMENT RECEIVED VIA UPI SECURE PROTOCOL</p>
-                `;
-
-                formContainer.style.display = 'none';
-                receiptSection.style.display = 'block';
-            }
+            renderOrderRow(orderData);
+            paymentModalBox.style.display = 'flex';
+            orderForm.reset();
         });
-    </script>
+
+        function attachSmsAction(rowItem) {
+            const btn = rowItem.querySelector('.sms-trigger-btn');
+            btn.addEventListener('click', () => {
+                const phoneText = rowItem.cells[0].querySelector('small').textContent;
+                const customerName = rowItem.cells[0].querySelector('strong').textContent;
+                const billVal = parseFloat(rowItem.querySelector('.bill-input').value) || 0;
+                
+                if (!billVal) { alert("Please enter Bill Amount!"); return; }
+
+                const targetPin = rowItem.cells[1].querySelector('small').getAttribute('data-pin');
+                let mode = (targetPin === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
+                
+                // Update UI and status
+                rowItem.querySelector('.status-field').textContent = "Confirmed: " + mode;
+                rowItem.querySelector('.status-field').className = "badge status-field " + (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
+                
+                calculateLiveRevenue();
+
+                const msg = `Order verified for ${customerName}. Total: Rs.${billVal}. Mode: ${mode}.\nPay here: https://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&am=${billVal}`;
+                window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
+            });
+        }
+    });
+</script>
+
+    
 </body>
 </html>
 
