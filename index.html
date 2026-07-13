@@ -365,11 +365,7 @@
                                      
                     calculateLiveRevenue();
 
-                    const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}\nMode: ${deliveryMode}\n\n👉 Pay Securely Click Here:\nhttps://upilinks.in/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
-
-                    window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(cleanMsg)}`;
-
-                    generateCustomerReceipt(billVal, deliveryMode);
+                    const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}\nMode: ${deliveryMode}\n\n👉 Pay Securely via Google Pay/PhonePe Click Here:\nhttps://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                 });
             }
 
