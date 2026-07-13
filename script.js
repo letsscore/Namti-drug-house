@@ -52,6 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentModalBox = document.getElementById('payment-modal-box');
     const closeModalAction = document.getElementById('close-modal-action');
 
+    // View Persistence Logic on DOM Load
+    const lastView = localStorage.getItem('namti_current_view');
+    const customerView = document.getElementById('customer-view');
+    const staffDashboard = document.getElementById('staff-dashboard');
+    
+    if (lastView === 'staff' && customerView && staffDashboard) {
+        customerView.classList.remove('active-view');
+        staffDashboard.classList.add('active-view');
+    } else if (customerView && staffDashboard) {
+        staffDashboard.classList.remove('active-view');
+        customerView.classList.add('active-view');
+    }
+
     let audioContext;
     function playBeepNotification() {
         try {
@@ -109,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
             prescriptionVisualControl = `<button class="view-presc-btn" onclick="window.openInteractivePrescription('${data.imageBlob}')">👁️ View Image</button>`;
         }
 
-        // CONTROL BUTTONS MATRIX BASED ON SYSTEM WORKFLOW STATE
         let actionButtons = '';
         if (!data.statusText || data.statusText === 'New Request') {
             actionButtons = `<button class="sms-trigger-btn" onclick="window.executeSmsProcess(${indexPointer}, this)">Confirm & Send UPI Link ✅</button>`;
@@ -138,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adminOrdersLog.appendChild(row);
     }
 
-        // STAGE 1: CORRECTED ACTION HANDLER TO SEND 100% WORKING MULTI-APP UPI LINK
+    // STAGE 1: OFFICIAL BHIM NATIONAL LINK PORTAL (No More 404 Errors)
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -154,7 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const merchantName = encodeURIComponent("Namti Drug House");
         const transactionNote = encodeURIComponent("Medicine Bill");
 
-        const finalUpiLink = `https://api.upi.link/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${transactionNote}`;
+        // Official NPCI/BHIM Server URL schema to list out installed app components safely
+        const finalUpiLink = `https://link.bhimupi.org/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${transactionNote}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -164,13 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
 
-        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Click this link to choose any UPI App to pay: ${finalUpiLink}`;
+        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Click this link to choose GPay, PhonePe, or Paytm to pay: ${finalUpiLink}`;
         
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
         window.loadSavedSystemOrders();
     };
 
-    // STAGE 2: OWNER RECEIVES NOTIFICATION/PAYMENT & UNLOCKS RECEIPT GENERATOR
+    // STAGE 2: CONFIRM PAYMENT LEVERAGE
     window.markAsPaid = function(arrayIndex, buttonElement) {
         if (!confirm("Confirm payment receipt? This will unlock the printable invoice layout.")) return;
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
@@ -182,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.loadSavedSystemOrders();
     };
 
-    // STAGE 3: RECEIPT GENERATOR (ONLY WORKS AFTER PAYMENT STAGE)
+    // STAGE 3: RECEIPT VISUALIZER
     window.generateAndOpenReceipt = function(arrayIndex, buttonElement) {
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         const data = currentOrders[arrayIndex];
@@ -273,15 +286,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // FUNCTION TO EXECUTE PRINT TO PDF/PRINTERS AND ALLOW SMS/WHATSAPP SHARING
+    // STATE CONTROLLED SAFE NATIVE PRINT CONTEXT ENGINE
     window.printReceipt = function() {
         const receiptContent = document.getElementById('printable-receipt').innerHTML;
-        const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-        
-        // Modal logic captures active state and allows easy native sharing
         const originalBody = document.body.innerHTML;
+        
         document.body.innerHTML = `<div style="padding:40px; font-family:monospace; width:320px; margin:0 auto; border:1px dashed #000;">${receiptContent}</div>`;
         window.print();
+        
+        // This makes sure layout parameters do not disrupt view context engines on reload triggers
+        document.body.innerHTML = originalBody;
         location.reload(); 
     };
 
@@ -291,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.loadSavedSystemOrders();
 });
-    
+                                                       
         
       
 
