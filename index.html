@@ -23,33 +23,37 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--light-bg); color: var(--dark-navy); min-height: 100vh; }
 
-        /* RE-ENGINEERED BLOCK NAVBAR: Zero overlay interference */
+        /* ABSOLUTE TOP-LEVEL NAVBAR: Zero mobile layout interference */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.25rem 8%;
-            background: white;
+            background: #ffffff !important;
             border-bottom: 2px solid var(--health-teal);
             position: relative;
+            z-index: 999999 !important;
         }
 
-        .logo { font-size: 1.5rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; }
+        .logo { font-size: 1.5rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; color: #0f172a; }
         .logo span { color: var(--health-teal); }
         
-        /* High visibility and standalone clickable zone */
-        .staff-link-btn {
-            border: 2px solid var(--warning);
+        /* ULTRA-RELIABLE CLICKABLE TRIGGER PAD */
+        .staff-touch-zone {
+            display: inline-block !important;
+            background: #fffbeb !important;
+            border: 2px solid var(--warning) !important;
             padding: 0.6rem 1.4rem;
             border-radius: 50px;
-            color: var(--warning);
-            background: #fffbeb;
+            color: #d97706 !important;
             font-weight: 700;
-            cursor: pointer;
-            outline: none;
-            display: inline-block;
+            font-size: 0.95rem;
+            cursor: pointer !important;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            text-align: center;
         }
-        .staff-link-btn:hover { background: var(--warning); color: white; }
+        .staff-touch-zone:hover { background: var(--warning) !important; color: white !important; }
 
         .hero-section { padding: 4rem 8%; text-align: center; background: linear-gradient(135deg, #fff 0%, #f0fdfa 100%); }
         .hero-section h1 { font-family: 'Plus Jakarta Sans'; font-size: 3rem; margin-bottom: 1rem; }
@@ -76,7 +80,7 @@
         .delivery-info-box { background: rgba(13, 148, 136, 0.08); border-left: 4px solid var(--health-teal); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; color: #0f766e; }
         .submit-btn { width: 100%; background: var(--health-teal); color: white; padding: 1.1rem; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
 
-        /* RECEIPT CARD ELEMENT STYLE */
+        /* THERMAL INVOICE STYLE RECEIPT CARD */
         .receipt-card {
             max-width: 600px;
             margin: 2rem auto;
@@ -92,7 +96,7 @@
         .receipt-row strong { color: var(--slate-gray); }
         .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
 
-        /* DASHBOARD GRID FLOW FIX */
+        /* ADMIN CONTROL LAYER PANEL */
         #employee-dashboard { 
             display: none; 
             background: #f8fafc; 
@@ -124,12 +128,14 @@
 </head>
 <body>
 
-    <!-- CUSTOMER DEPLOYMENT LAYOUT -->
+    <!-- CUSTOMER ENTRY CHANNEL LAYER -->
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
-            <!-- INLINE FIX: Pure DOM control over button context avoids routing freeze -->
-            <button type="button" onclick="switchToStaffView()" class="staff-link-btn">Staff Dashboard 🔑</button>
+            <!-- DUAL ACTION INTERACTION TRIGGERS: Works on both desktop clicks & mobile taps -->
+            <div onclick="switchToStaffView()" ontouchstart="switchToStaffView()" class="staff-touch-zone">
+                Staff Dashboard 🔑
+            </div>
         </header>
 
         <section class="hero-section">
@@ -187,6 +193,7 @@
             </div>
         </section>
 
+        <!-- SECURE DYNAMIC E-RECEIPT -->
         <section class="receipt-card" id="digital-receipt-section">
             <div class="receipt-header">
                 <h2 style="color: var(--health-teal);">NAMTI DRUG HOUSE</h2>
@@ -198,11 +205,11 @@
         </section>
     </div>
 
-    <!-- EMPLOYEE MANAGEMENT CONTROLLER INTERFACE -->
+    <!-- MAIN OPERATIONAL PHARMACY DASHBOARD -->
     <div id="employee-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
-            <button onclick="switchToCustomerView()" class="logout-btn">Exit Portal</button>
+            <button onclick="switchToCustomerView()" ontouchstart="switchToCustomerView()" class="logout-btn">Exit Portal</button>
         </header>
 
         <main class="dash-main">
@@ -244,18 +251,18 @@
     </div>
 
     <script>
-        // GLOBAL HIGH-VELOCITY VIEW STATE CONTROL CONTROLLERS (Bypasses DOM loading lag)
-        function switchToStaffView() {
+        // GLOBAL HIGH-VELOCITY INLINE INTERACTION HANDLERS (Forces instantaneous viewport toggles)
+        window.switchToStaffView = function() {
             document.getElementById('customer-view').style.display = 'none';
             document.getElementById('employee-dashboard').style.display = 'block';
             window.scrollTo(0, 0);
-        }
+        };
 
-        function switchToCustomerView() {
+        window.switchToCustomerView = function() {
             document.getElementById('employee-dashboard').style.display = 'none';
             document.getElementById('customer-view').style.display = 'block';
             window.scrollTo(0, 0);
-        }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             const orderForm = document.getElementById('order-submission-form');
@@ -336,13 +343,13 @@
                     } else {
                         statusBadge.className = "badge badge-pickup status-field";
                         statusBadge.textContent = "Confirmed: Self Collection";
-                        deliveryMode = "Self Collection at Counter";
+                        deliveryMode = "Self Collection";
                     }
 
                     calculateLiveRevenue();
                     generateCustomerReceipt(billVal, deliveryMode);
 
-                    // FIXED PERSONAL BANK ROUTING PROTOCOL
+                    // HARD-CODED UPI ROUTING TO ASSIGNED BUSINESS WALLET
                     const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
@@ -366,11 +373,5 @@
                     <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
                     <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
                     <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerInMemoryState.medicineDetails || 'N/A'}</span></div>
-                    <div class="receipt-row"><strong>Fulfillment Type:</strong> <span style="font-weight:700; color:var(--health-teal);">${modeText}</span></div>
-                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
-                    <div class="receipt-row" style="font-size: 1.3rem; font-weight: 800;">
-                        <span>TOTAL PAID:</span>
-                        <span style="color: var(--health-teal);">₹ ${finalBill.toFixed(2)}</span>
-                    </div>
-                    <p style="text-align:center; font-size:0.75rem; col
+                    <div class="receipt-row"><strong>Fulfillment Type:</strong> <span style="font-weight:700; color:var(--health-teal);">${mo
     
