@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Namti Drug House</title>
-    <!-- Cache-buster lagaya hai taaki browser naya design force-load kare -->
-    <link rel="stylesheet" href="style.css?v=1.1">
+    <link rel="stylesheet" href="style.css?v=1.2">
 </head>
 <body>
 
@@ -79,17 +78,16 @@
         </div>
     </div>
 
-    <!-- SUCCESS MESSAGE BOX -->
-    <div id="payment-modal-box" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); align-items:center; justify-content:center; z-index: 999;">
-        <div style="background:white; padding:2.5rem; border-radius:16px; text-align:center; max-width:420px; width:90%;">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">💚</div>
-            <h3 style="color:#0f766e; font-size: 1.4rem; margin-bottom: 0.5rem;">Order Logged Successfully!</h3>
-            <p style="color: #64748b; font-size: 0.95rem;">Medicine request updated. Staff will review layout details and send you an SMS link shortly.</p>
-            <button id="close-modal-action" style="background:#475569; color:white; border:none; padding:0.6rem 1.5rem; border-radius:8px; cursor:pointer; margin-top:1.5rem; font-weight: 600;">Close</button>
+    <!-- SUCCESS DIALOG DIALOG MODAL BOX -->
+    <div id="payment-modal-box" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); align-items:center; justify-content:center; z-index: 9999;">
+        <div style="background:white; padding:2.5rem; border-radius:16px; text-align:center; max-width:420px; width:90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15);">
+            <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">💚</div>
+            <h3 style="color:#0f766e; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight:700;">Order Submitted!</h3>
+            <p style="color: #64748b; font-size: 0.95rem; line-height:1.5;">Aapka order successfully save ho gaya hai. Staff jaldi hi ise verify karke aapko SMS bhejega.</p>
+            <button id="close-modal-action" style="background:#0d9488; color:white; border:none; padding:0.7rem 2rem; border-radius:8px; cursor:pointer; margin-top:1.5rem; font-weight: 700; width:100%;">OK, Close</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=1.2"></script>
 </body>
-    </html>
-    
+</html>
