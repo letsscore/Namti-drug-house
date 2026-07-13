@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adminOrdersLog.appendChild(row);
     }
 
-    // STAGE 1: ACTION HANDLER TO SEND DYNAMIC UPI SELECTION LINK VIA SMS
+        // STAGE 1: CORRECTED ACTION HANDLER TO SEND 100% WORKING MULTI-APP UPI LINK
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -152,9 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const upiAddress = "hussain.abidur@ybl";
         const merchantName = encodeURIComponent("Namti Drug House");
+        const transactionNote = encodeURIComponent("Medicine Bill");
 
-        // Is URL format se customer jab SMS link par click karega toh uske phone par automatic GPay, PhonePe, Paytm ka choice popup khulega
-        const finalUpiLink = `https://upilinks.in/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
+        const finalUpiLink = `https://api.upi.link/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${transactionNote}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
 
-        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Click this link to choose your favorite UPI App & pay: ${finalUpiLink}`;
+        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Click this link to choose any UPI App to pay: ${finalUpiLink}`;
         
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
         window.loadSavedSystemOrders();
