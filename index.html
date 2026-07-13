@@ -38,11 +38,11 @@
         .logo { font-size: 1.3rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; color: #0f172a; }
         .logo span { color: var(--health-teal); }
         
-        /* STAFF DASHBOARD TRIGGER BUTTON */
+        /* FIXED ANCHOR STYLE FOR ASSURED CLICK ROUTING */
         .staff-touch-zone {
             display: inline-block !important;
             position: relative !important;
-            z-index: 1000000 !important;
+            z-index: 2000000 !important;
             pointer-events: auto !important;
             background: #f59e0b !important;
             border: none !important;
@@ -53,12 +53,12 @@
             font-size: 0.95rem;
             cursor: pointer !important;
             user-select: none;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
             text-align: center;
-            text-decoration: none;
+            text-decoration: none !important;
         }
-        .staff-touch-zone:active {
-            opacity: 0.9;
+        .staff-touch-zone:hover, .staff-touch-zone:active {
+            opacity: 0.95 !important;
+            background: #d97706 !important;
         }
 
         .hero-section { 
@@ -113,7 +113,6 @@
         .receipt-row strong { color: var(--slate-gray); }
         .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
 
-        /* ALL REFERENCES RENAMED TO STAFF-DASHBOARD */
         #staff-dashboard { 
             display: none; 
             background: #f8fafc; 
@@ -122,7 +121,7 @@
             width: 100%;
         }
         .dash-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--dark-navy); color: white; border-radius: 12px; margin-bottom: 2rem; }
-        .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; }
         
         .stats-banner { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 2rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
@@ -149,9 +148,10 @@
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
-            <button onclick="switchToStaffView()" ontouchstart="switchToStaffView()" class="staff-touch-zone">
+            <!-- FIXED: Native Anchor routing to bypass stack blockages completely -->
+            <a href="javascript:void(0);" onclick="switchToStaffView(); return false;" class="staff-touch-zone">
                 Staff Dashboard 🔑
-            </button>
+            </a>
         </header>
 
         <section class="hero-section">
@@ -221,11 +221,11 @@
         </section>
     </div>
 
-    <!-- STAFF DASHBOARD PANEL (FIXED ID HERE) -->
+    <!-- STAFF DASHBOARD PANEL -->
     <div id="staff-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
-            <button onclick="switchToCustomerView()" ontouchstart="switchToCustomerView()" class="logout-btn">Exit Portal</button>
+            <a href="javascript:void(0);" onclick="switchToCustomerView(); return false;" class="logout-btn">Exit Portal</a>
         </header>
 
         <main class="dash-main">
@@ -267,18 +267,18 @@
     </div>
 
     <script>
-        // ROUTING ENGINES MAPPED EXACTLY TO THE NEW IDs
-        window.switchToStaffView = function() {
+        // IMMUTABLE ENGINE INTERFACES BOUND ON FIRST PARSE LISTENER
+        function switchToStaffView() {
             document.getElementById('customer-view').style.display = 'none';
             document.getElementById('staff-dashboard').style.display = 'block';
             window.scrollTo(0, 0);
-        };
+        }
 
-        window.switchToCustomerView = function() {
+        function switchToCustomerView() {
             document.getElementById('staff-dashboard').style.display = 'none';
             document.getElementById('customer-view').style.display = 'block';
             window.scrollTo(0, 0);
-        };
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const orderForm = document.getElementById('order-submission-form');
@@ -365,7 +365,7 @@
                     calculateLiveRevenue();
                     generateCustomerReceipt(billVal, deliveryMode);
 
-                    // UPI SECURE ROUTE MAPPING
+                    // UPI INTENT DATA BINDING
                     const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
@@ -388,5 +388,22 @@
                     <div class="receipt-row"><strong>Delivery Area:</strong> <span>${customerInMemoryState.village || 'N/A'}, ${customerInMemoryState.district || ''}</span></div>
                     <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
                     <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
-                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerIn
+                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerInMemoryState.medicineDetails || 'N/A'}</span></div>
+                    <div class="receipt-row"><strong>Fulfillment Type:</strong> <span style="font-weight:700; color:var(--health-teal);">${modeText}</span></div>
+                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
+                    <div class="receipt-row" style="font-size: 1.3rem; font-weight: 800;">
+                        <span>TOTAL PAID:</span>
+                        <span style="color: var(--health-teal);">₹ ${finalBill.toFixed(2)}</span>
+                    </div>
+                    <p style="text-align:center; font-size:0.75rem; color:var(--success); font-weight:700; margin-top:1.5rem;">✔ PAYMENT RECEIVED VIA UPI SECURE PROTOCOL</p>
+                `;
+
+                formContainer.style.display = 'none';
+                receiptSection.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
+
     
