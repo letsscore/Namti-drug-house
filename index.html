@@ -265,17 +265,19 @@
             <button type="button" class="close-modal-btn" id="close-modal-action">Close</button>
         </div>
     </div>
- <script>
-    // SOLID MULTI-VIEW ENGINE
+<script>
+    // 1. IMPROVED VIEW ENGINE WITH MEMORY (STATUS LOCK)
     const ViewManager = {
         switchToStaff: function() {
             document.getElementById('customer-view').classList.remove('active-view');
             document.getElementById('staff-dashboard').classList.add('active-view');
+            localStorage.setItem('namti_current_view', 'staff'); // State yaad rakhega
             window.scrollTo(0, 0);
         },
         switchToCustomer: function() {
             document.getElementById('staff-dashboard').classList.remove('active-view');
             document.getElementById('customer-view').classList.add('active-view');
+            localStorage.setItem('namti_current_view', 'customer'); // State yaad rakhega
             window.scrollTo(0, 0);
         }
     };
@@ -286,11 +288,18 @@
         const paymentModalBox = document.getElementById('payment-modal-box');
         const closeModalAction = document.getElementById('close-modal-action');
 
-        // 1. DATA PERSISTENCE: Page load hote hi purana data load karein
+        // 2. AUTO-OPEN PREVIOUS VIEW ON REFRESH (Dashboard Lock Fix)
+        const lastView = localStorage.getItem('namti_current_view');
+        if (lastView === 'staff') {
+            ViewManager.switchToStaff();
+        } else {
+            ViewManager.switchToCustomer();
+        }
+
+        // 3. SECURE DATA LOAD FROM STORAGE
         const savedOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-        
         savedOrders.forEach(orderData => {
-            renderOrderRow(orderData, false); // false matlab abhi save mat karo
+            renderOrderRow(orderData, false); 
         });
         calculateLiveRevenue();
 
@@ -298,14 +307,19 @@
             let currentDayTotal = 0;
             document.querySelectorAll('#admin-orders-log tr').forEach(row => {
                 const billInput = row.querySelector('.bill-input');
-                if (billInput && row.querySelector('.status-field').textContent.includes("Confirmed")) {
+                const statusField = row.querySelector('.status-field');
+                if (billInput && statusField && statusField.textContent.includes("Confirmed")) {
                     currentDayTotal += parseFloat(billInput.value) || 0;
                 }
             });
-            document.getElementById('total-revenue-display').textContent = `Total Successful Orders: ₹ ${currentDayTotal.toFixed(2)}`;
+            const revenueDisplay = document.getElementById('total-revenue-display');
+            if (revenueDisplay) {
+                revenueDisplay.textContent = `Total Successful Orders: ₹ ${currentDayTotal.toFixed(2)}`;
+            }
         };
 
         function renderOrderRow(data, shouldSave = true) {
+            if (!adminOrdersLog) return;
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td><strong>${data.name}</strong><br><small>${data.phone}</small></td>
@@ -326,54 +340,76 @@
             }
         }
 
-        orderForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const photoFile = document.getElementById('prescription-photo').files[0];
-            let photoHTML = `<span style="color:gray; font-size:0.8rem;">No Photo</span>`;
-            if (photoFile) photoHTML = `<span style="color:green; font-size:0.8rem;">Prescription Attached</span>`;
+        if (orderForm) {
+            orderForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const photoFile = document.getElementById('prescription-photo').files[0];
+                let photoHTML = `<span style="color:gray; font-size:0.8rem;">No Photo</span>`;
+                if (photoFile) photoHTML = `<span style="color:green; font-size:0.8rem;">Prescription Attached</span>`;
 
-            const orderData = {
-                name: document.getElementById('cust-name').value,
-                phone: document.getElementById('cust-phone').value,
-                village: document.getElementById('cust-village').value,
-                pincode: document.getElementById('cust-pincode').value,
-                district: document.getElementById('cust-district').value,
-                medicines: document.getElementById('medicine-details').value,
-                photoHTML: photoHTML,
-                statusText: "New Request",
-                statusClass: "badge-pending"
-            };
+                const orderData = {
+                    name: document.getElementById('cust-name').value,
+                    phone: document.getElementById('cust-phone').value,
+                    village: document.getElementById('cust-village').value,
+                    pincode: document.getElementById('cust-pincode').value,
+                    district: document.getElementById('cust-district').value,
+                    medicines: document.getElementById('medicine-details').value,
+                    photoHTML: photoHTML,
+                    statusText: "New Request",
+                    statusClass: "badge-pending"
+                };
 
-            renderOrderRow(orderData);
-            paymentModalBox.style.display = 'flex';
-            orderForm.reset();
-        });
+                renderOrderRow(orderData);
+                if (paymentModalBox) paymentModalBox.style.display = 'flex';
+                orderForm.reset();
+            });
+        }
+
+        if (closeModalAction && paymentModalBox) {
+            closeModalAction.addEventListener('click', () => { 
+                paymentModalBox.style.display = 'none'; 
+            });
+        }
 
         function attachSmsAction(rowItem) {
             const btn = rowItem.querySelector('.sms-trigger-btn');
+            if (!btn) return;
+            
             btn.addEventListener('click', () => {
                 const phoneText = rowItem.cells[0].querySelector('small').textContent;
                 const customerName = rowItem.cells[0].querySelector('strong').textContent;
                 const billVal = parseFloat(rowItem.querySelector('.bill-input').value) || 0;
                 
-                if (!billVal) { alert("Please enter Bill Amount!"); return; }
+                if (!billVal) { alert("Please enter Bill Amount first!"); return; }
 
                 const targetPin = rowItem.cells[1].querySelector('small').getAttribute('data-pin');
                 let mode = (targetPin === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
                 
-                // Update UI and status
-                rowItem.querySelector('.status-field').textContent = "Confirmed: " + mode;
-                rowItem.querySelector('.status-field').className = "badge status-field " + (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
+                const statusField = rowItem.querySelector('.status-field');
+                if (statusField) {
+                    statusField.textContent = "Confirmed: " + mode;
+                    statusField.className = "badge status-field " + (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
+                }
                 
+                // Storage mein bill aur status ko save karne ke liye index update
+                const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
+                const rowIndex = Array.from(adminOrdersLog.children).indexOf(rowItem);
+                if (currentOrders[rowIndex]) {
+                    currentOrders[rowIndex].bill = billVal;
+                    currentOrders[rowIndex].statusText = "Confirmed: " + mode;
+                    currentOrders[rowIndex].statusClass = (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
+                    localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
+                }
+
                 calculateLiveRevenue();
 
-                const msg = `Order verified for ${customerName}. Total: Rs.${billVal}. Mode: ${mode}.\nPay here: https://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&am=${billVal}`;
+                const msg = `Hello ${customerName}, order verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}\nMode: ${mode}\n\n👉 Pay Securely via Link:\nhttps://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                 window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
             });
         }
     });
 </script>
-
+    
     
 </body>
 </html>
