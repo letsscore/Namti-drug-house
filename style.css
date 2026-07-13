@@ -64,6 +64,29 @@ body {
     transform: translateY(-2px);
 }
 
+/* SPECIAL PROMINENT BUTTON FOR LICENSE LOGO */
+.licence-badge-btn {
+    background: #f59e0b !important;
+    color: #78350f !important;
+    border: none !important;
+}
+
+.licence-badge-btn:hover {
+    background: #fbbf24 !important;
+    color: #78350f !important;
+}
+
+/* DELIVERY RULES TOP BANNER */
+.delivery-rules-banner {
+    background: #fef3c7;
+    border-left: 5px solid #d97706;
+    color: #92400e;
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
 /* HIGHLY ATTRACTIVE CARDS FOR HISTORICAL QUOTES */
 .quote-container {
     max-width: 850px;
@@ -98,7 +121,7 @@ body {
     border: 1px dashed #0284c7;
 }
 
-/* CARDS & PANELS */
+/* CARDS & PANELS LAYOUTS */
 .view-panel {
     display: none;
     max-width: 1000px;
@@ -173,7 +196,7 @@ h2 {
     box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2);
 }
 
-/* DATA TABLE LOGIC */
+/* DATA TABLES ENGINE */
 .table-container {
     overflow-x: auto;
 }
@@ -208,7 +231,7 @@ td {
     color: #334155;
 }
 
-/* BADGES ENGINE */
+/* BADGES LAYER ENGINE */
 .badge {
     padding: 0.35rem 0.75rem;
     border-radius: 20px;
@@ -222,7 +245,7 @@ td {
 .badge-pickup { background-color: #e0f2fe; color: #0369a1; }
 .badge-rejected { background-color: #fee2e2; color: #991b1b; }
 
-/* DYNAMIC ACTIONS SYSTEM CONFIG */
+/* LAYOUT BUTTON ACTIONS SYSTEM */
 .action-flex {
     display: flex;
     gap: 5px;
@@ -241,7 +264,7 @@ td {
     border-radius: 6px;
 }
 
-/* MODALS LAYERS */
+/* SECURE MODAL POPUPS STRUCTURAL OVERLAYS */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -260,6 +283,7 @@ td {
     max-width: 500px;
     width: 90%;
     text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 .preview-img-frame {
@@ -275,6 +299,7 @@ td {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
     }
+    
 
 
 
