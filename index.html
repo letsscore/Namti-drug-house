@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Namti Drug House</title>
-    <link rel="stylesheet" href="style.css?v=1.2">
+    <link rel="stylesheet" href="style.css?v=2.1">
 </head>
 <body>
 
@@ -17,9 +17,10 @@
         </div>
     </nav>
 
-    <!-- AUTOMATIC HEALTH QUOTES BANNER -->
-    <div class="quote-container">
+    <!-- AUTOMATIC MEDICAL DISCOVERIES & ATTRACTIVE BANNER -->
+    <div class="quote-container" id="quote-wrapper-box">
         <p id="dynamic-quote" class="quote-text">"Your health is your greatest wealth. We care for your recovery."</p>
+        <span id="historical-fact" class="history-text">Loading Medical History...</span>
     </div>
 
     <!-- CUSTOMER PANEL -->
@@ -52,25 +53,30 @@
             </div>
             <div class="form-group">
                 <label>Upload Prescription Photo</label>
-                <input type="file" id="prescription-photo" accept="image/*">
+                <input type="file" id="prescription-photo" accept="image/*" required>
             </div>
             <button type="submit" class="submit-btn">Submit Order Securely</button>
         </form>
     </div>
 
-    <!-- STAFF LIVE PANEL -->
+    <!-- STAFF MANAGEMENT DASHBOARD LIVE PANEL -->
     <div id="staff-dashboard" class="view-panel">
-        <h2 id="total-revenue-display">Total Successful Orders: ₹ 0.00</h2>
+        <div class="staff-ctrl-header">
+            <h2 id="total-revenue-display" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">Total Revenue: ₹ 0.00</h2>
+            <button class="clear-old-btn" onclick="window.OrderManager.clearThirtyDayOldOrders()">🧹 Delete 1 Month Old Orders</button>
+        </div>
+        
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th>Customer Details</th>
                         <th>Address Details</th>
-                        <th>Medicines Req.</th>
+                        <th>Medicines / Prescription</th>
                         <th>Set Bill</th>
+                        <th>Gateway</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="admin-orders-log"></tbody>
@@ -78,21 +84,26 @@
         </div>
     </div>
 
-    <!-- SUCCESS DIALOG DIALOG MODAL BOX -->
-    <div id="payment-modal-box" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); align-items:center; justify-content:center; z-index: 9999;">
-        <div style="background:white; padding:2.5rem; border-radius:16px; text-align:center; max-width:420px; width:90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15);">
+    <!-- CUSTOMER CONGRATULATIONS SUCCESS DIALOG BOX -->
+    <div id="payment-modal-box" class="modal-overlay">
+        <div class="preview-modal-content" style="max-width:420px;">
             <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">💚</div>
-            <h3 style="color:#0f766e; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight:700;">Order Submitted!</h3>
-            <p style="color: #64748b; font-size: 0.95rem; line-height:1.5;">Aapka order successfully save ho gaya hai. Staff jaldi hi ise verify karke aapko SMS bhejega.</p>
-            <button id="close-modal-action" style="background:#0d9488; color:white; border:none; padding:0.7rem 2rem; border-radius:8px; cursor:pointer; margin-top:1.5rem; font-weight: 700; width:100%;">OK, Close</button>
+            <h3 style="color:#0f766e; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight:700;">Order Logged Successfully!</h3>
+            <p style="color: #64748b; font-size: 0.95rem; line-height:1.5;">Aapka medicine request safely submit ho gaya hai. Ab aap humare staff verification link SMS ka wait kijiye.</p>
+            <button id="close-modal-action" style="background:#0d9488; color:white; border:none; padding:0.7rem 2rem; border-radius:8px; cursor:pointer; margin-top:1.5rem; font-weight: 700; width:100%;">OK, Done</button>
         </div>
     </div>
 
-    <script src="script.js?v=1.2"></script>
-    <!-- Prescription Image Viewer Modal -->
-<div id="image-viewer-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index: 9999;">
-    <span onclick="document.getElementById('image-viewer-modal').style.display='none'" style="position:absolute; top:20px; right:30px; color:white; font-size:40px; cursor:pointer;">&times;</span>
-    <img id="full-prescription-img" style="max-width:90%; max-height:80%; border-radius:8px;">
-</div>
+    <!-- DYNAMIC PRESCRIPTION INTERACTIVE IMAGE PREVIEW BOX -->
+    <div id="prescription-preview-modal" class="modal-overlay">
+        <div class="preview-modal-content">
+            <h3 style="color:#0f766e; margin-bottom:1rem; font-weight:700;">Prescription Document</h3>
+            <img id="modal-target-image" class="preview-img-frame" src="" alt="No Image Loaded">
+            <button onclick="document.getElementById('prescription-preview-modal').style.display='none'" style="background:#475569; color:white; border:none; padding:0.6rem 1.5rem; border-radius:6px; cursor:pointer; font-weight:600; width:100%;">Close Preview</button>
+        </div>
+    </div>
+
+    <script src="script.js?v=2.1"></script>
 </body>
-</html>
+                    </html>
+                
