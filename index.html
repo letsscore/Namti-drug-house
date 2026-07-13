@@ -5,270 +5,306 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Namti Drug House - Pharmacy Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<style>  /* Management Layout Views */
-.hidden-view {
-    display: none !important;
-}
+    
+    <style>
+        /* Custom variables for medical professionalism */
+        :root {
+            --primary-color: #14b8a6; 
+            --secondary-color: #115e59; 
+            --accent-color: #fca311; 
+            --dark-bg: #0f172a; 
+            --light-bg: #f8fafc; 
+            --text-color: #1e293b; 
+            --white: #ffffff;
+            --transition: all 0.3s ease;
+        }
 
-.staff-link {
-    color: var(--accent-color) !important;
-    border: 1px dashed var(--accent-color);
-    padding: 3px 8px;
-    border-radius: 4px;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
 
-/* Dashboard Styling */
-#employee-dashboard {
-    background: #f0f2f5;
-    min-height: 100vh;
-}
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
 
-.dashboard-header {
-    background: var(--dark-bg);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 5%;
-}
+        body {
+            color: var(--text-color);
+            background-color: var(--white);
+        }
 
-.logout-btn {
-    background: #ef4444;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 10%;
+            background: var(--white);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+        }
 
-.dashboard-content {
-    display: flex;
-    min-height: calc(100vh - 65px);
-}
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--secondary-color);
+        }
 
-.sidebar {
-    width: 250px;
-    background: var(--secondary-color);
-    color: white;
-    padding: 2rem 1rem;
-}
+        .logo span {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
 
-.sidebar ul {
-    list-style: none;
-}
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
 
-.sidebar ul li {
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition);
-}
+        .nav-links li { margin: 0 1rem; }
 
-.sidebar ul li:hover, .sidebar ul li.active-tab {
-    background: var(--primary-color);
-}
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+        }
 
-.main-panel {
-    flex: 1;
-    padding: 2.5rem;
-}
+        .staff-link {
+            color: var(--accent-color) !important;
+            border: 1px dashed var(--accent-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
 
-.hidden-panel {
-    display: none;
-}
+        .nav-btn {
+            background: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.7rem 1.4rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
 
-/* Dashboard Table styling */
-.dashboard-table {
-    width: 100%;
-    background: white;
-    border-collapse: collapse;
-    margin-top: 1.5rem;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
+        .hero-section {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            background: var(--light-bg);
+            padding: 0 10%;
+            margin-top: 80px;
+        }
 
-.dashboard-table th, .dashboard-table td {
-    padding: 1rem 1.5rem;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-}
+        .hero-content h1 {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
 
-.dashboard-table th {
-    background: #e2e8f0;
-    color: var(--dark-bg);
-}
+        .hero-content p {
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+        }
 
-/* Badges */
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-.pending { background: #fef3c7; color: #d97706; }
-.success { background: #d1fae5; color: #065f46; }
-.low { background: #fee2e2; color: #991b1b; }
-.out { background: #f3f4f6; color: #1f2937; }
+        .btn {
+            padding: 0.9rem 2.2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-block;
+            margin-right: 1rem;
+        }
 
-.action-btn {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.action-btn.urgent { background: var(--accent-color); }
-                    
-</style>
+        .primary-btn { background: var(--primary-color); color: var(--white); }
+        .secondary-btn { background: var(--dark-bg); color: var(--white); }
+
+        .services-section { padding: 5rem 10%; }
+        .services-grid { display: flex; gap: 2rem; margin-top: 3rem; flex-wrap: wrap; }
+        .service-card { flex: 1; min-width: 250px; background: var(--light-bg); padding: 2rem; border-radius: 8px; }
+
+        .contact-section { padding: 5rem 10%; background: var(--light-bg); text-align: center; }
+        .contact-form { max-width: 500px; margin: 2rem auto 0; display: flex; flex-direction: column; }
+        .contact-form input { padding: 1rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+        .file-upload { padding: 1.5rem; border: 2px dashed #ccc; margin-bottom: 1rem; background: white; }
+        .submit-btn { background: var(--dark-bg); color: white; padding: 1rem; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; }
+
+        .hidden-view, .hidden-panel { display: none !important; }
+
+        /* Dashboard elements */
+        #employee-dashboard { background: #f0f2f5; min-height: 100vh; padding-top: 2rem; }
+        .dashboard-header { background: var(--dark-bg); color: white; display: flex; justify-content: space-between; padding: 1rem 5%; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 4px; }
+        .dashboard-content { display: flex; padding: 2rem 5%; gap: 2rem; }
+        .sidebar { background: var(--secondary-color); color: white; padding: 2rem; border-radius: 8px; min-width: 250px; }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li { padding: 10px; cursor: pointer; margin-bottom: 5px; border-radius: 4px; }
+        .sidebar ul li.active-tab { background: var(--primary-color); }
+        .main-panel { flex: 1; background: white; padding: 2rem; border-radius: 8px; }
+        .dashboard-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .dashboard-table th, .dashboard-table td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
+        .status-badge { background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+    </style>
 </head>
 <body>
 
     <!-- Main Customer View Container -->
     <div id="customer-view">
-        <!-- Navigation Bar -->
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>&reg;</span></div>
             <nav>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
-                    <li><a href="#services">Health Services</a></li>
-                    <li><a href="#store">Location</a></li>
-                    <li><a href="#contact">Prescriptions</a></li>
-                    <!-- NEW: Employee Portal Access -->
+                    <li><a href="#services">Services</a></li>
                     <li><a href="#" id="staff-login-lnk" class="staff-link">Staff Login 🔑</a></li>
                 </ul>
             </nav>
             <a href="#contact" class="nav-btn">Upload Prescription</a>
         </header>
 
-        <!-- Hero Section -->
         <section id="home" class="hero-section">
             <div class="hero-content">
                 <h1>Expert Care. Close to Home.<br><span>Your Community Health Partner.</span></h1>
                 <p>From essential prescriptions to personal health advice, Namti Drug House is here for you.</p>
                 <div class="hero-buttons">
-                    <a href="tel:+910000000000" class="btn primary-btn">Call Now</a>
+                    <a href="#" class="btn primary-btn">Call Now</a>
                     <a href="#contact" class="btn secondary-btn">Refill / Order</a>
                 </div>
             </div>
-            <div class="hero-image"></div> 
         </section>
 
-        <!-- Services Section -->
         <section id="services" class="services-section">
-            <div class="section-title">
-                <h2>Serving Our Local Community</h2>
-            </div>
+            <h2>Serving Our Local Community</h2>
             <div class="services-grid">
                 <div class="service-card"><h3>💊 Prescription Fills</h3><p>Fast, accurate processing.</p></div>
                 <div class="service-card"><h3>👩‍⚕️ Consulting</h3><p>Private health advice.</p></div>
-                <div class="service-card"><h3>🩺 Screenings</h3><p>Blood pressure & sugar checks.</p></div>
             </div>
         </section>
 
-        <!-- Store Info -->
-        <section id="store" class="store-info-section">
-            <div class="store-layout">
-                <div class="store-details">
-                    <h3>Find Us At Namti Chariali</h3>
-                    <p>College Road, trusted presence serving generations.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Prescription Upload Form -->
         <section id="contact" class="contact-section">
-            <div class="contact-container">
-                <h2>Secure Prescription Upload</h2>
-                <form id="refill-form" class="contact-form">
-                    <input type="text" id="cust-name" placeholder="Customer Name" required>
-                    <input type="tel" id="cust-phone" placeholder="Phone Number" required>
-                    <div class="file-upload">
-                        <label for="prescription-file">📄 Select Prescription Image:</label>
-                        <input type="file" id="prescription-file" accept="image/*" required>
-                    </div>
-                    <button type="submit" class="submit-btn">Send to Pharmacy</button>
-                </form>
-            </div>
+            <h2>Secure Prescription Upload</h2>
+            <form id="refill-form" class="contact-form">
+                <input type="text" id="cust-name" placeholder="Customer Name" required>
+                <input type="tel" id="cust-phone" placeholder="Phone Number" required>
+                <div class="file-upload">
+                    <input type="file" id="prescription-file" accept="image/*" required>
+                </div>
+                <button type="submit" class="submit-btn">Send to Pharmacy</button>
+            </form>
         </section>
-
-        <footer>
-            <p>&copy; 2026 Namti Drug House. Trusted Local Pharmacy.</p>
-        </footer>
     </div>
 
-    <!-- NEW: Hidden Employee Dashboard Container -->
+    <!-- Hidden Employee Dashboard Container -->
     <div id="employee-dashboard" class="hidden-view">
         <header class="dashboard-header">
-            <div class="logo">NAMTI DRUG HOUSE <span>Staff Dashboard</span></div>
-            <button id="logout-btn" class="logout-btn">Exit Portal Logout</button>
+            <h2>NAMTI DRUG HOUSE <span>Staff Portal</span></h2>
+            <button id="logout-btn" class="logout-btn">Logout</button>
         </header>
         
-        <main class="dashboard-content">
-            <aside class="sidebar">
+        <div class="dashboard-content">
+            <div class="sidebar">
                 <ul>
                     <li class="active-tab" id="tab-orders">📥 Incoming Prescriptions</li>
-                    <li id="tab-inventory">📦 Quick Inventory Tracker</li>
+                    <li id="tab-inventory">📦 Inventory</li>
                 </ul>
-            </aside>
+            </div>
             
-            <section class="main-panel">
-                <!-- Sub-tab 1: Orders -->
+            <div class="main-panel">
                 <div id="orders-panel">
-                    <h2>Live Customer Orders</h2>
+                    <h3>Live Customer Orders</h3>
                     <table class="dashboard-table">
                         <thead>
                             <tr>
-                                <th>Time</th>
-                                <th>Customer Name</th>
-                                <th>Phone Number</th>
-                                <th>Prescription File</th>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>File</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="orders-log">
-                            <!-- Orders will dynamically appear here via JavaScript -->
                             <tr>
-                                <td>Just Now</td>
                                 <td>Demo Customer</td>
                                 <td>+91 98765 43210</td>
-                                <td><a href="#" class="view-link">View Image.jpg</a></td>
-                                <td><span class="status-badge pending">Pending Review</span></td>
+                                <td>prescription.jpg</td>
+                                <td><span class="status-badge">Pending Review</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Sub-tab 2: Inventory -->
                 <div id="inventory-panel" class="hidden-panel">
-                    <h2>Stock Alert Panel</h2>
-                    <p>Quick reference guide for critical stock levels.</p>
-                    <table class="dashboard-table">
-                        <thead>
-                            <tr>
-                                <th>Medicine Item</th>
-                                <th>Stock Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Paracetamol 650mg</td><td><span class="status-badge success">In Stock</span></td><td><button class="action-btn">Update</button></td></tr>
-                            <tr><td>Amoxicillin 500mg</td><td><span class="status-badge low">Low Stock (2 Boxes)</span></td><td><button class="action-btn urgent">Order Now</button></td></tr>
-                            <tr><td>Insulin Glargine</td><td><span class="status-badge out">Out of Stock</span></td><td><button class="action-btn urgent">Order Now</button></td></tr>
-                        </tbody>
-                    </table>
+                    <h3>Stock Alert Panel</h3>
+                    <p>All core medicines are currently fully operational.</p>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
 
-    <script src="./script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const customerView = document.getElementById('customer-view');
+            const employeeDashboard = document.getElementById('employee-dashboard');
+            const staffLoginLnk = document.getElementById('staff-login-lnk');
+            const logoutBtn = document.getElementById('logout-btn');
+            const tabOrders = document.getElementById('tab-orders');
+            const tabInventory = document.getElementById('tab-inventory');
+            const ordersPanel = document.getElementById('orders-panel');
+            const inventoryPanel = document.getElementById('inventory-panel');
+            const refillForm = document.getElementById('refill-form');
+            const ordersLog = document.getElementById('orders-log');
 
+            staffLoginLnk.addEventListener('click', (e) => {
+                e.preventDefault();
+                const passcode = prompt("Enter Security Passcode:");
+                if(passcode === "namti123") {
+                    customerView.classList.add('hidden-view');
+                    employeeDashboard.classList.remove('hidden-view');
+                } else if (passcode !== null) {
+                    alert("Invalid Pin Code.");
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                employeeDashboard.classList.add('hidden-view');
+                customerView.classList.remove('hidden-view');
+            });
+
+            tabOrders.addEventListener('click', () => {
+                tabOrders.classList.add('active-tab');
+                tabInventory.classList.remove('active-tab');
+                ordersPanel.classList.remove('hidden-panel');
+                inventoryPanel.classList.add('hidden-panel');
+            });
+
+            tabInventory.addEventListener('click', () => {
+                tabInventory.classList.add('active-tab');
+                tabOrders.classList.remove('active-tab');
+                inventoryPanel.classList.remove('hidden-panel');
+                ordersPanel.classList.add('hidden-panel');
+            });
+
+            refillForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('cust-name').value;
+                const phone = document.getElementById('cust-phone').value;
+                const fileInput = document.getElementById('prescription-file');
+                const filename = fileInput.files[0] ? fileInput.files[0].name : "file.jpg";
+
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><strong>${name}</strong></td>
+                    <td>${phone}</td>
+                    <td>${filename}</td>
+                    <td><span class="status-badge">New Order</span></td>
+                `;
+                ordersLog.insertBefore(newRow, ordersLog.firstChild);
+                alert(`Success! Order sent. Go to 'Staff Login' to view.`);
+                refillForm.reset();
+            });
+        });
+    </script>
 </body>
-  </html>
-  
+    </html>
+    
