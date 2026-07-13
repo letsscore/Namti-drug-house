@@ -9,7 +9,7 @@ window.ViewManager = {
                 customerView.classList.remove('active-view');
                 staffDashboard.classList.add('active-view');
                 localStorage.setItem('namti_current_view', 'staff');
-                // Force load orders upon login to sync state
+                // Force load orders upon login to sync state seamlessly
                 if (typeof window.loadSavedSystemOrders === 'function') {
                     window.loadSavedSystemOrders();
                 }
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // SMS COMMUNICATION HANDLER RUN BY OWNER
+    // SMS HANDLER MODIFIED FOR UNIVERSAL UPI DEEP LINK CHOICE
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -196,8 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const upiAddress = "hussain.abidur@ybl";
         const merchantName = encodeURIComponent("Namti Drug House");
+        const transactionNote = encodeURIComponent("Medicine Bill");
 
-        let finalUpiLink = `https://upilinks.in/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
+        // UNIVERSAL UPI INTENT STRING FOR MOBILE APP CHOOSER
+        const finalUpiLink = `upi://pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${transactionNote}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -210,20 +212,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.calculateLiveRevenue();
 
-        // Trigger SMS communication containing payment details
-        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Kindly clear payment here: ${finalUpiLink}`;
+        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Click this link to choose any UPI App to pay: ${finalUpiLink}`;
         
-        // Open receipt metadata for owner to issue/print post successful payment verification
         const uniqueId = "NDH-" + Math.floor(1000 + Math.random() * 9000);
         document.getElementById('rec-id').textContent = uniqueId;
         document.getElementById('rec-name').textContent = customerName;
         document.getElementById('rec-phone').textContent = phoneText;
         document.getElementById('rec-addr').textContent = rowItem.cells[1].innerHTML.split('<br>')[0];
 
-        // Fire SMS gateway intent redirect smoothly
+        // Redirect to safe SMS intent scheme
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
         
-        // Show the printable receipt workspace to owner so they can print/save it anytime
+        // Modal dashboard reveals receipt template for owner to execute prints
         if (paymentModalBox) paymentModalBox.style.display = 'flex';
     };
 
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.loadSavedSystemOrders();
     };
 
-    // FORM REGISTRATION DATA PIPELINE (ONLY SUBMITS WITHOUT BREAKING SCREEN STATE)
+    // CUSTOMER FORM PIPELINE (ONLY SUBMITS SAFELY)
     if (orderForm) {
         orderForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentOrders.unshift(orderData);
                 localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
 
-                // Instantly sync internal views without disruptive reloads
+                // Instantly refresh back-end storage matrix log
                 window.loadSavedSystemOrders();
                 playBeepNotification();
 
@@ -293,18 +293,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // NATIVE SAFE SYSTEM FOR DESKTOP AND SMARTPHONE PRINT-TO-PDF
+    // NATIVE PRINT-TO-PDF STRUCTURAL CONTROL
     window.printReceipt = function() {
-        const receiptElement = document.getElementById('printable-receipt');
-        const originalContent = document.body.innerHTML;
-        const printLayout = `<div style="padding:30px; font-family:monospace; max-width:400px; margin:0 auto; border:1px dashed #000;">${receiptElement.innerHTML}</div>`;
-        
-        document.body.innerHTML = printLayout;
+        const receiptContent = document.getElementById('printable-receipt').innerHTML;
+        const originalBody = document.body.innerHTML;
+        document.body.innerHTML = `<div style="padding:40px; font-family:monospace; width:320px; margin:0 auto; border:1px dashed #000;">${receiptContent}</div>`;
         window.print();
-        
-        // Restore context state safely
-        document.body.innerHTML = originalContent;
-        window.location.reload();
+        location.reload(); 
     };
 
     if (closeModalAction && paymentModalBox) {
@@ -313,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.loadSavedSystemOrders();
 });
+        
       
 
                           
