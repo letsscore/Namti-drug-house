@@ -31,11 +31,16 @@ window.OrderManager = {
     clearThirtyDayOldOrders: function() {
         if (!confirm("Are you sure you want to delete all orders older than 30 days?")) return;
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-        const checkLimit = Date.now() - (30 * 24 * 60 * 60 * 1000); // 30 Days scale memory
         
-        const filteredOrders = currentOrders.filter(order => order.timestamp >= checkLimit);
-        localStorage.setItem('namti_orders', JSON.stringify(filteredOrders));
-        alert("30 Days old orders cleared from system storage!");
+        // 30 Days scale memory barrier
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000); 
+        
+        // BUG FIX: Keep orders that are NEWER than thirtyDaysAgo (order.timestamp >= thirtyDaysAgo)
+        const keptOrders = currentOrders.filter(order => order.timestamp >= thirtyDaysAgo);
+        const deletedCount = currentOrders.length - keptOrders.length;
+        
+        localStorage.setItem('namti_orders', JSON.stringify(keptOrders));
+        alert(`${deletedCount} old orders cleared from system storage!`);
         location.reload();
     }
 };
@@ -114,16 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
         row.innerHTML = `
             <td><strong>${data.name}</strong><br><small>${data.phone}</small></td>
             <td>${data.village}<br><small data-pin="${data.pincode}">PIN: ${data.pincode} | ${data.district}</small></td>
-            <td><div style="max-height:60px; overflow:y-auto; font-size:0.85rem; color:#334155;">${data.medicines}</div>${prescriptionVisualControl}</td>
+            <td><div style="max-height:60px; overflow-y:auto; font-size:0.85rem; color:#334155;">${data.medicines}</div>${prescriptionVisualControl}</td>
             <td><input type="number" class="bill-input" value="${data.bill || ''}" placeholder="₹" oninput="window.calculateLiveRevenue()"></td>
             <td>
                 <select class="gateway-select">
+                    <option value="universal" ${data.preferredGateway === 'universal' ? 'selected' : ''}>Any UPI App</option>
                     <option value="gpay" ${data.preferredGateway === 'gpay' ? 'selected' : ''}>Google Pay</option>
-                    <option value="paytm" ${data.preferredGateway === 'paytm' ? 'selected' : ''}>PayPaytm</option>
+                    <option value="paytm" ${data.preferredGateway === 'paytm' ? 'selected' : ''}>Paytm</option>
                     <option value="phonepe" ${data.preferredGateway === 'phonepe' ? 'selected' : ''}>PhonePe</option>
-                    <option value="bhim" ${data.preferredGateway === 'bhim' ? 'selected' : ''}>BHIM UPI</option>
-                    <option value="bajaj" ${data.preferredGateway === 'bajaj' ? 'selected' : ''}>Bajaj Pay</option>
-                    <option value="navi" ${data.preferredGateway === 'navi' ? 'selected' : ''}>Navi Pay</option>
                 </select>
             </td>
             <td><span class="badge ${data.statusClass || 'badge-pending'} status-field">${data.statusText || 'New Request'}</span></td>
@@ -167,13 +170,28 @@ document.addEventListener('DOMContentLoaded', () => {
             statusField.className = "badge status-field " + (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
         }
         
-        // Dynamic URI Gateway Link Builder Engine
-        let gatewayLabel = "Google Pay";
-        if(selectedGateway === "paytm") gatewayLabel = "Paytm";
-        if(selectedGateway === "phonepe") gatewayLabel = "PhonePe";
-        if(selectedGateway === "bhim") gatewayLabel = "BHIM";
-        if(selectedGateway === "bajaj") gatewayLabel = "Bajaj Pay";
-        if(selectedGateway === "navi") gatewayLabel = "Navi Pay";
+        // BUG FIX: Dynamic Link Engine for multi-app capability
+        let finalUpiLink = "";
+        let gatewayLabel = "";
+
+        const upiAddress = "hussain.abidur@ybl";
+        const merchantName = encodeURIComponent("Namti Drug House");
+        const note = encodeURIComponent("Medicine Bill");
+
+        if (selectedGateway === "gpay") {
+            gatewayLabel = "Google Pay";
+            finalUpiLink = `https://gpay.app.goo.gl/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
+        } else if (selectedGateway === "phonepe") {
+            gatewayLabel = "PhonePe";
+            finalUpiLink = `phonepe://pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
+        } else if (selectedGateway === "paytm") {
+            gatewayLabel = "Paytm";
+            finalUpiLink = `paytmmp://pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
+        } else {
+            gatewayLabel = "Any UPI App (GPay/PhonePe/Paytm)";
+            // Universal standard UPI intent that opens the app choice selector on customer's phone
+            finalUpiLink = `upi://pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
+        }
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -186,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.calculateLiveRevenue();
 
-        const msg = `Hello ${customerName}, your order has been verified at Namti Drug House.\nTotal Bill Amount: Rs. ${billVal}\nDelivery Mode: ${mode}\n\n👉 Pay Securely via ${gatewayLabel} link:\nhttps://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
+        const msg = `Hello ${customerName}, your order has been verified at Namti Drug House.\nTotal Bill Amount: Rs. ${billVal}\nDelivery Mode: ${mode}\n\n👉 Pay Securely via ${gatewayLabel} link:\n${finalUpiLink}`;
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
     };
 
@@ -243,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     district: document.getElementById('cust-district').value,
                     medicines: document.getElementById('medicine-details').value,
                     imageBlob: base64ImageString,
-                    preferredGateway: "gpay",
+                    preferredGateway: "universal",
                     bill: "",
                     statusText: "New Request",
                     statusClass: "badge-pending"
@@ -268,6 +286,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadSavedSystemOrders();
 });
-            
                 
                           
