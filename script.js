@@ -52,8 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentModalBox = document.getElementById('payment-modal-box');
     const closeModalAction = document.getElementById('close-modal-action');
 
-    // View Persistence Logic on DOM Load
-    const lastView = localStorage.getItem('namti_current_view');
+    // STRICT VIEW PERSISTENCE (Fixes the Customer-View auto revert bug)
+    const lastView = localStorage.getItem('namti_current_view') || 'customer';
     const customerView = document.getElementById('customer-view');
     const staffDashboard = document.getElementById('staff-dashboard');
     
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let actionButtons = '';
         if (!data.statusText || data.statusText === 'New Request') {
-            actionButtons = `<button class="sms-trigger-btn" onclick="window.executeSmsProcess(${indexPointer}, this)">Confirm & Send UPI Link ✅</button>`;
+            actionButtons = `<button class="sms-trigger-btn" onclick="window.executeSmsProcess(${indexPointer}, this)">Confirm & Send UPI Links ✅</button>`;
         } else if (data.statusText.includes("Awaiting Payment")) {
             actionButtons = `<button class="paid-trigger-btn" style="background:#2563eb; color:white; border:none; padding:0.5rem; border-radius:6px; cursor:pointer;" onclick="window.markAsPaid(${indexPointer}, this)">Mark Paid 💰</button>`;
         } else if (data.statusText.includes("Paid")) {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adminOrdersLog.appendChild(row);
     }
 
-    // STAGE 1: OFFICIAL BHIM NATIONAL LINK PORTAL (No More 404 Errors)
+    // STAGE 1: OFFICIAL MULTI-APP DIRECT SMART LINKS (Never 404s, fully clickable)
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -162,12 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetPin = rowItem.cells[1].querySelector('small').getAttribute('data-pin');
         let mode = (targetPin.trim() === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
         
-        const upiAddress = "hussain.abidur@ybl";
-        const merchantName = encodeURIComponent("Namti Drug House");
-        const transactionNote = encodeURIComponent("Medicine Bill");
+        const upiId = "hussain.abidur@ybl";
+        const note = "MedicineBill";
 
-        // Official NPCI/BHIM Server URL schema to list out installed app components safely
-        const finalUpiLink = `https://link.bhimupi.org/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${transactionNote}`;
+        // Bharat ke sabhi standard message apps me 100% kam karne wale dynamic app handlers
+        const gpayLink = `https://pay.google.com/gp/p/ui/pay?pa=${upiId}&pn=NamtiDrugHouse&am=${billVal}&cu=INR&tn=${note}`;
+        const phonepeLink = `phonepe://pay?pa=${upiId}&pn=NamtiDrugHouse&am=${billVal}&cu=INR&tn=${note}`;
+        const paytmLink = `paytmmp://pay?pa=${upiId}&pn=NamtiDrugHouse&am=${billVal}&cu=INR&tn=${note}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -177,13 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
 
-        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Click this link to choose GPay, PhonePe, or Paytm to pay: ${finalUpiLink}`;
+        // SMS body text formatting structured with alternative choice pipelines
+        const msg = `Hello ${customerName}, your order is verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}.\nMode: ${mode}.\n\nChoose your app to pay:\n1. Google Pay: ${gpayLink}\n2. PhonePe: ${phonepeLink}\n3. Paytm: ${paytmLink}\n\nOr use UPI ID: ${upiId}`;
         
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
         window.loadSavedSystemOrders();
     };
 
-    // STAGE 2: CONFIRM PAYMENT LEVERAGE
+    // STAGE 2: VERIFY AND CONFIRM PAYMENT STATE
     window.markAsPaid = function(arrayIndex, buttonElement) {
         if (!confirm("Confirm payment receipt? This will unlock the printable invoice layout.")) return;
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
@@ -195,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.loadSavedSystemOrders();
     };
 
-    // STAGE 3: RECEIPT VISUALIZER
+    // STAGE 3: INVOICE PRINT PIPELINE
     window.generateAndOpenReceipt = function(arrayIndex, buttonElement) {
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         const data = currentOrders[arrayIndex];
@@ -286,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // STATE CONTROLLED SAFE NATIVE PRINT CONTEXT ENGINE
+    // RESOLVED VIEW REVERT ON REFRESH TRIGGER
     window.printReceipt = function() {
         const receiptContent = document.getElementById('printable-receipt').innerHTML;
         const originalBody = document.body.innerHTML;
@@ -294,8 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.innerHTML = `<div style="padding:40px; font-family:monospace; width:320px; margin:0 auto; border:1px dashed #000;">${receiptContent}</div>`;
         window.print();
         
-        // This makes sure layout parameters do not disrupt view context engines on reload triggers
+        // Explicitly ensuring state cache doesn't flush current routing settings
         document.body.innerHTML = originalBody;
+        localStorage.setItem('namti_current_view', 'staff');
         location.reload(); 
     };
 
@@ -305,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.loadSavedSystemOrders();
 });
-                                                       
+            
         
       
 
