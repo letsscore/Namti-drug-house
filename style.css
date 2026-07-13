@@ -13,14 +13,30 @@ body {
     padding-bottom: 3rem;
 }
 
-/* NAVBAR DESIGN */
+/* NAVBAR DESIGN WITH AVATAR INTEGRATION */
 .pharmacy-navbar {
     background: linear-gradient(90deg, #0f766e 0%, #0d9488 100%);
-    padding: 1.2rem;
+    padding: 0.8rem 1.2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.brand-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* HIGHLY PROFESSIONAL ROUND SHAPE SHOP AVATAR */
+.brand-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .brand-logo {
@@ -48,7 +64,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* HIGHLY ATTRACTIVE ATTRACTIVE COLOURFUL CARDS FOR HISTORICAL QUOTES */
+/* HIGHLY ATTRACTIVE CARDS FOR HISTORICAL QUOTES */
 .quote-container {
     max-width: 850px;
     margin: 2rem auto 1rem auto;
@@ -59,7 +75,6 @@ body {
     border-radius: 12px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    transition: all 0.5s ease-in-out;
 }
 
 .quote-text {
@@ -107,7 +122,6 @@ h2 {
     padding-bottom: 0.5rem;
 }
 
-/* UTILITY UTILITY MANAGEMENT HEADER FOR STAFF */
 .staff-ctrl-header {
     display: flex;
     justify-content: space-between;
@@ -157,7 +171,6 @@ h2 {
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2);
-    transition: transform 0.2s;
 }
 
 /* DATA TABLE LOGIC */
@@ -186,7 +199,6 @@ td {
     font-size: 0.95rem;
 }
 
-/* SELECT GATEWAY STYLING */
 .gateway-select {
     padding: 0.4rem;
     border: 1px solid #cbd5e1;
@@ -217,7 +229,7 @@ td {
 }
 
 .sms-trigger-btn { background: #10b981; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
-.view-presc-btn { background: #6366f1; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.view-presc-btn { background: #6366f1; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 5px; display: block; }
 .reject-trigger-btn { background: #f59e0b; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
 .delete-trigger-btn { background: #ef4444; color: white; border: none; padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
 .clear-old-btn { background: #dc2626; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
@@ -229,7 +241,7 @@ td {
     border-radius: 6px;
 }
 
-/* VIEW INTERACTION MODALS LAYER */
+/* MODALS LAYERS */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -262,7 +274,8 @@ td {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-}
+    }
+
 
 
     
