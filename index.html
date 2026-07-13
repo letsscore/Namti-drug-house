@@ -38,17 +38,17 @@
         .logo { font-size: 1.3rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; color: #0f172a; }
         .logo span { color: var(--health-teal); }
         
-        /* FIXED BUTTON BLOCK */
+        /* STAFF DASHBOARD TRIGGER BUTTON */
         .staff-touch-zone {
             display: inline-block !important;
             position: relative !important;
             z-index: 1000000 !important;
             pointer-events: auto !important;
-            background: #f59e0b !important; /* Fixed Amber background matching your screenshot */
+            background: #f59e0b !important;
             border: none !important;
             padding: 0.6rem 1.4rem;
             border-radius: 50px;
-            color: #ffffff !important; /* White text */
+            color: #ffffff !important;
             font-weight: 700;
             font-size: 0.95rem;
             cursor: pointer !important;
@@ -113,7 +113,8 @@
         .receipt-row strong { color: var(--slate-gray); }
         .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
 
-        #employee-dashboard { 
+        /* ALL REFERENCES RENAMED TO STAFF-DASHBOARD */
+        #staff-dashboard { 
             display: none; 
             background: #f8fafc; 
             min-height: 100vh; 
@@ -148,7 +149,6 @@
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
-            <!-- FIXED EXPLICIT TEXT NODE -->
             <button onclick="switchToStaffView()" ontouchstart="switchToStaffView()" class="staff-touch-zone">
                 Staff Dashboard 🔑
             </button>
@@ -221,8 +221,8 @@
         </section>
     </div>
 
-    <!-- STAFF VIEW PANEL -->
-    <div id="employee-dashboard">
+    <!-- STAFF DASHBOARD PANEL (FIXED ID HERE) -->
+    <div id="staff-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
             <button onclick="switchToCustomerView()" ontouchstart="switchToCustomerView()" class="logout-btn">Exit Portal</button>
@@ -267,15 +267,15 @@
     </div>
 
     <script>
-        // ROUTING ENGINES
+        // ROUTING ENGINES MAPPED EXACTLY TO THE NEW IDs
         window.switchToStaffView = function() {
             document.getElementById('customer-view').style.display = 'none';
-            document.getElementById('employee-dashboard').style.display = 'block';
+            document.getElementById('staff-dashboard').style.display = 'block';
             window.scrollTo(0, 0);
         };
 
         window.switchToCustomerView = function() {
-            document.getElementById('employee-dashboard').style.display = 'none';
+            document.getElementById('staff-dashboard').style.display = 'none';
             document.getElementById('customer-view').style.display = 'block';
             window.scrollTo(0, 0);
         };
@@ -365,7 +365,7 @@
                     calculateLiveRevenue();
                     generateCustomerReceipt(billVal, deliveryMode);
 
-                    // UPI SECURE PAYMENT ROUTE
+                    // UPI SECURE ROUTE MAPPING
                     const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
@@ -388,5 +388,5 @@
                     <div class="receipt-row"><strong>Delivery Area:</strong> <span>${customerInMemoryState.village || 'N/A'}, ${customerInMemoryState.district || ''}</span></div>
                     <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
                     <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
-                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${
+                    <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerIn
     
