@@ -1,6 +1,6 @@
-// BRAND CONFIG & VIEW CONTROLLER CONTEXT ENGINE
+  // BRAND CONFIG & VIEW CONTROLLER CONTEXT ENGINE
 window.ViewManager = {
-    switchToStaff = function() {
+    switchToStaff: function() {
         const passwordCheck = prompt("Enter Staff Security Password:");
         if (passwordCheck === "Happy2026") {
             const customerView = document.getElementById('customer-view');
@@ -15,7 +15,7 @@ window.ViewManager = {
             alert("Wrong Password! Access Denied.");
         }
     },
-    switchToCustomer = function() {
+    switchToCustomer: function() {
         const customerView = document.getElementById('customer-view');
         const staffDashboard = document.getElementById('staff-dashboard');
         if (customerView && staffDashboard) {
@@ -29,7 +29,7 @@ window.ViewManager = {
 
 // AUTO DATA CLEANSING STORAGE SYSTEM
 window.OrderManager = {
-    clearThirtyDayOldOrders = function() {
+    clearThirtyDayOldOrders: function() {
         if (!confirm("Are you sure you want to delete all orders older than 30 days?")) return;
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000); 
@@ -319,5 +319,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadSavedSystemOrders();
 });
-            
+
                           
