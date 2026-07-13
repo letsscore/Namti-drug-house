@@ -4,20 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Namti Drug House</title>
-    <link rel="stylesheet" href="style.css?v=2.1">
+    <link rel="stylesheet" href="style.css?v=2.5">
 </head>
 <body>
 
-    <!-- BRANDED PHARMACY NAVBAR -->
+    <!-- BRANDED PHARMACY NAVBAR (WITH ROUND SHOP AVATAR) -->
     <nav class="pharmacy-navbar">
-        <div class="brand-logo">🏥 Namti Drug House</div>
+        <div class="brand-logo-container">
+            <img src="pharmacy-shop.jpg" alt="Namti Drug House" class="brand-avatar">
+            <div class="brand-logo">🏥 Namti Drug House</div>
+        </div>
         <div class="nav-buttons">
             <button onclick="window.ViewManager.switchToCustomer()">New Order</button>
             <button onclick="window.ViewManager.switchToStaff()">Staff Login</button>
         </div>
     </nav>
 
-    <!-- AUTOMATIC MEDICAL DISCOVERIES & ATTRACTIVE BANNER -->
+    <!-- AUTOMATIC MEDICAL DISCOVERIES BANNER -->
     <div class="quote-container" id="quote-wrapper-box">
         <p id="dynamic-quote" class="quote-text">"Your health is your greatest wealth. We care for your recovery."</p>
         <span id="historical-fact" class="history-text">Loading Medical History...</span>
@@ -59,7 +62,7 @@
         </form>
     </div>
 
-    <!-- STAFF MANAGEMENT DASHBOARD LIVE PANEL -->
+    <!-- STAFF DASHBOARD -->
     <div id="staff-dashboard" class="view-panel">
         <div class="staff-ctrl-header">
             <h2 id="total-revenue-display" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">Total Revenue: ₹ 0.00</h2>
@@ -84,7 +87,7 @@
         </div>
     </div>
 
-    <!-- CUSTOMER CONGRATULATIONS SUCCESS DIALOG BOX -->
+    <!-- CONGRATULATIONS SUCCESS DIALOG BOX -->
     <div id="payment-modal-box" class="modal-overlay">
         <div class="preview-modal-content" style="max-width:420px;">
             <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">💚</div>
@@ -94,7 +97,7 @@
         </div>
     </div>
 
-    <!-- DYNAMIC PRESCRIPTION INTERACTIVE IMAGE PREVIEW BOX -->
+    <!-- PRESCRIPTION INTERACTIVE IMAGE PREVIEW BOX -->
     <div id="prescription-preview-modal" class="modal-overlay">
         <div class="preview-modal-content">
             <h3 style="color:#0f766e; margin-bottom:1rem; font-weight:700;">Prescription Document</h3>
@@ -103,7 +106,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=2.1"></script>
+    <script src="script.js?v=2.5"></script>
 </body>
-                    </html>
-                
+    </html>
+    
