@@ -366,12 +366,9 @@
                     generateCustomerReceipt(billVal, deliveryMode);
 
                     // UPI INTENT DATA BINDING
-                    const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
-                    const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
+                
+const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}\nMode: ${deliveryMode}\n\n👉 Pay Securely Click Here:\nhttps://upilinks.in/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
 
-                    window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(cleanMsg)}`;
-                });
-            }
 
             function generateCustomerReceipt(finalBill, modeText) {
                 const receiptSection = document.getElementById('digital-receipt-section');
