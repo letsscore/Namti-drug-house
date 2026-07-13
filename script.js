@@ -1,4 +1,4 @@
-  // BRAND CONFIG & VIEW CONTROLLER CONTEXT ENGINE
+// BRAND CONFIG & VIEW CONTROLLER CONTEXT ENGINE
 window.ViewManager = {
     switchToStaff: function() {
         const passwordCheck = prompt("Enter Staff Security Password:");
@@ -9,6 +9,10 @@ window.ViewManager = {
                 customerView.classList.remove('active-view');
                 staffDashboard.classList.add('active-view');
                 localStorage.setItem('namti_current_view', 'staff');
+                // Force load orders upon login to sync state
+                if (typeof window.loadSavedSystemOrders === 'function') {
+                    window.loadSavedSystemOrders();
+                }
                 window.scrollTo(0, 0);
             }
         } else if (passwordCheck !== null) {
@@ -34,13 +38,12 @@ window.OrderManager = {
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000); 
         
-        // Retain orders that match correct scale boundary
         const keptOrders = currentOrders.filter(order => order.timestamp >= thirtyDaysAgo);
         const deletedCount = currentOrders.length - keptOrders.length;
         
         localStorage.setItem('namti_orders', JSON.stringify(keptOrders));
         alert(`${deletedCount} old orders successfully cleared from storage!`);
-        location.reload();
+        if (typeof window.loadSavedSystemOrders === 'function') window.loadSavedSystemOrders();
     }
 };
 
@@ -58,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let osc = audioContext.createOscillator();
             let gain = audioContext.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(880, audioContext.currentTime); // High crisp frequency beep
+            osc.frequency.setValueAtTime(880, audioContext.currentTime); 
             gain.gain.setValueAtTime(0.2, audioContext.currentTime);
             osc.connect(gain);
             gain.connect(audioContext.destination);
@@ -67,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) { console.log("Audio notification context blocked by browser."); }
     }
 
-    // LISTENER FOR CROSS-TAB STORAGE SYNC & IMMEDIATE BEEP FOR OWNER
+    // LISTENER FOR CROSS-TAB STORAGE SYNC
     window.addEventListener('storage', (e) => {
         if (e.key === 'namti_orders') {
-            loadSavedSystemOrders();
+            window.loadSavedSystemOrders();
             playBeepNotification();
         }
     });
@@ -104,15 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loadSavedSystemOrders() {
+    window.loadSavedSystemOrders = function() {
         if (!adminOrdersLog) return;
         adminOrdersLog.innerHTML = "";
         const savedOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         savedOrders.forEach((data, trackingIndex) => {
             renderDatabaseRow(data, trackingIndex);
         });
-        calculateLiveRevenue();
-    }
+        window.calculateLiveRevenue();
+    };
 
     window.calculateLiveRevenue = function() {
         let currentDayTotal = 0;
@@ -135,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let prescriptionVisualControl = `<span style="color:gray; font-size:0.8rem;">No Photo</span>`;
         if (data.imageBlob) {
-            prescriptionVisualControl = `<button class="view-presc-btn" onclick="openInteractivePrescription('${data.imageBlob}')">👁️ View Image</button>`;
+            prescriptionVisualControl = `<button class="view-presc-btn" onclick="window.openInteractivePrescription('${data.imageBlob}')">👁️ View Image</button>`;
         }
 
         row.innerHTML = `
@@ -154,9 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><span class="badge ${data.statusClass || 'badge-pending'} status-field">${data.statusText || 'New Request'}</span></td>
             <td>
                 <div class="action-flex">
-                    <button class="sms-trigger-btn" onclick="executeSmsProcess(${indexPointer}, this)">Confirm ✅</button>
-                    <button class="reject-trigger-btn" onclick="executeRejectProcess(${indexPointer}, this)">Reject ❌</button>
-                    <button class="delete-trigger-btn" onclick="executeDeleteProcess(${indexPointer})">Delete 🗑️</button>
+                    <button class="sms-trigger-btn" onclick="window.executeSmsProcess(${indexPointer}, this)">Confirm ✅</button>
+                    <button class="reject-trigger-btn" onclick="window.executeRejectProcess(${indexPointer}, this)">Reject ❌</button>
+                    <button class="delete-trigger-btn" onclick="window.executeDeleteProcess(${indexPointer})">Delete 🗑️</button>
                 </div>
             </td>
         `;
@@ -172,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // SMS HANDLER BUILT ON PRECISE PINCODE DELIVERY POLICIES
+    // SMS COMMUNICATION HANDLER RUN BY OWNER
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -182,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!billVal) { alert("Please enter Bill Amount first!"); return; }
 
-        // AUTOMATIC POLICIES VALIDATOR: Pin must match 785684 & Bill >= 1999
         const targetPin = rowItem.cells[1].querySelector('small').getAttribute('data-pin');
         let mode = (targetPin.trim() === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
         
@@ -194,25 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const upiAddress = "hussain.abidur@ybl";
         const merchantName = encodeURIComponent("Namti Drug House");
-        const note = encodeURIComponent("Medicine Bill");
 
-        let finalUpiLink = "";
-        let gatewayLabel = "";
-
-        // 100% Guaranteed Clickable Web Redirect Hyperlinks
-        if (selectedGateway === "gpay") {
-            gatewayLabel = "Google Pay";
-            finalUpiLink = `https://gpay.app.goo.gl/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
-        } else if (selectedGateway === "phonepe") {
-            gatewayLabel = "PhonePe";
-            finalUpiLink = `https://phon.pe/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
-        } else if (selectedGateway === "paytm") {
-            gatewayLabel = "Paytm";
-            finalUpiLink = `https://paytm.me/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
-        } else {
-            gatewayLabel = "Any UPI App (GPay/PhonePe/Paytm/BHIM)";
-            finalUpiLink = `https://upilinks.in/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
-        }
+        let finalUpiLink = `https://upilinks.in/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -224,8 +209,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         window.calculateLiveRevenue();
-        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Pay via ${gatewayLabel} here: ${finalUpiLink}`;
+
+        // Trigger SMS communication containing payment details
+        const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Kindly clear payment here: ${finalUpiLink}`;
+        
+        // Open receipt metadata for owner to issue/print post successful payment verification
+        const uniqueId = "NDH-" + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('rec-id').textContent = uniqueId;
+        document.getElementById('rec-name').textContent = customerName;
+        document.getElementById('rec-phone').textContent = phoneText;
+        document.getElementById('rec-addr').textContent = rowItem.cells[1].innerHTML.split('<br>')[0];
+
+        // Fire SMS gateway intent redirect smoothly
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
+        
+        // Show the printable receipt workspace to owner so they can print/save it anytime
+        if (paymentModalBox) paymentModalBox.style.display = 'flex';
     };
 
     window.executeRejectProcess = function(arrayIndex, buttonElement) {
@@ -250,10 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         currentOrders.splice(arrayIndex, 1);
         localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
-        loadSavedSystemOrders();
+        window.loadSavedSystemOrders();
     };
 
-    // FORM REGISTRATION DATA REDIRECT TO CUSTOM RECEIPT POPUP
+    // FORM REGISTRATION DATA PIPELINE (ONLY SUBMITS WITHOUT BREAKING SCREEN STATE)
     if (orderForm) {
         orderForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -263,21 +262,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileEngineReader = new FileReader();
             fileEngineReader.onload = function(event) {
                 const base64ImageString = event.target.result;
-                const uniqueId = "NDH-" + Math.floor(1000 + Math.random() * 9000);
-
-                const nameInput = document.getElementById('cust-name').value;
-                const phoneInput = document.getElementById('cust-phone').value;
-                const villageInput = document.getElementById('cust-village').value;
-                const pinInput = document.getElementById('cust-pincode').value;
-                const distInput = document.getElementById('cust-district').value;
 
                 const orderData = {
                     timestamp: Date.now(),
-                    name: nameInput,
-                    phone: phoneInput,
-                    village: villageInput,
-                    pincode: pinInput,
-                    district: distInput,
+                    name: document.getElementById('cust-name').value,
+                    phone: document.getElementById('cust-phone').value,
+                    village: document.getElementById('cust-village').value,
+                    pincode: document.getElementById('cust-pincode').value,
+                    district: document.getElementById('cust-district').value,
                     medicines: document.getElementById('medicine-details').value,
                     imageBlob: base64ImageString,
                     preferredGateway: "universal",
@@ -290,34 +282,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentOrders.unshift(orderData);
                 localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
 
-                // INJECT DYNAMIC METADATA INTO THE PRINTABLE ELEMENT
-                document.getElementById('rec-id').textContent = uniqueId;
-                document.getElementById('rec-name').textContent = nameInput;
-                document.getElementById('rec-phone').textContent = phoneInput;
-                document.getElementById('rec-addr').textContent = `${villageInput}, PIN: ${pinInput}, ${distInput}`;
+                // Instantly sync internal views without disruptive reloads
+                window.loadSavedSystemOrders();
+                playBeepNotification();
 
-                loadSavedSystemOrders();
-                if (paymentModalBox) paymentModalBox.style.display = 'flex';
+                alert("✅ Your Order has been placed successfully! Namti Drug House staff will verify your prescription and send an SMS with payment instructions shortly.");
                 orderForm.reset();
             };
             fileEngineReader.readAsDataURL(photoFile);
         });
     }
 
-    // CUSTOM SINGLE ELEMENT PRINT FUNCTION PIPELINE
+    // NATIVE SAFE SYSTEM FOR DESKTOP AND SMARTPHONE PRINT-TO-PDF
     window.printReceipt = function() {
-        const receiptContent = document.getElementById('printable-receipt').innerHTML;
-        const originalBody = document.body.innerHTML;
-        document.body.innerHTML = `<div style="padding:40px; font-family:monospace; width:320px; margin:0 auto; border:1px solid #000;">${receiptContent}</div>`;
+        const receiptElement = document.getElementById('printable-receipt');
+        const originalContent = document.body.innerHTML;
+        const printLayout = `<div style="padding:30px; font-family:monospace; max-width:400px; margin:0 auto; border:1px dashed #000;">${receiptElement.innerHTML}</div>`;
+        
+        document.body.innerHTML = printLayout;
         window.print();
-        location.reload(); // Hard refresh to reset app state seamlessly
+        
+        // Restore context state safely
+        document.body.innerHTML = originalContent;
+        window.location.reload();
     };
 
     if (closeModalAction && paymentModalBox) {
         closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
     }
 
-    loadSavedSystemOrders();
+    window.loadSavedSystemOrders();
 });
+      
 
                           
