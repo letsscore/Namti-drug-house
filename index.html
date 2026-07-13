@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Namti Drug House</title>
-    <link rel="stylesheet" href="style.css?v=2.5">
+    <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
 
-    <!-- BRANDED PHARMACY NAVBAR (WITH ROUND SHOP AVATAR) -->
+    <!-- BRANDED PHARMACY NAVBAR -->
     <nav class="pharmacy-navbar">
         <div class="brand-logo-container">
             <img src="pharmacy-shop.jpg" alt="Namti Drug House" class="brand-avatar">
             <div class="brand-logo">🏥 Namti Drug House</div>
         </div>
         <div class="nav-buttons">
+            <!-- LICENSE DISPLAY BUTTON -->
+            <button class="licence-badge-btn" onclick="document.getElementById('licence-modal').style.display='flex'">📜 View Licence & Reg.</button>
             <button onclick="window.ViewManager.switchToCustomer()">New Order</button>
             <button onclick="window.ViewManager.switchToStaff()">Staff Login</button>
         </div>
@@ -28,6 +30,10 @@
 
     <!-- CUSTOMER PANEL -->
     <div id="customer-view" class="view-panel active-view">
+        <div class="delivery-rules-banner">
+            🚨 <strong>Delivery Policy:</strong> Free Home Delivery is available ONLY for PIN <strong>785684</strong> on orders above <strong>₹1999</strong>. Others must choose Self Collection.
+        </div>
+        
         <h2>Upload & Request Medicines</h2>
         <form id="order-submission-form">
             <div class="form-group">
@@ -87,13 +93,45 @@
         </div>
     </div>
 
-    <!-- CONGRATULATIONS SUCCESS DIALOG BOX -->
+    <!-- LICENCE DOCUMENT MODAL -->
+    <div id="licence-modal" class="modal-overlay">
+        <div class="preview-modal-content" style="max-width: 450px; text-align: left;">
+            <h3 style="color:#0f766e; border-bottom: 2px solid #0d9488; padding-bottom: 5px; margin-bottom: 15px;">Govt. Pharmacy Licence Details</h3>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.6; color: #334155;">
+                📌 <strong>Pharmacy Name:</strong> Namti Drug House<br>
+                📍 <strong>Location:</strong> Namti Chariali, College Road, Sivasagar, Assam<br>
+                🆔 <strong>Drug Licence No:</strong> DL-SIV-XXXXXX / 2026<br>
+                👨‍⚕️ <strong>Registered Pharmacist:</strong> Govt. Certified Professionals<br>
+                Status: <span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:12px; font-weight:700; font-size:0.8rem;">ACTIVE & VALID</span>
+            </div>
+            <button onclick="document.getElementById('licence-modal').style.display='none'" class="submit-btn" style="margin-top: 15px; background: #475569;">Close Window</button>
+        </div>
+    </div>
+
+    <!-- CUSTOMER ORDER SUCCESS & RECEIPT POPUP MODAL -->
     <div id="payment-modal-box" class="modal-overlay">
-        <div class="preview-modal-content" style="max-width:420px;">
-            <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">💚</div>
-            <h3 style="color:#0f766e; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight:700;">Order Logged Successfully!</h3>
-            <p style="color: #64748b; font-size: 0.95rem; line-height:1.5;">Aapka medicine request safely submit ho gaya hai. Ab aap humare staff verification link SMS ka wait kijiye.</p>
-            <button id="close-modal-action" style="background:#0d9488; color:white; border:none; padding:0.7rem 2rem; border-radius:8px; cursor:pointer; margin-top:1.5rem; font-weight: 700; width:100%;">OK, Done</button>
+        <div class="preview-modal-content" style="max-width:450px;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📄</div>
+            <h3 style="color:#0f766e; font-size: 1.4rem; margin-bottom: 0.5rem; font-weight:700;">Order Logged & Receipt Generated</h3>
+            
+            <!-- PRINTABLE RECEIPT CONTAINER -->
+            <div id="printable-receipt" style="background:#fff; border:1px dashed #cbd5e1; padding:1rem; text-align:left; font-size:0.85rem; margin:1rem 0; border-radius:6px; color:#1e293b;">
+                <h4 style="text-align:center; margin-bottom:5px; color:#0f766e;">NAMTI DRUG HOUSE RECEIPT</h4>
+                <p style="text-align:center; font-size:0.75rem; color:#64748b; margin-bottom:10px;">College Road, Namti Chariali</p>
+                <hr style="border:none; border-top:1px dashed #cbd5e1; margin-bottom:8px;">
+                <p><strong>Receipt ID:</strong> <span id="rec-id">NDH-9823</span></p>
+                <p><strong>Patient Name:</strong> <span id="rec-name">--</span></p>
+                <p><strong>Phone:</strong> <span id="rec-phone">--</span></p>
+                <p><strong>Address:</strong> <span id="rec-addr">--</span></p>
+                <p><strong>Status:</strong> <span style="color:#b45309; font-weight:700;">Awaiting Verification</span></p>
+                <hr style="border:none; border-top:1px dashed #cbd5e1; margin:8px 0;">
+                <p style="font-size:0.75rem; color:#64748b; text-align:center;">Staff verify karke bill amount aur secure payment link aapke number par SMS karenge.</p>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="window.printReceipt()" style="background:#0284c7; color:white; border:none; padding:0.6rem; border-radius:6px; cursor:pointer; font-weight:600; flex:1;">🖨️ Print Receipt</button>
+                <button id="close-modal-action" style="background:#0d9488; color:white; border:none; padding:0.6rem; border-radius:6px; cursor:pointer; font-weight:600; flex:1;">Close</button>
+            </div>
         </div>
     </div>
 
@@ -106,7 +144,8 @@
         </div>
     </div>
 
-    <script src="script.js?v=2.5"></script>
+    <script src="script.js?v=3.0"></script>
 </body>
-    </html>
+                    </html>
+                                                                                                                                    
     
