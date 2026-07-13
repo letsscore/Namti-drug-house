@@ -1,59 +1,205 @@
-/* VIEW MANAGEMENT SYSTEM */
+/* GLOBAL RESETS & COLOURFUL GRADIENT BACKGROUND */
+* {
+    margin: 0;
+    padding: 0;
+    box-box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef3c7 100%);
+    min-height: 100vh;
+    color: #1e293b;
+    padding-bottom: 3rem;
+}
+
+/* NAVBAR DESIGN */
+.pharmacy-navbar {
+    background: linear-gradient(90deg, #0f766e 0%, #0d9488 100%);
+    padding: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.brand-logo {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.nav-buttons button {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.6rem 1.2rem;
+    margin-left: 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-buttons button:hover {
+    background: white;
+    color: #0d9488;
+    transform: translateY(-2px);
+}
+
+/* DYNAMIC HEALTH QUOTE BANNER */
+.quote-container {
+    max-width: 800px;
+    margin: 2rem auto 1rem auto;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-left: 5px solid #0d9488;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(15, 23, 42, 0.05);
+}
+
+.quote-text {
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #0f766e;
+    font-weight: 600;
+}
+
+/* CARDS & PANELS */
 .view-panel {
     display: none;
+    max-width: 900px;
+    margin: 1.5rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 .view-panel.active-view {
     display: block;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-/* PHARMACY DASHBOARD UI */
-.badge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
+/* FORM STYLING */
+h2 {
+    color: #0f766e;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
     font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #475569;
 }
 
-.badge-pending {
-    background-color: #fef3c7;
-    color: #92400e;
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
 }
 
-.badge-delivery {
-    background-color: #dcfce7;
-    color: #166534;
+.form-control:focus {
+    outline: none;
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
-.badge-pickup {
-    background-color: #e0f2fe;
-    color: #0369a1;
-}
-
-.sms-trigger-btn {
-    background-color: #0d9488;
+.submit-btn {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
     color: white;
     border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
-    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2);
+    transition: transform 0.2s;
 }
 
-.sms-trigger-btn:hover {
-    background-color: #0f766e;
+.submit-btn:hover {
+    transform: translateY(-1px);
 }
+
+/* STAFF TABLE UI */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+}
+
+/* BADGES & ACTION BUTTONS */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.badge-pending { background-color: #fef3c7; color: #92400e; }
+.badge-delivery { background-color: #dcfce7; color: #166534; }
+.badge-pickup { background-color: #e0f2fe; color: #0369a1; }
+
+.sms-trigger-btn {
+    background: #0284c7;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.sms-trigger-btn:hover { background: #0369a1; }
 
 .bill-input {
-    width: 80px;
-    padding: 0.3rem;
+    width: 90px;
+    padding: 0.4rem;
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
-.rx-link {
-    color: #2563eb;
-    text-decoration: underline;
-    font-size: 0.85rem;
-}
-
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+    }
+    
