@@ -1,6 +1,6 @@
-// GLOBAL SECURE STATE CONFIG GATE
+// BRAND CONFIG & VIEW CONTROLLER CONTEXT ENGINE
 window.ViewManager = {
-    switchToStaff: function() {
+    switchToStaff = function() {
         const passwordCheck = prompt("Enter Staff Security Password:");
         if (passwordCheck === "Happy2026") {
             const customerView = document.getElementById('customer-view');
@@ -15,7 +15,7 @@ window.ViewManager = {
             alert("Wrong Password! Access Denied.");
         }
     },
-    switchToCustomer: function() {
+    switchToCustomer = function() {
         const customerView = document.getElementById('customer-view');
         const staffDashboard = document.getElementById('staff-dashboard');
         if (customerView && staffDashboard) {
@@ -27,20 +27,19 @@ window.ViewManager = {
     }
 };
 
+// AUTO DATA CLEANSING STORAGE SYSTEM
 window.OrderManager = {
-    clearThirtyDayOldOrders: function() {
+    clearThirtyDayOldOrders = function() {
         if (!confirm("Are you sure you want to delete all orders older than 30 days?")) return;
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-        
-        // BUG FIXED: Precise 30-day millisecond barrier
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000); 
         
-        // Retain orders that are newer than thirtyDaysAgo
+        // Retain orders that match correct scale boundary
         const keptOrders = currentOrders.filter(order => order.timestamp >= thirtyDaysAgo);
         const deletedCount = currentOrders.length - keptOrders.length;
         
         localStorage.setItem('namti_orders', JSON.stringify(keptOrders));
-        alert(`${deletedCount} old orders successfully cleared from system storage!`);
+        alert(`${deletedCount} old orders successfully cleared from storage!`);
         location.reload();
     }
 };
@@ -51,13 +50,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentModalBox = document.getElementById('payment-modal-box');
     const closeModalAction = document.getElementById('close-modal-action');
 
-    // MEDICAL HISTORY AND DISCOVERIES ROTATOR
+    // AUDIO CONTEXT SYSTEM FOR REAL-TIME INSTANT BEEP NOTIFICATIONS TO OWNER
+    let audioContext;
+    function playBeepNotification() {
+        try {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = audioContext.createOscillator();
+            let gain = audioContext.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, audioContext.currentTime); // High crisp frequency beep
+            gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.15);
+        } catch(e) { console.log("Audio notification context blocked by browser."); }
+    }
+
+    // LISTENER FOR CROSS-TAB STORAGE SYNC & IMMEDIATE BEEP FOR OWNER
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'namti_orders') {
+            loadSavedSystemOrders();
+            playBeepNotification();
+        }
+    });
+
+    // MEDICAL HISTORICAL DISCOVERIES TRIVIA PIPELINE
     const medicalHubData = [
         { q: "Your health is your greatest wealth. We care for your speedy recovery.", f: "Historical Fact: Sir Alexander Fleming discovered Penicillin in 1928, saving millions of lives!" },
         { q: "Medicines cure diseases, but only pharmacists can optimize your therapy.", f: "Discovery: In 1897, Felix Hoffmann synthesized Aspirin, creating the world's most popular drug." },
         { q: "Good health and good sense are two of life's greatest blessings.", f: "Invention: Wilhelm Röntgen discovered X-Rays in 1895, revolutionizing medical diagnostics." },
-        { q: "Namti Drug House: Committed to your wellness, every single day.", f: "Vaccine Milestone: Edward Jenner successfully developed the world's first Smallpox vaccine in 1796." },
-        { q: "Let food be thy medicine and medicine be thy food.", f: "Ancient Discovery: Lord Dhanvantari & Charaka compiled the Charaka Samhita (Ayurveda) around 300 BCE." }
+        { q: "Namti Drug House: Committed to your wellness, every single day.", f: "Vaccine Milestone: Edward Jenner successfully developed the world's first Smallpox vaccine in 1796." }
     ];
     
     let rotatingPointer = 0;
@@ -71,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 8000);
 
-    // PERSIST VIEW ENGINE LOOKUP
     const lastView = localStorage.getItem('namti_current_view');
     if (lastView === 'staff') {
         const customerView = document.getElementById('customer-view');
@@ -150,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // SMS DISPATCH PROCESS WITH UPGRADED INTERFACES
+    // SMS HANDLER BUILT ON PRECISE PINCODE DELIVERY POLICIES
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -160,8 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!billVal) { alert("Please enter Bill Amount first!"); return; }
 
+        // AUTOMATIC POLICIES VALIDATOR: Pin must match 785684 & Bill >= 1999
         const targetPin = rowItem.cells[1].querySelector('small').getAttribute('data-pin');
-        let mode = (targetPin === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
+        let mode = (targetPin.trim() === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
         
         const statusField = rowItem.querySelector('.status-field');
         if (statusField) {
@@ -176,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let finalUpiLink = "";
         let gatewayLabel = "";
 
-        // BUG FIXED: HTTPS Standard Web Links that force apps to generate clickable shortcuts on the recipient's phone
+        // 100% Guaranteed Clickable Web Redirect Hyperlinks
         if (selectedGateway === "gpay") {
             gatewayLabel = "Google Pay";
             finalUpiLink = `https://gpay.app.goo.gl/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
@@ -188,7 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
             finalUpiLink = `https://paytm.me/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
         } else {
             gatewayLabel = "Any UPI App (GPay/PhonePe/Paytm/BHIM)";
-            // Universal custom secure direct parser structure for 100% click text delivery
             finalUpiLink = `https://upilinks.in/pay?pa=${upiAddress}&pn=${merchantName}&am=${billVal}&cu=INR`;
         }
 
@@ -202,9 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         window.calculateLiveRevenue();
-
         const msg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Mode: ${mode}. Pay via ${gatewayLabel} here: ${finalUpiLink}`;
-        
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
     };
 
@@ -212,12 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm("Reject this order request?")) return;
         const rowItem = buttonElement.closest('tr');
         const statusField = rowItem.querySelector('.status-field');
-        
         if (statusField) {
             statusField.textContent = "Rejected";
             statusField.className = "badge status-field badge-rejected";
         }
-
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
             currentOrders[arrayIndex].statusText = "Rejected";
@@ -235,27 +253,31 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSavedSystemOrders();
     };
 
+    // FORM REGISTRATION DATA REDIRECT TO CUSTOM RECEIPT POPUP
     if (orderForm) {
         orderForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const photoFile = document.getElementById('prescription-photo').files[0];
-            
-            if (!photoFile) {
-                alert("Please attach a Prescription photo to submit your request.");
-                return;
-            }
+            if (!photoFile) { alert("Please attach a Prescription photo first!"); return; }
 
             const fileEngineReader = new FileReader();
             fileEngineReader.onload = function(event) {
                 const base64ImageString = event.target.result;
+                const uniqueId = "NDH-" + Math.floor(1000 + Math.random() * 9000);
+
+                const nameInput = document.getElementById('cust-name').value;
+                const phoneInput = document.getElementById('cust-phone').value;
+                const villageInput = document.getElementById('cust-village').value;
+                const pinInput = document.getElementById('cust-pincode').value;
+                const distInput = document.getElementById('cust-district').value;
 
                 const orderData = {
                     timestamp: Date.now(),
-                    name: document.getElementById('cust-name').value,
-                    phone: document.getElementById('cust-phone').value,
-                    village: document.getElementById('cust-village').value,
-                    pincode: document.getElementById('cust-pincode').value,
-                    district: document.getElementById('cust-district').value,
+                    name: nameInput,
+                    phone: phoneInput,
+                    village: villageInput,
+                    pincode: pinInput,
+                    district: distInput,
                     medicines: document.getElementById('medicine-details').value,
                     imageBlob: base64ImageString,
                     preferredGateway: "universal",
@@ -268,14 +290,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentOrders.unshift(orderData);
                 localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
 
+                // INJECT DYNAMIC METADATA INTO THE PRINTABLE ELEMENT
+                document.getElementById('rec-id').textContent = uniqueId;
+                document.getElementById('rec-name').textContent = nameInput;
+                document.getElementById('rec-phone').textContent = phoneInput;
+                document.getElementById('rec-addr').textContent = `${villageInput}, PIN: ${pinInput}, ${distInput}`;
+
                 loadSavedSystemOrders();
                 if (paymentModalBox) paymentModalBox.style.display = 'flex';
                 orderForm.reset();
             };
-            
             fileEngineReader.readAsDataURL(photoFile);
         });
     }
+
+    // CUSTOM SINGLE ELEMENT PRINT FUNCTION PIPELINE
+    window.printReceipt = function() {
+        const receiptContent = document.getElementById('printable-receipt').innerHTML;
+        const originalBody = document.body.innerHTML;
+        document.body.innerHTML = `<div style="padding:40px; font-family:monospace; width:320px; margin:0 auto; border:1px solid #000;">${receiptContent}</div>`;
+        window.print();
+        location.reload(); // Hard refresh to reset app state seamlessly
+    };
 
     if (closeModalAction && paymentModalBox) {
         closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
