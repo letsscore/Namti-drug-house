@@ -183,5 +183,108 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Layout Logs Data Load on runtime
     loadSavedOrders();
 });
+// Function to view full image
+window.openPrescription = function(imgSrc) {
+    const modal = document.getElementById('image-viewer-modal');
+    const fullImg = document.getElementById('full-prescription-img');
+    fullImg.src = imgSrc;
+    modal.style.display = 'flex';
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const orderForm = document.getElementById('order-submission-form');
+    const adminOrdersLog = document.getElementById('admin-orders-log');
+
+    // ... (Keep existing ViewManager, Quotes logic same) ...
+
+    function renderOrderRow(data, shouldSave = true, positionIndex = 0) {
+        if (!adminOrdersLog) return;
+        
+        // Image logic check
+        let imageHTML = `<span style="color:gray;">No Image</span>`;
+        if (data.image) {
+            imageHTML = `<img src="${data.image}" width="60" style="cursor:pointer; border-radius:5px;" onclick="window.openPrescription('${data.image}')">`;
+        }
+
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><strong>${data.name}</strong><br><small>${data.phone}</small></td>
+            <td>${data.village}<br><small>PIN: ${data.pincode}</small></td>
+            <td>${data.medicines}<br>${imageHTML}</td>
+            <td><input type="number" class="bill-input" value="${data.bill || ''}" placeholder="₹"></td>
+            <td><span class="badge ${data.statusClass || 'badge-pending'} status-field">${data.statusText || 'New Request'}</span></td>
+            <td><button class="sms-trigger-btn">Process Order 💬</button></td>
+        `;
+        
+        adminOrdersLog.appendChild(newRow);
+        attachSmsAction(newRow, positionIndex);
+    }
+
+    // Submit Logic with Image processing
+    if (orderForm) {
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('prescription-photo');
+            const file = fileInput.files[0];
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const orderData = {
+                    name: document.getElementById('cust-name').value,
+                    phone: document.getElementById('cust-phone').value,
+                    village: document.getElementById('cust-village').value,
+                    pincode: document.getElementById('cust-pincode').value,
+                    district: document.getElementById('cust-district').value,
+                    medicines: document.getElementById('medicine-details').value,
+                    image: e.target.result, // Base64 image saved
+                    bill: "",
+                    statusText: "New Request",
+                    statusClass: "badge-pending"
+                };
+
+                const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
+                currentOrders.unshift(orderData);
+                localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
+                
+                loadSavedOrders();
+                document.getElementById('payment-modal-box').style.display = 'flex';
+                orderForm.reset();
+            };
+            
+            if (file) { reader.readAsDataURL(file); } 
+            else { reader.onload({target: {result: null}}); }
+        });
+    }
+
+    function attachSmsAction(rowItem, internalIdx) {
+        const btn = rowItem.querySelector('.sms-trigger-btn');
+        if (!btn) return;
+        
+        btn.addEventListener('click', () => {
+            const billVal = parseFloat(rowItem.querySelector('.bill-input').value) || 0;
+            const customerName = rowItem.cells[0].querySelector('strong').textContent;
+            
+            if (!billVal) { alert("Please enter Bill Amount!"); return; }
+
+            // Enhanced Payment Message
+            const msg = `Namti Drug House - Order Confirmation\n` +
+                        `---------------------------\n` +
+                        `Dear ${customerName}, your medicine order is ready.\n` +
+                        `Total Amount: Rs. ${billVal}\n\n` +
+                        `Please Pay via any of these UPI apps:\n` +
+                        `1. Google Pay\n2. Paytm\n3. PhonePe\n4. Bajaj Pay\n5. BHIM\n6. Navi\n\n` +
+                        `UPI ID: hussain.abidur@ybl\n` +
+                        `Click to Pay: https://gpay.app.goo.gl/pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR`;
+
+            // Update status UI
+            rowItem.querySelector('.status-field').textContent = "Pending Payment";
+            
+            // Trigger SMS
+            const phone = rowItem.cells[0].querySelector('small').textContent;
+            window.location.href = `sms:+91${phone}?body=${encodeURIComponent(msg)}`;
+        });
+    }
+});
+                    
                 
                           
