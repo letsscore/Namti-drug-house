@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namti Drug House - Pharmacy Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Main Customer View Container -->
+    <div id="customer-view">
+        <!-- Navigation Bar -->
+        <header class="navbar">
+            <div class="logo">NAMTI DRUG HOUSE<span>&reg;</span></div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#services">Health Services</a></li>
+                    <li><a href="#store">Location</a></li>
+                    <li><a href="#contact">Prescriptions</a></li>
+                    <!-- NEW: Employee Portal Access -->
+                    <li><a href="#" id="staff-login-lnk" class="staff-link">Staff Login 🔑</a></li>
+                </ul>
+            </nav>
+            <a href="#contact" class="nav-btn">Upload Prescription</a>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1>Expert Care. Close to Home.<br><span>Your Community Health Partner.</span></h1>
+                <p>From essential prescriptions to personal health advice, Namti Drug House is here for you.</p>
+                <div class="hero-buttons">
+                    <a href="tel:+910000000000" class="btn primary-btn">Call Now</a>
+                    <a href="#contact" class="btn secondary-btn">Refill / Order</a>
+                </div>
+            </div>
+            <div class="hero-image"></div> 
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="services-section">
+            <div class="section-title">
+                <h2>Serving Our Local Community</h2>
+            </div>
+            <div class="services-grid">
+                <div class="service-card"><h3>💊 Prescription Fills</h3><p>Fast, accurate processing.</p></div>
+                <div class="service-card"><h3>👩‍⚕️ Consulting</h3><p>Private health advice.</p></div>
+                <div class="service-card"><h3>🩺 Screenings</h3><p>Blood pressure & sugar checks.</p></div>
+            </div>
+        </section>
+
+        <!-- Store Info -->
+        <section id="store" class="store-info-section">
+            <div class="store-layout">
+                <div class="store-details">
+                    <h3>Find Us At Namti Chariali</h3>
+                    <p>College Road, trusted presence serving generations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prescription Upload Form -->
+        <section id="contact" class="contact-section">
+            <div class="contact-container">
+                <h2>Secure Prescription Upload</h2>
+                <form id="refill-form" class="contact-form">
+                    <input type="text" id="cust-name" placeholder="Customer Name" required>
+                    <input type="tel" id="cust-phone" placeholder="Phone Number" required>
+                    <div class="file-upload">
+                        <label for="prescription-file">📄 Select Prescription Image:</label>
+                        <input type="file" id="prescription-file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Send to Pharmacy</button>
+                </form>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 Namti Drug House. Trusted Local Pharmacy.</p>
+        </footer>
+    </div>
+
+    <!-- NEW: Hidden Employee Dashboard Container -->
+    <div id="employee-dashboard" class="hidden-view">
+        <header class="dashboard-header">
+            <div class="logo">NAMTI DRUG HOUSE <span>Staff Dashboard</span></div>
+            <button id="logout-btn" class="logout-btn">Exit Portal Logout</button>
+        </header>
+        
+        <main class="dashboard-content">
+            <aside class="sidebar">
+                <ul>
+                    <li class="active-tab" id="tab-orders">📥 Incoming Prescriptions</li>
+                    <li id="tab-inventory">📦 Quick Inventory Tracker</li>
+                </ul>
+            </aside>
+            
+            <section class="main-panel">
+                <!-- Sub-tab 1: Orders -->
+                <div id="orders-panel">
+                    <h2>Live Customer Orders</h2>
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Customer Name</th>
+                                <th>Phone Number</th>
+                                <th>Prescription File</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-log">
+                            <!-- Orders will dynamically appear here via JavaScript -->
+                            <tr>
+                                <td>Just Now</td>
+                                <td>Demo Customer</td>
+                                <td>+91 98765 43210</td>
+                                <td><a href="#" class="view-link">View Image.jpg</a></td>
+                                <td><span class="status-badge pending">Pending Review</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sub-tab 2: Inventory -->
+                <div id="inventory-panel" class="hidden-panel">
+                    <h2>Stock Alert Panel</h2>
+                    <p>Quick reference guide for critical stock levels.</p>
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Medicine Item</th>
+                                <th>Stock Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Paracetamol 650mg</td><td><span class="status-badge success">In Stock</span></td><td><button class="action-btn">Update</button></td></tr>
+                            <tr><td>Amoxicillin 500mg</td><td><span class="status-badge low">Low Stock (2 Boxes)</span></td><td><button class="action-btn urgent">Order Now</button></td></tr>
+                            <tr><td>Insulin Glargine</td><td><span class="status-badge out">Out of Stock</span></td><td><button class="action-btn urgent">Order Now</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+  </html>
+  
