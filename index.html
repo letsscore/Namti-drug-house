@@ -3,76 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namti Drug House Portal</title>
-    <!-- CSS LINK -->
+    <title>Namti Drug House</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- NAVIGATION SYSTEM TO SWITCH PANELS -->
-    <nav style="padding: 1rem; background: #0f172a; text-align: center;">
-        <button onclick="window.ViewManager.switchToCustomer()" style="margin-right: 10px; padding: 0.5rem 1rem;">Customer View</button>
-        <button onclick="window.ViewManager.switchToStaff()" style="padding: 0.5rem 1rem;">Staff Dashboard</button>
+    <!-- BRANDED PHARMACY NAVBAR -->
+    <nav class="pharmacy-navbar">
+        <div class="brand-logo">🏥 Namti Drug House</div>
+        <div class="nav-buttons">
+            <button onclick="window.ViewManager.switchToCustomer()">New Order</button>
+            <button onclick="window.ViewManager.switchToStaff()">Staff Login</button>
+        </div>
     </nav>
 
-    <!-- CUSTOMER VIEW ENGINE -->
-    <div id="customer-view" class="view-panel active-view">
-        <div id="customer-form-container">
-            <h2>Order Prescription / Medicine</h2>
-            <form id="order-submission-form">
-                <input type="text" id="cust-name" placeholder="Full Name" required><br><br>
-                <input type="tel" id="cust-phone" placeholder="Mobile Number" required><br><br>
-                <input type="text" id="cust-village" placeholder="Village / Area" required><br><br>
-                <input type="text" id="cust-pincode" placeholder="Pincode (e.g. 785684)" required><br><br>
-                <input type="text" id="cust-district" placeholder="District" required><br><br>
-                <textarea id="medicine-details" placeholder="Write medicine details here..." required></textarea><br><br>
-                <label>Upload Prescription Photo:</label>
-                <input type="file" id="prescription-photo" accept="image/*"><br><br>
-                <button type="submit" style="background:#0d9488; color:white; padding:0.6rem 1.2rem; border:none; cursor:pointer;">Submit Request</button>
-            </form>
-        </div>
+    <!-- AUTOMATIC HEALTH QUOTES BANNER -->
+    <div class="quote-container">
+        <p id="dynamic-quote" class="quote-text">"Your health is your greatest wealth. We care for your recovery."</p>
+    </div>
 
-        <!-- DIGITAL RECEIPT LOG BOX -->
-        <div id="digital-receipt-section" style="display: none; margin-top: 2rem; border: 1px solid #cbd5e1; padding: 1.5rem; border-radius: 8px;">
-            <h3 style="text-align: center;">Digital Verification Receipt</h3>
-            <p id="receipt-date" style="text-align: center; color: gray; font-size: 0.85rem;"></p>
-            <hr>
+    <!-- CUSTOMER PANEL -->
+    <div id="customer-view" class="view-panel active-view">
+        <h2>Upload & Request Medicines</h2>
+        <form id="order-submission-form">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="cust-name" class="form-control" placeholder="Enter patient name" required>
+            </div>
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" id="cust-phone" class="form-control" placeholder="Enter 10-digit number" required>
+            </div>
+            <div class="form-group">
+                <label>Village / Locality</label>
+                <input type="text" id="cust-village" class="form-control" placeholder="Enter residential area" required>
+            </div>
+            <div class="form-group">
+                <label>Pincode</label>
+                <input type="text" id="cust-pincode" class="form-control" placeholder="e.g. 785684" required>
+            </div>
+            <div class="form-group">
+                <label>District</label>
+                <input type="text" id="cust-district" class="form-control" placeholder="e.g. Sivasagar" required>
+            </div>
+            <div class="form-group">
+                <label>Medicine Names / Requirements</label>
+                <textarea id="medicine-details" class="form-control" rows="3" placeholder="List your medicines here..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Upload Prescription Photo</label>
+                <input type="file" id="prescription-photo" accept="image/*">
+            </div>
+            <button type="submit" class="submit-btn">Submit Order Securely</button>
+        </form>
+
+        <!-- DIGITAL RECEIPT -->
+        <div id="digital-receipt-section" style="display: none; margin-top: 2rem; border: 2px dashed #0d9488; padding: 1.5rem; border-radius: 8px; background: #fafafa;">
+            <h3 style="text-align: center; color: #0f766e;">Digital Verification Receipt</h3>
+            <p id="receipt-date" style="text-align: center; color: gray; font-size: 0.85rem; margin-bottom: 1rem;"></p>
             <div id="receipt-details-body"></div>
         </div>
     </div>
 
-    <!-- STAFF LIVE ACTION DASHBOARD -->
+    <!-- STAFF LIVE LIVE PANEL -->
     <div id="staff-dashboard" class="view-panel">
-        <h2 id="total-revenue-display" style="color: #0f766e; padding: 1rem 0;">Total Successful Orders: ₹ 0.00</h2>
-        <table border="1" width="100%" cellpadding="8" style="border-collapse: collapse; text-align: left;">
-            <thead>
-                <tr style="background-color: #f1f5f9;">
-                    <th>Customer Info</th>
-                    <th>Location / Route</th>
-                    <th>Medicines & Doc</th>
-                    <th>Bill Amount</th>
-                    <th>Status Badge</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="admin-orders-log">
-                <!-- Live items automatically insert here via JS -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- NOTIFICATION MODAL FRAMEWORK -->
-    <div id="payment-modal-box" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-        <div style="background:white; padding:2rem; border-radius:8px; text-align:center; max-width:400px; width:90%;">
-            <h3 style="color:#0d9488;">✓ Order Submitted Successfully!</h3>
-            <p>Your medicine request has been logged. Our staff will review and push the verification invoice message.</p>
-            <button id="close-modal-action" style="background:#334155; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; margin-top:1rem;">Close Windows</button>
+        <h2 id="total-revenue-display">Total Successful Orders: ₹ 0.00</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer Details</th>
+                        <th>Address Details</th>
+                        <th>Medicines Req.</th>
+                        <th>Set Bill</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-orders-log"></tbody>
+            </table>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LINK -->
+    <!-- SUCCESS MESSAGE BOX -->
+    <div id="payment-modal-box" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); align-items:center; justify-content:center; z-index: 999;">
+        <div style="background:white; padding:2.5rem; border-radius:16px; text-align:center; max-width:420px; width:90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">💚</div>
+            <h3 style="color:#0f766e; font-size: 1.4rem; margin-bottom: 0.5rem;">Order Logged Successfully!</h3>
+            <p style="color: #64748b; font-size: 0.95rem;">Medicine request updated. Staff will verify layout details and send you an SMS link shortly.</p>
+            <button id="close-modal-action" style="background:#475569; color:white; border:none; padding:0.6rem 1.5rem; border-radius:8px; cursor:pointer; margin-top:1.5rem; font-weight: 600;">Close</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
-</html>
-
-
+    </html>
+                    
