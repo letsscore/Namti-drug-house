@@ -1,9 +1,8 @@
-// 1. GLOBAL SCOPE ENGINE FOR VIEW SWITCHING
+// 1. GLOBAL SCOPE ENGINE FOR VIEW SWITCHING WITH LOCKS
 window.ViewManager = {
     switchToStaff: function() {
         const customerView = document.getElementById('customer-view');
         const staffDashboard = document.getElementById('staff-dashboard');
-        
         if (customerView && staffDashboard) {
             customerView.classList.remove('active-view');
             staffDashboard.classList.add('active-view');
@@ -14,7 +13,6 @@ window.ViewManager = {
     switchToCustomer: function() {
         const customerView = document.getElementById('customer-view');
         const staffDashboard = document.getElementById('staff-dashboard');
-        
         if (customerView && staffDashboard) {
             staffDashboard.classList.remove('active-view');
             customerView.classList.add('active-view');
@@ -30,19 +28,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentModalBox = document.getElementById('payment-modal-box');
     const closeModalAction = document.getElementById('close-modal-action');
 
-    // 2. AUTO-OPEN STATE LOCK (PERSISTENCE)
-    const lastView = localStorage.getItem('namti_current_view');
-    if (lastView === 'staff') {
-        window.ViewManager.switchToStaff();
-    } else {
-        window.ViewManager.switchToCustomer();
-    }
+    // DYNAMIC HEALTH QUOTES ROTATOR ENGINE
+    const healthQuotes = [
+        `"Your health is your greatest wealth. We care for your speedy recovery."`,
+        `"Medicines cure diseases, but only pharmacists can optimize your therapy."`,
+        `"Good health and good sense are two of life's greatest blessings."`,
+        `"To ensure good health: eat lightly, breathe deeply, live moderately, and cultivate cheerfulness."`,
+        `"Namti Drug House: Committed to your wellness, every single day."`
+    ];
+    let currentQuoteIndex = 0;
+    setInterval(() => {
+        currentQuoteIndex = (currentQuoteIndex + 1) % healthQuotes.length;
+        const quoteEl = document.getElementById('dynamic-quote');
+        if(quoteEl) quoteEl.textContent = healthQuotes[currentQuoteIndex];
+    }, 7000); // Har 7 seconds mein badlega
 
-    // 3. STORAGE SYNC ON LOAD
+    // STATE VIEW SYNC RESCUE LOCK
+    const lastView = localStorage.getItem('namti_current_view');
+    if (lastView === 'staff') { window.ViewManager.switchToStaff(); } 
+    else { window.ViewManager.switchToCustomer(); }
+
+    // DATA RESTORATION FROM MEMORY
     const savedOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-    savedOrders.forEach(orderData => {
-        renderOrderRow(orderData, false); 
-    });
+    savedOrders.forEach(orderData => { renderOrderRow(orderData, false); });
     calculateLiveRevenue();
 
     window.calculateLiveRevenue = function() {
@@ -87,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const photoFile = document.getElementById('prescription-photo').files[0];
             let photoHTML = `<span style="color:gray; font-size:0.8rem;">No Photo</span>`;
-            if (photoFile) photoHTML = `<span style="color:green; font-size:0.8rem;">Prescription Attached</span>`;
+            if (photoFile) photoHTML = `<span style="color:green; font-size:0.8rem; font-weight:700;">📄 Attached</span>`;
 
             const orderData = {
                 name: document.getElementById('cust-name').value,
@@ -108,9 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (closeModalAction && paymentModalBox) {
-        closeModalAction.addEventListener('click', () => { 
-            paymentModalBox.style.display = 'none'; 
-        });
+        closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
     }
 
     function attachSmsAction(rowItem) {
@@ -149,4 +155,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+                                                                             
                           
