@@ -1,13 +1,18 @@
-// 1. GLOBAL SCOPE ENGINE FOR VIEW SWITCHING WITH LOCKS
+// 1. GLOBAL SCOPE ENGINE FOR VIEW SWITCHING WITH PASSWORD GATE
 window.ViewManager = {
     switchToStaff: function() {
-        const customerView = document.getElementById('customer-view');
-        const staffDashboard = document.getElementById('staff-dashboard');
-        if (customerView && staffDashboard) {
-            customerView.classList.remove('active-view');
-            staffDashboard.classList.add('active-view');
-            localStorage.setItem('namti_current_view', 'staff');
-            window.scrollTo(0, 0);
+        const passwordCheck = prompt("Enter Staff Security Password:");
+        if (passwordCheck === "Happy2026") {
+            const customerView = document.getElementById('customer-view');
+            const staffDashboard = document.getElementById('staff-dashboard');
+            if (customerView && staffDashboard) {
+                customerView.classList.remove('active-view');
+                staffDashboard.classList.add('active-view');
+                localStorage.setItem('namti_current_view', 'staff');
+                window.scrollTo(0, 0);
+            }
+        } else if (passwordCheck !== null) {
+            alert("Wrong Password! Access Denied.");
         }
     },
     switchToCustomer: function() {
@@ -33,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `"Your health is your greatest wealth. We care for your speedy recovery."`,
         `"Medicines cure diseases, but only pharmacists can optimize your therapy."`,
         `"Good health and good sense are two of life's greatest blessings."`,
-        `"To ensure good health: eat lightly, breathe deeply, live moderately, and cultivate cheerfulness."`,
         `"Namti Drug House: Committed to your wellness, every single day."`
     ];
     let currentQuoteIndex = 0;
@@ -41,24 +45,37 @@ document.addEventListener('DOMContentLoaded', () => {
         currentQuoteIndex = (currentQuoteIndex + 1) % healthQuotes.length;
         const quoteEl = document.getElementById('dynamic-quote');
         if(quoteEl) quoteEl.textContent = healthQuotes[currentQuoteIndex];
-    }, 7000); // Har 7 seconds mein badlega
+    }, 7000);
 
-    // STATE VIEW SYNC RESCUE LOCK
+    // STATE VIEW SYNC ON LOAD
     const lastView = localStorage.getItem('namti_current_view');
-    if (lastView === 'staff') { window.ViewManager.switchToStaff(); } 
-    else { window.ViewManager.switchToCustomer(); }
+    if (lastView === 'staff') { 
+        // Default recovery protection lock
+        const customerView = document.getElementById('customer-view');
+        const staffDashboard = document.getElementById('staff-dashboard');
+        if (customerView && staffDashboard) {
+            customerView.classList.remove('active-view');
+            staffDashboard.classList.add('active-view');
+        }
+    } 
 
-    // DATA RESTORATION FROM MEMORY
-    const savedOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-    savedOrders.forEach(orderData => { renderOrderRow(orderData, false); });
-    calculateLiveRevenue();
+    // DATA RESTORATION FROM MEMORY TRUCKS
+    function loadSavedOrders() {
+        if (!adminOrdersLog) return;
+        adminOrdersLog.innerHTML = ""; // Clean refresh layout
+        const savedOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
+        savedOrders.forEach((orderData, index) => { 
+            renderOrderRow(orderData, false, index); 
+        });
+        calculateLiveRevenue();
+    }
 
     window.calculateLiveRevenue = function() {
         let currentDayTotal = 0;
         document.querySelectorAll('#admin-orders-log tr').forEach(row => {
             const billInput = row.querySelector('.bill-input');
             const statusField = row.querySelector('.status-field');
-            if (billInput && statusField && statusField.textContent.includes("Confirmed")) {
+            if (billInput && statusField && (statusField.textContent.includes("Confirmed") || statusField.textContent.includes("Delivery"))) {
                 currentDayTotal += parseFloat(billInput.value) || 0;
             }
         });
@@ -68,24 +85,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    function renderOrderRow(data, shouldSave = true) {
+    function renderOrderRow(data, shouldSave = true, positionIndex = 0) {
         if (!adminOrdersLog) return;
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td><strong>${data.name}</strong><br><small>${data.phone}</small></td>
             <td>${data.village}<br><small data-pin="${data.pincode}">PIN: ${data.pincode} | ${data.district}</small></td>
             <td>${data.medicines}<br>${data.photoHTML}</td>
-            <td><input type="number" class="bill-input" value="${data.bill || ''}" placeholder="₹" oninput="calculateLiveRevenue()"></td>
-            <td><span class="badge ${data.statusClass} status-field">${data.statusText}</span></td>
+            <td><input type="number" class="bill-input" value="${data.bill || ''}" placeholder="₹" oninput="window.calculateLiveRevenue()"></td>
+            <td><span class="badge ${data.statusClass || 'badge-pending'} status-field">${data.statusText || 'New Request'}</span></td>
             <td><button class="sms-trigger-btn">Process Order 💬</button></td>
         `;
         
-        adminOrdersLog.insertBefore(newRow, adminOrdersLog.firstChild);
-        attachSmsAction(newRow);
+        adminOrdersLog.appendChild(newRow);
+        attachSmsAction(newRow, positionIndex);
 
         if (shouldSave) {
             const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-            currentOrders.unshift(data);
+            currentOrders.push(data);
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
     }
@@ -105,11 +122,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 district: document.getElementById('cust-district').value,
                 medicines: document.getElementById('medicine-details').value,
                 photoHTML: photoHTML,
+                bill: "",
                 statusText: "New Request",
                 statusClass: "badge-pending"
             };
 
-            renderOrderRow(orderData);
+            // Save order first
+            const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
+            currentOrders.unshift(orderData); // Unshift pushes to top of array database
+            localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
+
+            // Reload engine layout logs
+            loadSavedOrders();
+
+            // Display Dialog Box
             if (paymentModalBox) paymentModalBox.style.display = 'flex';
             orderForm.reset();
         });
@@ -119,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
     }
 
-    function attachSmsAction(rowItem) {
+    function attachSmsAction(rowItem, internalIdx) {
         const btn = rowItem.querySelector('.sms-trigger-btn');
         if (!btn) return;
         
@@ -140,11 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
-            const rowIndex = Array.from(adminOrdersLog.children).indexOf(rowItem);
-            if (currentOrders[rowIndex]) {
-                currentOrders[rowIndex].bill = billVal;
-                currentOrders[rowIndex].statusText = "Confirmed: " + mode;
-                currentOrders[rowIndex].statusClass = (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
+            if (currentOrders[internalIdx]) {
+                currentOrders[internalIdx].bill = billVal;
+                currentOrders[internalIdx].statusText = "Confirmed: " + mode;
+                currentOrders[internalIdx].statusClass = (mode === "Home Delivery" ? "badge-delivery" : "badge-pickup");
                 localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
             }
 
@@ -154,6 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
         });
     }
+
+    // Initialize Layout Logs Data Load on runtime
+    loadSavedOrders();
 });
-                                                                             
+                
                           
