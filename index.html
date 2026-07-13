@@ -15,7 +15,7 @@
             --health-light: #f0fdf4;
             --dark-navy: #0f172a;
             --slate-gray: #64748b;
-            --light-bg: #f0fdfa; /* Medical light teal background tint */
+            --light-bg: #f0fdfa;
             --white: #ffffff;
             --success: #22c55e;
             --danger: #ef4444;
@@ -44,7 +44,6 @@
             font-weight: 700;
         }
 
-        /* Fixed Navbar Layout Adjustments */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -64,7 +63,6 @@
         .logo {
             font-size: 1.5rem;
             color: var(--dark-navy);
-            letter-spacing: -0.5px;
         }
 
         .logo span { color: var(--health-teal); }
@@ -85,7 +83,6 @@
 
         .nav-links a:hover { color: var(--health-teal); }
 
-        /* Direct Anchored Button Style */
         .staff-link-btn {
             border: 1px solid var(--warning);
             padding: 0.5rem 1rem;
@@ -94,14 +91,7 @@
             background: rgba(245, 158, 11, 0.05);
             font-weight: 600;
             font-size: 0.9rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-block;
             text-decoration: none;
-        }
-        .staff-link-btn:hover { 
-            background: rgba(245, 158, 11, 0.15);
-            transform: translateY(-1px);
         }
 
         .nav-btn {
@@ -112,11 +102,8 @@
             border-radius: 8px;
             font-weight: 600;
             transition: var(--transition);
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
         }
-        .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13, 148, 136, 0.3); }
 
-        /* Hero presentation styling */
         .hero-section {
             min-height: 75vh;
             display: flex;
@@ -126,9 +113,9 @@
         }
 
         .hero-content { max-width: 650px; }
-        .hero-content h1 { font-size: 3.5rem; line-height: 1.15; color: var(--dark-navy); margin-bottom: 1.5rem; }
+        .hero-content h1 { font-size: 3.5rem; line-height: 1.15; margin-bottom: 1.5rem; }
         .hero-content h1 span { color: var(--health-teal); }
-        .hero-content p { font-size: 1.15rem; color: var(--slate-gray); line-height: 1.6; margin-bottom: 2.5rem; }
+        .hero-content p { font-size: 1.15rem; color: var(--slate-gray); mb: 2.5rem; line-height: 1.6; margin-bottom: 2rem; }
 
         .btn {
             padding: 1rem 2.25rem;
@@ -138,18 +125,12 @@
             display: inline-block;
             transition: var(--transition);
         }
-        .primary-btn { background: var(--health-teal); color: var(--white); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3); }
-        .primary-btn:hover { background: #0f766e; transform: translateY(-2px); }
+        .primary-btn { background: var(--health-teal); color: var(--white); }
 
-        /* Pharmacy Image Gallery Grid Section */
         .gallery-section { padding: 4rem 8%; background: var(--white); text-align: center; }
-        .gallery-section h2 { font-size: 2.25rem; margin-bottom: 1rem; color: var(--dark-navy); }
-        .gallery-section p { color: var(--slate-gray); margin-bottom: 2.5rem; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-        .gallery-card { background: var(--light-bg); border-radius: 12px; height: 220px; overflow: hidden; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--slate-gray); font-weight: 600; transition: var(--transition); }
-        .gallery-card:hover { border-color: var(--health-teal); background: #e0f2fe; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .gallery-card { background: var(--light-bg); border-radius: 12px; height: 180px; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--slate-gray); font-weight: 600; }
 
-        /* Premium Form Block */
         .contact-section { padding: 5rem 8%; background: var(--light-bg); }
         .form-card {
             max-width: 650px;
@@ -160,20 +141,13 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
-        .form-card h2 { font-size: 2.25rem; margin-bottom: 0.5rem; text-align: center; }
-        .form-card p { color: var(--slate-gray); text-align: center; margin-bottom: 2.5rem; }
 
-        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        .input-group { margin-bottom: 1.5rem; }
         .input-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
         .input-group input, .input-group textarea {
-            width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 10px;
-            font-size: 1rem; background: #fafafa; transition: var(--transition);
-        }
-        .input-group input:focus, .input-group textarea:focus {
-            outline: none; border-color: var(--health-teal); background: var(--white); box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+            width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem;
         }
 
-        /* Delivery Rules Info Badge */
         .delivery-info-box {
             background: rgba(13, 148, 136, 0.08); border-left: 4px solid var(--health-teal);
             padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; color: #0f766e;
@@ -182,167 +156,144 @@
         .submit-btn {
             width: 100%; background: var(--health-teal); color: white; padding: 1.1rem;
             border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
-            transition: var(--transition); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
         }
-        .submit-btn:hover { background: #0f766e; }
 
-        /* Payment QR Modal Elements */
+        /* NEW FIXED: Dedicated Visible Staff Login Area Box */
+        .login-box-section {
+            padding: 5rem 8%;
+            background: #f1f5f9;
+            border-top: 2px dashed var(--border);
+        }
+        .login-card {
+            max-width: 400px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
         .payment-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000;
             align-items: center; justify-content: center;
         }
-        .modal-card {
-            background: white; padding: 2.5rem; border-radius: 20px; text-align: center;
-            max-width: 450px; width: 90%; box-shadow: var(--shadow);
-        }
-        .close-modal-btn {
-            background: var(--dark-navy); color: white; padding: 0.6rem 1.5rem;
-            border: none; border-radius: 8px; cursor: pointer; margin-top: 1rem; font-weight: 600;
-        }
+        .modal-card { background: white; padding: 2.5rem; border-radius: 20px; text-align: center; max-width: 450px; width: 90%; }
+        
+        .close-modal-btn { background: var(--dark-navy); color: white; padding: 0.6rem 1.5rem; border: none; border-radius: 8px; margin-top: 1rem; cursor: pointer; }
 
-        /* Hidden Dashboard Portal (Triggered Explicitly via Password Route) */
+        /* Full Screen Dashboard View Panel */
         #employee-dashboard { 
             display: none; 
             background: #f8fafc; 
             min-height: 100vh;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             z-index: 10000;
+            overflow-y: auto;
         }
-        .dash-nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem 4%; background: var(--dark-navy); color: white;
-        }
+        .dash-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 4%; background: var(--dark-navy); color: white; }
         .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
-        .dash-container { display: flex; min-height: calc(100vh - 70px); }
-        .dash-sidebar { width: 280px; background: #1e293b; padding: 2rem 1rem; color: white; }
-        .dash-sidebar ul { list-style: none; }
-        .dash-sidebar li {
-            padding: 1rem; cursor: pointer; margin-bottom: 0.5rem; border-radius: 8px;
-            font-weight: 500; display: flex; align-items: center; gap: 0.75rem; transition: var(--transition);
-        }
-        .dash-sidebar li.active { background: var(--health-teal); }
-
-        .dash-main { flex: 1; padding: 3rem; }
-        .card { background: white; padding: 2.5rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .dash-main { padding: 2rem 4%; }
+        .card { background: white; padding: 2rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
         
-        /* Modernized Table Design */
-        .order-table { width: 100%; border-collapse: separate; border-spacing: 0 0.75rem; margin-top: 1.5rem; }
-        .order-table th { padding: 1rem; text-align: left; color: var(--slate-gray); font-size: 0.9rem; }
-        .order-table td { padding: 1.25rem 1rem; background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .order-table tr td:first-child { border-left: 1px solid var(--border); border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
-        .order-table tr td:last-child { border-right: 1px solid var(--border); border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+        .order-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        .order-table th, .order-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
         
-        /* Badges & Action Buttons */
-        .badge { padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+        .badge { padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
         .badge-pending { background: #ffedd5; color: #ea580c; }
         .badge-success { background: #dcfce7; color: #16a34a; }
         .badge-danger { background: #fee2e2; color: #dc2626; }
 
-        .action-select { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; font-weight: 500; }
-        .bill-input { width: 90px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); text-align: center; }
-        .sms-trigger-btn {
-            background: var(--health-teal); color: white; border: none; padding: 0.5rem 1rem;
-            border-radius: 6px; font-weight: 600; cursor: pointer; transition: var(--transition);
-        }
-        .sms-trigger-btn:hover { background: #0f766e; }
+        .action-select { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); }
+        .bill-input { width: 90px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); }
+        .sms-trigger-btn { background: var(--health-teal); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
         
-        footer { background: var(--dark-navy); color: var(--slate-gray); text-align: center; padding: 2.5rem; border-top: 2px solid var(--health-teal); }
-        footer p { color: white; font-weight: 500; margin-bottom: 0.5rem; }
+        footer { background: var(--dark-navy); color: var(--slate-gray); text-align: center; padding: 2.5rem; }
     </style>
 </head>
 <body>
 
-    <!-- CUSTOMER INTERFACE VIEW -->
+    <!-- CUSTOMER & GATEWAY UI -->
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
             <nav>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
-                    <li><a href="#gallery-section">Store Photos</a></li>
                     <li><a href="#order-form-section">Order Medicine</a></li>
-                    <!-- Bulletproof anchored link trigger bypasses browser caching limits entirely -->
-                    <li><a href="#employee-dashboard" id="staff-gate-anchor" class="staff-link-btn">Staff Login 🔑</a></li>
+                    <!-- Pure simple anchor HTML link - zero JS dependency to scroll -->
+                    <li><a href="#login-gateway" class="staff-link-btn">Staff Login 🔑</a></li>
                 </ul>
             </nav>
-            <a href="#order-form-section" class="nav-btn">Order Online Now</a>
         </header>
 
         <section id="home" class="hero-section">
             <div class="hero-content">
                 <h1>Professional Pharmacy Care.<br><span>Direct To Your Doorstep.</span></h1>
-                <p>Submit your medicine list or upload a prescription instantly. Our pharmacist will verify the order items, calculate the cost, and send you a link/SMS to confirm logistics rules.</p>
-                <div>
-                    <a href="#order-form-section" class="btn primary-btn">Start Order Request</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- PHOTO UPLOAD PREVIEW PLACEHOLDER SECTION -->
-        <section id="gallery-section" class="gallery-section">
-            <h2>Our Professional Pharmacy Facility</h2>
-            <p>Serving our local community with genuine medicines, temperature-controlled storage, and qualified pharmacists.</p>
-            <div class="gallery-grid">
-                <div class="gallery-card">📸 Pharmacy Front Counter View</div>
-                <div class="gallery-card">💊 Medicine Storage Vault</div>
-                <div class="gallery-card">🏢 Store Front Board View</div>
+                <p>Submit your medicine list or upload a prescription instantly. Our pharmacist will verify items and send you updates.</p>
+                <a href="#order-form-section" class="btn primary-btn">Start Order Request</a>
             </div>
         </section>
 
         <section id="order-form-section" class="contact-section">
             <div class="form-card">
                 <h2>Digital Prescriptions Counter</h2>
-                <p>Submit your order parameters to our pharmacy counter below.</p>
+                <p style="margin-bottom: 1.5rem; color: var(--slate-gray);">Submit your order details below.</p>
                 
                 <div class="delivery-info-box">
-                    <strong>🚛 Store Delivery Threshold Guidelines:</strong><br>
-                    • Final bill below ₹1,000: 🧾 **Self-Collect at Pharmacy Counter**.<br>
-                    • Final bill above ₹1,000: 🏡 **Free Home Delivery inside 2 Days** (5km radius).<br>
-                    • Final bill above ₹1,999: 🚀 **Express Same-Day Home Delivery** (5km radius).
+                    <strong>Work Flow Rules:</strong> Bills > ₹1000 qualify for Home Delivery options.
                 </div>
 
                 <form id="order-submission-form">
                     <div class="input-group">
                         <label>Customer Name</label>
-                        <input type="text" id="cust-name" placeholder="Enter your full name" required>
+                        <input type="text" id="cust-name" required>
                     </div>
                     <div class="input-group">
-                        <label>Mobile Number (For Live SMS Updates)</label>
-                        <input type="tel" id="cust-phone" placeholder="Enter 10-digit mobile number" required>
+                        <label>Mobile Number</label>
+                        <input type="tel" id="cust-phone" required>
                     </div>
                     <div class="input-group">
-                        <label>Medicines Needed (Name & Strip Quantity)</label>
-                        <textarea id="medicine-details" rows="4" placeholder="Example:&#10;1. Pantocid 40mg - 2 strips&#10;2. Paracetamol 650mg - 1 strip" required></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label>Upload Prescription Image (Optional)</label>
-                        <input type="file" id="prescription-img" accept="image/*">
+                        <label>Medicines List</label>
+                        <textarea id="medicine-details" rows="3" required></textarea>
                     </div>
                     <button type="submit" class="submit-btn">Submit Order Request</button>
                 </form>
             </div>
         </section>
 
-        <!-- POPUP DIALOG FOR CUSTOMER CONFIRMATION -->
+        <!-- NEW: Fallback HTML UI Form for Staff Gate -->
+        <section id="login-gateway" class="login-box-section">
+            <div class="login-card">
+                <h3 style="margin-bottom: 0.5rem;">Pharmacy Staff Portal</h3>
+                <p style="font-size: 0.85rem; color: var(--slate-gray); margin-bottom: 1.5rem;">Enter credential pass-pin to look into order dashboard logs.</p>
+                
+                <div class="input-group" style="text-align: left;">
+                    <label>Enter Passcode PIN</label>
+                    <input type="password" id="staff-pin-input" placeholder="e.g. namti123" style="text-align: center; font-weight: bold; letter-spacing: 2px;">
+                </div>
+                <button type="button" id="submit-login-btn" class="submit-btn" style="padding: 0.75rem;">Verify & Enter Portal</button>
+                <p id="login-error-msg" style="color: var(--danger); font-size: 0.85rem; margin-top: 0.75rem; display: none; font-weight: 600;">Incorrect PIN Code!</p>
+            </div>
+        </section>
+
         <div id="payment-modal-box" class="payment-modal">
             <div class="modal-card">
-                <h3 style="color: var(--health-teal);">✔ Order Request Transmitted Successfully</h3>
-                <p style="margin-top: 1rem; color: var(--dark-navy); line-height: 1.5;">Our pharmacists at Namti Chariali are checking item availability right now. You will receive an SMS text alert on your mobile containing the exact bill amount and delivery allocation status shortly.</p>
-                <button type="button" class="close-modal-btn" id="close-modal-action">Got It, Thanks!</button>
+                <h3 style="color: var(--health-teal);">✔ Sent Successfully</h3>
+                <p style="margin-top: 1rem;">Pharmacists will verify your prescription database shortly.</p>
+                <button type="button" class="close-modal-btn" id="close-modal-action">Close</button>
             </div>
         </div>
 
         <footer>
-            <p>&copy; 2026 Namti Drug House. All rights reserved.</p>
-            <p style="font-size: 0.8rem; opacity: 0.6;">Verified Health Portal</p>
+            <p>&copy; 2026 Namti Drug House.</p>
         </footer>
     </div>
-
 
     <!-- EMPLOYEE MANAGEMENT PORTAL VIEW -->
     <div id="employee-dashboard">
@@ -351,68 +302,138 @@
             <button id="portal-logout-action" class="logout-btn">Exit Portal</button>
         </header>
 
-        <div class="dash-container">
-            <aside class="dash-sidebar">
-                <ul>
-                    <li class="active">📥 Incoming Orders Panel</li>
-                </ul>
-            </aside>
-
-            <main class="dash-main">
-                <div class="card">
-                    <h2>Live Orders Dashboard Queue</h2>
-                    <p style="color: var(--slate-gray); margin-bottom: 1.5rem;">Review client medicine demands, type in the calculated total bill amount, configure stock statuses, and dispatch alerts.</p>
-                    
-                    <div style="overflow-x: auto;">
-                        <table class="order-table">
-                            <thead>
-                                <tr>
-                                    <th>Customer Info</th>
-                                    <th>Medicines Requested</th>
-                                    <th>Calculate Bill (₹)</th>
-                                    <th>Stock Availability</th>
-                                    <th>Fulfillment Status</th>
-                                    <th>Actions Portal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-orders-log">
-                                <!-- Pre-populated Pitching Sample -->
-                                <tr>
-                                    <td>
-                                        <strong>Rahul Borah</strong><br>
-                                        <span style="font-size: 0.85rem; color: var(--slate-gray);">+91 98765 43210</span>
-                                    </td>
-                                    <td><span style="font-family: monospace; white-space: pre-line;">Amoxicillin 500mg - 1 Strip</span></td>
-                                    <td>
-                                        <input type="number" class="bill-input" value="1250" placeholder="Enter ₹">
-                                    </td>
-                                    <td>
-                                        <select class="action-select stock-toggle">
-                                            <option value="Available" selected>🟢 Fully In Stock</option>
-                                            <option value="Partial">🟡 Partial Stock</option>
-                                            <option value="Unavailable">🔴 Out of Stock</option>
-                                        </select>
-                                    </td>
-                                    <td><span class="badge badge-pending status-field">Awaiting Pharmacy Review</span></td>
-                                    <td>
-                                        <button class="sms-trigger-btn">Send Bill & SMS 💬</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <main class="dash-main">
+            <div class="card">
+                <h2>Live Orders Dashboard Queue</h2>
+                <div style="overflow-x: auto;">
+                    <table class="order-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Info</th>
+                                <th>Medicines</th>
+                                <th>Bill (₹)</th>
+                                <th>Stock Status</th>
+                                <th>Fulfillment</th>
+                                <th>Action Panel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-log">
+                            <tr>
+                                <td><strong>Rahul Borah</strong><br><small>9876543210</small></td>
+                                <td>Amoxicillin - 1 Strip</td>
+                                <td><input type="number" class="bill-input" value="1250"></td>
+                                <td>
+                                    <select class="action-select stock-toggle">
+                                        <option value="Available">🟢 Fully In Stock</option>
+                                        <option value="Partial">🟡 Partial Stock</option>
+                                        <option value="Unavailable">🔴 Out of Stock</option>
+                                    </select>
+                                </td>
+                                <td><span class="badge badge-pending status-field">Awaiting Review</span></td>
+                                <td><button class="sms-trigger-btn">Send SMS 💬</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <!-- CODE INTERACTION ROUTER CONTROL -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const customerView = document.getElementById('customer-view');
             const employeeDashboard = document.getElementById('employee-dashboard');
-            const staffGateAnchor = document.getElementById('staff-gate-anchor');
+            const submitLoginBtn = document.getElementById('submit-login-btn');
+            const staffPinInput = document.getElementById('staff-pin-input');
+            const loginErrorMsg = document.getElementById('login-error-msg');
             const portalLogoutAction = document.getElementById('portal-logout-action');
             
-            const orderForm = document.getElementById          
+            const orderForm = document.getElementById('order-submission-form');
+            const paymentModalBox = document.getElementById('payment-modal-box');
+            const closeModalAction = document.getElementById('close-modal-action');
+            const adminOrdersLog = document.getElementById('admin-orders-log');
+
+            // Plain UI Login Input Logic instead of tricky pop-ups
+            submitLoginBtn.addEventListener('click', () => {
+                const enteredPin = staffPinInput.value.trim();
+                if (enteredPin === "namti123") {
+                    loginErrorMsg.style.display = 'none';
+                    staffPinInput.value = ''; // Reset input field
+                    customerView.style.display = 'none';
+                    employeeDashboard.style.display = 'block';
+                    window.scrollTo(0, 0);
+                } else {
+                    loginErrorMsg.style.display = 'block';
+                }
+            });
+
+            portalLogoutAction.addEventListener('click', () => {
+                employeeDashboard.style.display = 'none';
+                customerView.style.display = 'block';
+                window.scrollTo(0, 0);
+            });
+
+            orderForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('cust-name').value;
+                const phone = document.getElementById('cust-phone').value;
+                const medicineDetails = document.getElementById('medicine-details').value;
+
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><strong>${name}</strong><br><small>${phone}</small></td>
+                    <td>${medicineDetails}</td>
+                    <td><input type="number" class="bill-input" placeholder="₹"></td>
+                    <td>
+                        <select class="action-select stock-toggle">
+                            <option value="Available">🟢 Fully In Stock</option>
+                            <option value="Partial">🟡 Partial Stock</option>
+                            <option value="Unavailable">🔴 Out of Stock</option>
+                        </select>
+                    </td>
+                    <td><span class="badge badge-pending status-field">New Request</span></td>
+                    <td><button class="sms-trigger-btn">Send SMS 💬</button></td>
+                `;
+                adminOrdersLog.insertBefore(newRow, adminOrdersLog.firstChild);
+                attachSmsAction(newRow);
+
+                paymentModalBox.style.display = 'flex';
+                orderForm.reset();
+            });
+
+            closeModalAction.addEventListener('click', () => { paymentModalBox.style.display = 'none'; });
+
+            function attachSmsAction(rowItem) {
+                const btn = rowItem.querySelector('.sms-trigger-btn');
+                if(!btn) return;
+                btn.addEventListener('click', () => {
+                    const billVal = rowItem.querySelector('.bill-input').value;
+                    const stockStatus = rowItem.querySelector('.stock-toggle').value;
+                    const statusBadge = rowItem.querySelector('.status-field');
+                    
+                    if (!billVal && stockStatus !== "Unavailable") {
+                        alert("Please input the computed bill amount before sending SMS.");
+                        return;
+                    }
+
+                    if (stockStatus === "Available") {
+                        statusBadge.className = "badge badge-success";
+                        statusBadge.textContent = `Approved (₹${billVal})`;
+                    } else if (stockStatus === "Partial") {
+                        statusBadge.className = "badge badge-warning";
+                        statusBadge.textContent = `Partial (₹${billVal})`;
+                    } else {
+                        statusBadge.className = "badge badge-danger";
+                        statusBadge.textContent = "Unavailable";
+                    }
+                    alert("Automated Outbox Alert: SMS dispatched successfully to customer client device.");
+                });
+            }
+
+            document.querySelectorAll('#admin-orders-log tr').forEach(row => attachSmsAction(row));
+        });
+    </script>
+</body>
+                            </html>
+        
     
