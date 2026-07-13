@@ -23,6 +23,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--light-bg); color: var(--dark-navy); }
 
+        /* FIXED INTERACTION LAYER: Independent Navbar stack flow */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -30,13 +31,12 @@
             padding: 1.25rem 8%;
             background: white;
             position: relative;
-            z-index: 999;
+            z-index: 99999;
             border-bottom: 2px solid var(--health-teal);
         }
 
         .logo { font-size: 1.5rem; font-weight: 700; font-family: 'Plus Jakarta Sans'; }
         .logo span { color: var(--health-teal); }
-        .nav-links { display: flex; align-items: center; list-style: none; gap: 1.5rem; }
         
         .staff-link-btn {
             border: 2px solid var(--warning);
@@ -73,7 +73,7 @@
         .delivery-info-box { background: rgba(13, 148, 136, 0.08); border-left: 4px solid var(--health-teal); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; color: #0f766e; }
         .submit-btn { width: 100%; background: var(--health-teal); color: white; padding: 1.1rem; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
 
-        /* RECEIPT CARD ELEMENT STYLE */
+        /* RECEIPT SYSTEM */
         .receipt-card {
             max-width: 600px;
             margin: 2rem auto;
@@ -89,7 +89,14 @@
         .receipt-row strong { color: var(--slate-gray); }
         .print-btn { background: var(--dark-navy); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
 
-        #employee-dashboard { display: none; background: #f8fafc; min-height: 100vh; padding: 2rem 4%; }
+        /* DASHBOARD SECTION LAYOUT CONTROL FIX */
+        #employee-dashboard { 
+            display: none; 
+            background: #f8fafc; 
+            min-height: 100vh; 
+            padding: 2rem 4%;
+            width: 100%;
+        }
         .dash-nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--dark-navy); color: white; border-radius: 12px; margin-bottom: 2rem; }
         .logout-btn { background: var(--danger); border: none; padding: 0.6rem 1.2rem; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
@@ -114,15 +121,11 @@
 </head>
 <body>
 
-    <!-- CUSTOMER VIEW -->
+    <!-- CUSTOMER VIEW FRAME -->
     <div id="customer-view">
         <header class="navbar">
             <div class="logo">NAMTI DRUG HOUSE<span>+</span></div>
-            <nav>
-                <ul class="nav-links">
-                    <li><button type="button" id="direct-staff-btn" class="staff-link-btn">Staff Dashboard 🔑</button></li>
-                </ul>
-            </nav>
+            <button type="button" id="direct-staff-btn" class="staff-link-btn">Staff Dashboard 🔑</button>
         </header>
 
         <section class="hero-section">
@@ -180,23 +183,18 @@
             </div>
         </section>
 
-        <!-- DYNAMIC DIGITAL INVOICE RECEIPT GENERATOR CARD -->
         <section class="receipt-card" id="digital-receipt-section">
             <div class="receipt-header">
                 <h2 style="color: var(--health-teal);">NAMTI DRUG HOUSE</h2>
                 <p style="font-size: 0.85rem; color: var(--slate-gray);">Digital Transaction E-Receipt</p>
                 <p style="font-size: 0.8rem; color: var(--slate-gray); margin-top: 5px;" id="receipt-date"></p>
             </div>
-            
-            <div id="receipt-details-body">
-                <!-- Data injection point via JS -->
-            </div>
-            
+            <div id="receipt-details-body"></div>
             <button class="print-btn" onclick="window.print()">🖨 Print Invoice Receipt</button>
         </section>
     </div>
 
-    <!-- EMPLOYEE MANAGEMENT PORTAL -->
+    <!-- EMPLOYEE MANAGEMENT PORTAL CONTAINER -->
     <div id="employee-dashboard">
         <header class="dash-nav">
             <h2>NAMTI DRUG HOUSE — Live Admin Panel</h2>
@@ -226,9 +224,7 @@
                                 <th>Action Panel</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-orders-log">
-                            <!-- Live entries render dynamically here -->
-                        </tbody>
+                        <tbody id="admin-orders-log"></tbody>
                     </table>
                 </div>
             </div>
@@ -238,8 +234,8 @@
     <div id="payment-modal-box" class="payment-modal">
         <div class="modal-card">
             <h3 style="color: var(--health-teal);">✔ Sent Successfully</h3>
-            <p style="margin-top: 1rem; color: var(--slate-gray);">Data transmitted to admin counter queue. Keep checking this window to see your processed receipt once payment confirmation link completes.</p>
-            <button type="button" class="close-modal-btn" id="close-modal-action">Close & Check Status</button>
+            <p style="margin-top: 1rem; color: var(--slate-gray);">Data transmitted to admin counter queue.</p>
+            <button type="button" class="close-modal-btn" id="close-modal-action">Close</button>
         </div>
     </div>
 
@@ -254,15 +250,18 @@
             const paymentModalBox = document.getElementById('payment-modal-box');
             const closeModalAction = document.getElementById('close-modal-action');
 
-            // Shared Global state to hold customer tracking details mapping local receipts
             let customerInMemoryState = {};
 
-            directStaffBtn.addEventListener('click', (e) => {
-                e.preventDefault();
+            // STRICT TOGGLE SWITCH REPAIR: Clean screen swaps without event interruptions
+            function openStaffPanel(e) {
+                if(e) e.preventDefault();
                 customerView.style.display = 'none';
                 employeeDashboard.style.display = 'block';
                 window.scrollTo(0, 0);
-            });
+            }
+
+            directStaffBtn.addEventListener('click', openStaffPanel);
+            directStaffBtn.addEventListener('touchstart', openStaffPanel);
 
             portalLogoutAction.addEventListener('click', () => {
                 employeeDashboard.style.display = 'none';
@@ -298,7 +297,6 @@
                     photoUrlHTML = `<a href="${tempUrl}" target="_blank" class="rx-link">📄 View Prescription</a>`;
                 }
 
-                // Cache active reference markers locally 
                 customerInMemoryState = { name, phone, village, pincode, district, medicineDetails };
 
                 const newRow = document.createElement('tr');
@@ -346,11 +344,10 @@
                     }
 
                     calculateLiveRevenue();
-
-                    // Instantly trigger and build receipt at customer interface window container
                     generateCustomerReceipt(billVal, deliveryMode);
 
-                    const upiDeepLink = `upi://pay?pa=namtidrughouse@upi&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
+                    // FIXED TARGET BUSINESS LOGIC: Strict routing to customized personal UPI account
+                    const upiDeepLink = `upi://pay?pa=hussain.abidur@ybl&pn=Namti%20Drug%20House&am=${billVal}&cu=INR&tn=Medicine`;
                     const cleanMsg = `Hello ${customerName}, order verified at Namti Drug House. Total: Rs. ${billVal}. Mode: ${deliveryMode}. Pay via UPI: ${upiDeepLink}`;
 
                     window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(cleanMsg)}`;
@@ -363,7 +360,6 @@
                 const formContainer = document.getElementById('customer-form-container');
                 const dateDisplay = document.getElementById('receipt-date');
 
-                // Set Current Timestamp
                 const now = new Date();
                 dateDisplay.textContent = `Date: ${now.toLocaleDateString()} | Time: ${now.toLocaleTimeString()}`;
 
@@ -374,5 +370,8 @@
                     <div class="receipt-row"><strong>Pincode:</strong> <span>${customerInMemoryState.pincode || 'N/A'}</span></div>
                     <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
                     <div class="receipt-row"><strong>Items Requested:</strong> <span style="text-align:right; max-width:60%; font-size:0.9rem;">${customerInMemoryState.medicineDetails || 'N/A'}</span></div>
-                    <div class="
+                    <div class="receipt-row"><strong>Fulfillment Type:</strong> <span style="font-weight:700; color:var(--health-teal);">${modeText}</span></div>
+                    <hr style="border: 1px dashed #cbd5e1; margin: 1rem 0;">
+                    <div class="receipt-row" style="font-size: 1.3rem; font-weight: 800;">
+                        <span>TOT
     
