@@ -60,14 +60,6 @@
         .search-wrapper { position: relative; display: flex; gap: 10px; margin-bottom: 20px; }
         .search-wrapper input { margin: 0; padding: 14px 40px 14px 14px; border: 2px solid var(--accent); }
 
-        /* PRINT STYLING CONFIGURATION */
-        #prescription-print-area { display: none; }
-        @media print {
-            body * { display: none !important; }
-            #prescription-print-area { display: block !important; width: 100% !important; margin: 0 !important; padding: 20px !important; }
-            #prescription-print-area * { display: block !important; }
-        }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -170,7 +162,7 @@
             <h2>🔍 Global Customer Records Engine</h2>
             <p style="font-size: 0.85rem; color:#64748b; margin-bottom:10px;">Search details instantaneously across both doctor sheets and online order logs using Name or Phone.</p>
             <div class="search-wrapper">
-                <input type="text" id="staff-search-input" onkeyup="window.StaffDashboard.filterRecords()" placeholder="Type Customer/Patient Name or Phone Number to search...">
+                <input type="text" id="staff-search-input" placeholder="Type Customer/Patient Name, ID or Phone to search...">
             </div>
         </div>
 
@@ -225,7 +217,7 @@
         </div>
     </div>
 
-    <!-- ================= 5. POPUPS & INVISIBLE PRINT CONTAINER ================= -->
+    <!-- ================= 5. POPUPS & OVERLAYS ================= -->
     <div id="qr-modal-overlay" class="qr-modal">
         <div class="qr-box">
             <h3 style="color:var(--success); margin-bottom:10px;">Scan to Complete Payment</h3>
@@ -243,13 +235,10 @@
         </div>
     </div>
 
-    <!-- SAFE HIDDEN DIV FOR ERROR-FREE PRINTING -->
-    <div id="prescription-print-area"></div>
-
     <script src="script.js"></script>
 </body>
-                    </html>
-    
+        </html>
+            
     
 
     
