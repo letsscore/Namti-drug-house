@@ -385,7 +385,7 @@ window.StaffDashboard = {
         }
     },
 
-    // 100% WORKING ERROR-FREE PRINT SYSTEM USING MEDIA RENDERING STYLE INJECTIONS
+ // 100% WORKING ERROR-FREE PRINT SYSTEM USING MEDIA RENDERING STYLE INJECTIONS
     printRxMedicalPdf: function(itemId) {
         const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
         const rx = rxData.find(item => item.id === itemId);
@@ -395,5 +395,48 @@ window.StaffDashboard = {
         if (!printArea) return;
 
         // Structured Layout inner design injection
-        printA
+        printArea.innerHTML = `
+            <div style="font-family: 'Courier New', monospace; padding: 20px; color: #000; background: #fff; line-height: 1.5;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px;">NAMTI DRUG HOUSE</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Sivasagar, Assam | Consultation Desk Receipt</p>
+                </div>
+                <div style="border-top: 2px dashed #000; margin: 15px 0;"></div>
+                <p><b>Rx Token ID :</b> ${rx.id}</p>
+                <p><b>Patient Name:</b> ${rx.name}</p>
+                <p><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</p>
+                <p><b>Visit Time :</b> ${rx.formattedDate}</p>
+                <div style="border-top: 1px dashed #000; margin: 15px 0;"></div>
+                <p><b>CHIEF SYMPTOMS & COMPLAINTS:</b></p>
+                <p style="padding-left: 20px; color: #222;">${rx.symptoms}</p>
+                <br>
+                <p><b>DIAGNOSTIC TESTS REFERRED:</b></p>
+                <p style="padding-left: 20px; font-style: italic; color: #222;">${rx.tests}</p>
+                <div style="border-top: 1px dashed #000; margin: 15px 0;"></div>
+                <p style="font-weight: bold; font-size: 1.15rem;">💊 Rx PRESCRIBED MEDICINES:</p>
+                <div style="white-space: pre-line; background: #f5f5f5; padding: 15px; font-size: 1.05rem; border-radius: 4px; border: 1px solid #ccc; margin-top: 10px;">${rx.rx}</div>
+                <div style="border-top: 2px dashed #000; margin-top: 50px;"></div>
+                <p style="text-align: center; font-size: 0.85rem; color: #444; margin-top: 10px;">Generated digitally via Doctor Consultation Desk Engine</p>
+            </div>
+        `;
+
+        // Direct hardware trigger sequence without external window openings
+        setTimeout(() => {
+            window.print();
+            printArea.innerHTML = ""; // Clean context after driver receives printable assets
+        }, 300);
+    },
+
+    deletePermanentItem: function(type, itemId) {
+        if (confirm("🚨 Warning: Are you absolutely sure you want to permanently delete this operational record from portal memory?")) {
+            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
             
+            dataset = dataset.filter(item => item.id !== itemId);
+            localStorage.setItem(storageKey, JSON.stringify(dataset));
+            
+            this.filterRecords(); 
+            alert("🗑️ Record expunged permanently.");
+        }
+    }
+};
