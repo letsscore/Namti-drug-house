@@ -3,149 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namti Drug House</title>
-    <link rel="stylesheet" href="style.css?v=3.0">
+    <title>Namti Drug House - Advanced Pharmacy Management Portal</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #0284c7;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --background: #f8fafc;
+            --surface: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--primary);
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .nav-buttons button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+
+        .nav-buttons button:hover {
+            opacity: 0.9;
+        }
+
+        .view-container {
+            display: none;
+        }
+
+        .active-view {
+            display: block;
+        }
+
+        /* 3D MEDICAL QUOTATION CONTAINER STYLING */
+        .quotation-wrapper {
+            margin: 20px 0 30px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Grid Layouts */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+        /* Forms Styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+        }
+
+        button.btn-submit {
+            background: var(--success);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Tables Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-pending { background: #fef08a; color: #854d0e; }
+        .badge-delivery { background: #dcfce7; color: #15803d; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.98); opacity: 0.9; }
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- BRANDED PHARMACY NAVBAR -->
-    <nav class="pharmacy-navbar">
-        <div class="brand-logo-container">
-            <img src="pharmacy-shop.png" alt="Namti Drug House" class="brand-avatar">
-            <div class="brand-logo">🏥 Namti Drug House</div>
+    <!-- PORTAL HEADER NAVIGATION -->
+    <header>
+        <div>
+            <h1 style="font-size: 1.5rem; letter-spacing: 0.5px;">🏥 NAMTI DRUG HOUSE</h1>
+            <p style="font-size: 0.8rem; color: #94a3b8;">Smart Pharmacy & Consultation Ecosystem</p>
         </div>
         <div class="nav-buttons">
-            <!-- LICENSE DISPLAY BUTTON -->
-            <button class="licence-badge-btn" onclick="document.getElementById('licence-modal').style.display='flex'">📜 View Licence & Reg.</button>
-            <button onclick="window.ViewManager.switchToCustomer()">New Order</button>
-            <button onclick="window.ViewManager.switchToStaff()">Staff Login</button>
+            <button onclick="window.ViewManager.switchToCustomer()">🛒 Customer Order Desk</button>
+            <button onclick="window.ViewManager.switchToStaff()" style="background: #334155;">🔑 Staff Dashboard</button>
         </div>
-    </nav>
+    </header>
 
-    <!-- AUTOMATIC MEDICAL DISCOVERIES BANNER -->
-    <div class="quote-container" id="quote-wrapper-box">
-        <p id="dynamic-quote" class="quote-text">"Your health is your greatest wealth. We care for your recovery."</p>
-        <span id="historical-fact" class="history-text">Loading Medical History...</span>
-    </div>
-
-    <!-- CUSTOMER PANEL -->
-    <div id="customer-view" class="view-panel active-view">
-        <div class="delivery-rules-banner">
-            🚨 <strong>Delivery Policy:</strong> Free Home Delivery is available ONLY for PIN <strong>785684</strong> on orders above <strong>₹1999</strong>. Others must choose Self Collection.
-        </div>
-        
-        <h2>Upload & Request Medicines</h2>
-        <form id="order-submission-form">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="cust-name" class="form-control" placeholder="Enter patient name" required>
-            </div>
-            <div class="form-group">
-                <label>Mobile Number</label>
-                <input type="tel" id="cust-phone" class="form-control" placeholder="Enter 10-digit number" required>
-            </div>
-            <div class="form-group">
-                <label>Village / Locality</label>
-                <input type="text" id="cust-village" class="form-control" placeholder="Enter residential area" required>
-            </div>
-            <div class="form-group">
-                <label>Pincode</label>
-                <input type="text" id="cust-pincode" class="form-control" placeholder="e.g. 785684" required>
-            </div>
-            <div class="form-group">
-                <label>District</label>
-                <input type="text" id="cust-district" class="form-control" placeholder="e.g. Sivasagar" required>
-            </div>
-            <div class="form-group">
-                <label>Medicine Names / Requirements</label>
-                <textarea id="medicine-details" class="form-control" rows="3" placeholder="List your medicines here..." required></textarea>
-            </div>
-            <div class="form-group">
-                <label>Upload Prescription Photo</label>
-                <input type="file" id="prescription-photo" accept="image/*" required>
-            </div>
-            <button type="submit" class="submit-btn">Submit Order Securely</button>
-        </form>
-    </div>
-
-    <!-- STAFF DASHBOARD -->
-    <div id="staff-dashboard" class="view-panel">
-        <div class="staff-ctrl-header">
-            <h2 id="total-revenue-display" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">Total Revenue: ₹ 0.00</h2>
-            <button class="clear-old-btn" onclick="window.OrderManager.clearThirtyDayOldOrders()">🧹 Delete 1 Month Old Orders</button>
-        </div>
-        
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Customer Details</th>
-                        <th>Address Details</th>
-                        <th>Medicines / Prescription</th>
-                        <th>Set Bill</th>
-                        <th>Gateway</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-orders-log"></tbody>
-            </table>
+    <!-- 1. DYNAMIC 3D PERIODIC MEDICAL QUOTATION ROTATOR BOX -->
+    <div class="quotation-wrapper">
+        <div id="medical-inventions-container" style="width: 100%; max-width: 800px;">
+            <!-- 3D Card rotates smoothly dynamically via script.js -->
+            <div style="text-align:center; padding:20px; background:#1e293b; color:#fff; border-radius:12px;">Loading Medical Inventions & History...</div>
         </div>
     </div>
 
-    <!-- LICENCE DOCUMENT MODAL -->
-    <div id="licence-modal" class="modal-overlay">
-        <div class="preview-modal-content" style="max-width: 450px; text-align: left;">
-            <h3 style="color:#0f766e; border-bottom: 2px solid #0d9488; padding-bottom: 5px; margin-bottom: 15px;">Govt. Pharmacy Licence Details</h3>
-            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; font-size: 0.95rem; line-height: 1.6; color: #334155;">
-                📌 <strong>Pharmacy Name:</strong> Namti Drug House<br>
-                📍 <strong>Location:</strong> Namti Chariali, College Road, Sivasagar, Assam<br>
-                🆔 <strong>Drug Licence No:</strong> DL-SIV-XXXXXX / 2026<br>
-                👨‍⚕️ <strong>Registered Pharmacist:</strong> Govt. Certified Professionals<br>
-                Status: <span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:12px; font-weight:700; font-size:0.8rem;">ACTIVE & VALID</span>
-            </div>
-            <button onclick="document.getElementById('licence-modal').style.display='none'" class="submit-btn" style="margin-top: 15px; background: #475569;">Close Window</button>
-        </div>
-    </div>
-
-    <!-- CUSTOMER ORDER SUCCESS & RECEIPT POPUP MODAL -->
-    <div id="payment-modal-box" class="modal-overlay">
-        <div class="preview-modal-content" style="max-width:450px;">
-            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📄</div>
-            <h3 style="color:#0f766e; font-size: 1.4rem; margin-bottom: 0.5rem; font-weight:700;">Order Logged & Receipt Generated</h3>
+    <!-- ========================================== -->
+    <!-- VIEW A: CUSTOMER WEB APP FOR ORDER INTENTION -->
+    <!-- ========================================== -->
+    <main id="customer-view" class="view-container active-view">
+        <div style="max-width: 650px; margin: 0 auto;" class="card">
+            <h3>📦 Upload Prescription (Cash on Delivery)</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Note: All online orders will be delivered straight to your address via Cash on Delivery (COD). No advance payment links required.</p>
             
-            <!-- PRINTABLE RECEIPT CONTAINER -->
-            <div id="printable-receipt" style="background:#fff; border:1px dashed #cbd5e1; padding:1rem; text-align:left; font-size:0.85rem; margin:1rem 0; border-radius:6px; color:#1e293b;">
-                <h4 style="text-align:center; margin-bottom:5px; color:#0f766e;">NAMTI DRUG HOUSE RECEIPT</h4>
-                <p style="text-align:center; font-size:0.75rem; color:#64748b; margin-bottom:10px;">College Road, Namti Chariali</p>
-                <hr style="border:none; border-top:1px dashed #cbd5e1; margin-bottom:8px;">
-                <p><strong>Receipt ID:</strong> <span id="rec-id">NDH-9823</span></p>
-                <p><strong>Patient Name:</strong> <span id="rec-name">--</span></p>
-                <p><strong>Phone:</strong> <span id="rec-phone">--</span></p>
-                <p><strong>Address:</strong> <span id="rec-addr">--</span></p>
-                <p><strong>Status:</strong> <span style="color:#b45309; font-weight:700;">Awaiting Verification</span></p>
-                <hr style="border:none; border-top:1px dashed #cbd5e1; margin:8px 0;">
-                <p style="font-size:0.75rem; color:#64748b; text-align:center;">Staff verify karke bill amount aur secure payment link aapke number par SMS karenge.</p>
+            <form id="order-submission-form">
+                <div class="form-group">
+                    <label>Your Full Name *</label>
+                    <input type="text" id="cust-name" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number *</label>
+                    <input type="tel" id="cust-phone" required placeholder="Enter 10-digit phone number">
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Village/Town *</label>
+                        <input type="text" id="cust-village" required placeholder="Village name">
+                    </div>
+                    <div>
+                        <label>PIN Code *</label>
+                        <input type="text" id="cust-pincode" required placeholder="6-digit PIN">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>District *</label>
+                    <input type="text" id="cust-district" value="Sivasagar" required>
+                </div>
+                <div class="form-group">
+                    <label>Written Medicine Details / Extra Notes</label>
+                    <textarea id="medicine-details" placeholder="List your medicines here if prescription is hand-written or hard to read..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Attach Prescription Image (Photo) *</label>
+                    <input type="file" id="prescription-photo" accept="image/*" required style="border:none; padding:5px 0;">
+                </div>
+                <button type="submit" class="btn-submit">Submit Order via COD 🚚</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW B: INTEGRATED COMPREHENSIVE STAFF CONSOLE -->
+    <!-- ========================================== -->
+    <main id="staff-dashboard" class="view-container">
+        
+        <!-- MODULE 4: LIVE DOCTOR CONSULTATION DESK PANEL -->
+        <div class="card" style="border-top: 4px solid #0284c7;">
+            <h3>👨‍⚕️ Doctor Consultation & Prescription Desk</h3>
+            <form id="doctor-prescription-form" onsubmit="window.submitDoctorPrescriptionLog(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Patient Name *</label>
+                        <input type="text" id="doc-patient-name" required placeholder="Patient full name">
+                    </div>
+                    <div>
+                        <label>Patient Contact Phone</label>
+                        <input type="text" id="doc-patient-phone" placeholder="Mobile string">
+                    </div>
+                    <div>
+                        <label>Clinical Assessment / Diagnosis</label>
+                        <input type="text" id="doc-clinical-notes" placeholder="e.g., Acute Fever, High BP">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Rx Medicine Prescription Configuration *</label>
+                    <textarea id="doc-rx-prescription" required style="height: 80px; font-family: monospace;" placeholder="Rx:\n1. Tab Paracetamol 650mg -- 1-0-1 -- 3 Days\n2. Caps Amoxicillin 500mg -- 1-1-1 -- 5 Days"></textarea>
+                </div>
+                <button type="submit" style="background: #0284c7; color:#fff; padding: 10px 20px; border:none; border-radius: 6px; font-weight: bold; cursor: pointer;">Transmit Prescription to Counter 📤</button>
+            </form>
+        </div>
+
+        <!-- MODULE 3: OFFLINE COUNTER OVER-THE-COUNTER (POS) BILLING PANEL -->
+        <div class="card" style="border-top: 4px solid #16a34a;">
+            <h3>🏬 Offline Counter POS Billing System</h3>
+            <form id="pos-billing-form" onsubmit="window.processOfflineCounterSale(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Counter Customer Name</label>
+                        <input type="text" id="pos-cust-name" placeholder="Walk-in Customer">
+                    </div>
+                    <div>
+                        <label>Customer Phone Reference</label>
+                        <input type="text" id="pos-cust-phone" placeholder="Optional contact log">
+                    </div>
+                    <div>
+                        <label>Total Final Amount (₹) *</label>
+                        <input type="number" id="pos-total-bill" required placeholder="Enter final bill amount">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Items Sold List *</label>
+                    <textarea id="pos-medicine-list" required style="height: 60px;" placeholder="Enter items sold details over the counter..."></textarea>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                    <button type="submit" style="background: #16a34a; color: white; padding: 12px 20px; border:none; border-radius:6px; font-weight: bold; cursor: pointer;">Generate Invoice & Trigger Payment QR ⚡</button>
+                    <!-- Wrapper for instant payment QR code onto the desktop screen -->
+                    <div id="pos-dynamic-qr-wrapper"></div>
+                </div>
+            </form>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- LEFT PANEL: BOTH ONLINE AND IN-STORE QUEUES -->
+            <div class="left-column">
+                
+                <!-- ONLINE INTAKES (CASH ON DELIVERY INBOUND PIPELINE) -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin:0; border:none; padding:0;">🚚 Online Web Request Log (Pure COD Routing)</h3>
+                        <button onclick="window.OrderManager.clearThirtyDayOldOrders()" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.8rem;">Clear Old Orders (>30 Days)</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Customer Information</th>
+                                    <th>Address Map</th>
+                                    <th>Prescription / Details</th>
+                                    <th>Bill (₹)</th>
+                                    <th>Status State</th>
+                                    <th>Operational Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-log">
+                                <!-- Generated Dynamic Content Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- LIVE INCOMING DOCTOR PRESCRIPTION DECK CONSOLE -->
+                <div class="card">
+                    <h3>📋 Doctor Prescriptions Queue (Live Transmitted)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rx ID</th>
+                                    <th>Patient Details</th>
+                                    <th>Diagnosis Notes</th>
+                                    <th>Rx Prescribed Medicines</th>
+                                    <th>Status</th>
+                                    <th>Action Trigger</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-prescription-log">
+                                <!-- Direct internal incoming stream data -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <button onclick="window.printReceipt()" style="background:#0284c7; color:white; border:none; padding:0.6rem; border-radius:6px; cursor:pointer; font-weight:600; flex:1;">🖨️ Print Receipt</button>
-                <button id="close-modal-action" style="background:#0d9488; color:white; border:none; padding:0.6rem; border-radius:6px; cursor:pointer; font-weight:600; flex:1;">Close</button>
+            <!-- RIGHT PANEL: FINANCIAL REPORT REVENUE OVERVIEW -->
+            <div class="right-column">
+                <div class="card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; text-align: center; padding: 35px 20px;">
+                    <h2 style="font-weight: 400; font-size: 1.1rem; opacity: 0.8; margin-bottom: 10px;">DAILY TRANSACTION SUMMARY</h2>
+                    <div id="total-revenue-display" style="font-size: 2rem; font-weight: bold; color: #38bdf8; letter-spacing: 0.5px;">Total Revenue: ₹ 0.00</div>
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 10px;">Includes online processed cash handovers and offline POS collections.</p>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- PRESCRIPTION INTERACTIVE IMAGE PREVIEW BOX -->
-    <div id="prescription-preview-modal" class="modal-overlay">
-        <div class="preview-modal-content">
-            <h3 style="color:#0f766e; margin-bottom:1rem; font-weight:700;">Prescription Document</h3>
-            <img id="modal-target-image" class="preview-img-frame" src="" alt="No Image Loaded">
-            <button onclick="document.getElementById('prescription-preview-modal').style.display='none'" style="background:#475569; color:white; border:none; padding:0.6rem 1.5rem; border-radius:6px; cursor:pointer; font-weight:600; width:100%;">Close Preview</button>
         </div>
-    </div>
+    </main>
 
-    <script src="script.js?v=3.0"></script>
-</body>
-                    </html>
-                                                                                                                                    
+    <!-- ========================================== -->
+    <!-- INTERACTIVE SYSTEM LAYER MODAL POPUPS -->
+    <!-- ========================================== -->
     
+    <!-- MODAL 1: PHYSICAL SLIP PRINTING PREVIEW -->
+    <div id="payment-modal-box" class="modal-overlay">
+        <div style="background: white; padding: 25px; border-radius: 8px; width: 360px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);">
+            <div id="printable-receipt">
+                <div style="text-align: center; font-family: monospace;">
+                    <h3 style="display:block; text-align:center; border:none; margin:0;">NAMTI DRUG HOUSE</h3>
+                    <p style="font-size: 0.75rem;">Sivasagar, Assam</p>
+                    <hr style="border-top:1px dashed #000; margin:8px 0;">
+                    <p style="text-align:left; font-size:0.8rem;"><strong>Receipt ID:</strong> <span id="rec-id"></span></p>
+                    <p style="text-align:left; font-size:0.8rem;"><strong>Name:</strong> <span id="rec-name"></span></p>
+                    <p style="text-align:left; font-size:0.8rem;"><strong>Phone:</strong> <span id="rec-phone"></span></p>
+                    <p style="text-align:left; font-size:0.8rem;"><strong>Address:</strong> <span id="rec-addr"></span></p>
+                    <div class="receipt-amt-check" style="text-align: left; font-size:0.85rem;"></div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button onclick="window.printReceipt()" style="flex:1; background:var(--success); color:white; border:none; padding:8px; border-radius:4px; cursor:pointer; font-weight:bold;">Print Slip 🖨️</button>
+                <button id="close-modal-action" style="flex:1; background:#64748b; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CUSTOMER PRESCRIPTION IMAGE INTERACTIVE FRAME -->
+    <div id="prescription-preview-modal" class="modal-overlay" onclick="this.style.display='none'">
+        <div style="max-width: 90%; max-height: 90%; background: white; padding: 10px; border-radius: 8px; position: relative;" onclick="event.stopPropagation()">
+            <img id="modal-target-image" src="" alt="Prescription Big View" style="max-width:100%; max-height:80vh; display:block; border-radius:4px;">
+            <button style="position: absolute; top: -15px; right: -15px; background: black; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold;" onclick="document.getElementById('prescription-preview-modal').style.display='none'">X</button>
+        </div>
+    </div>
+
+    <!-- JS Architecture File Core Endpoint Injection Link -->
+    <script src="script.js"></script>
+</body>
+    </html>
+                
