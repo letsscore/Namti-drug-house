@@ -1,237 +1,282 @@
 // ========================================================
-// 1. ENGINE NAVIGATION & REFRESH PERSISTENCE (Bina Password Loop Ke)
+// 1. NAVIGATION & PERSISTENCE
 // ========================================================
 window.ViewManager = {
     navigate: function(viewId) {
         document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
         document.getElementById(viewId).classList.add('active-view');
-        
-        // Save current view state
         localStorage.setItem('ndh_last_active_view', viewId);
         
-        // Context loading
-        if (viewId === 'staff-view') StaffDashboard.loadRxQueue();
+        if (viewId === 'staff-view') {
+            StaffDashboard.loadRxQueue();
+            StaffDashboard.loadOnlineOrders();
+        }
     },
-    
     secureNavigation: function(viewId, correctPassword) {
-        // Checking Session persistence so refresh doesn't wipe auth lock
         if (sessionStorage.getItem('auth_valid_' + viewId) === 'true') {
             this.navigate(viewId);
             return;
         }
-
         const inputPass = prompt("Enter Authorized Security Password:");
         if (inputPass === correctPassword) {
             sessionStorage.setItem('auth_valid_' + viewId, 'true');
             this.navigate(viewId);
         } else if (inputPass !== null) {
-            alert("❌ Access Denied: Invalid Security Key!");
+            alert("❌ Invalid Password!");
         }
     }
 };
 
-// Auto-restoration of system on Page Reload
 document.addEventListener('DOMContentLoaded', () => {
     const savedState = localStorage.getItem('ndh_last_active_view') || 'home-view';
-    // Deep load verification
     ViewManager.navigate(savedState);
 });
 
-
 // ========================================================
-// 2. PHARMACEUTICAL MEDICAL MILESTONES ROTATOR (Attractive Theme)
+// 2. HEALTH ROTATOR
 // ========================================================
 document.addEventListener('DOMContentLoaded', () => {
     const medicalQuotes = [
-        "Alexander Fleming discovered Penicillin in 1928, launching the modern era of lifesaving antibiotics.",
-        "Wilhelm Röntgen developed X-Rays in 1895, unlocking non-invasive diagnostic capabilities.",
-        "Edward Jenner formulated the smallpox vaccine in 1796, pioneering the science of immunology.",
-        "Frederick Banting and Charles Best isolated Insulin in 1921, saving diabetic patients globally.",
-        "The double-helix structure of Human DNA was mapped by Watson, Crick, and Franklin in 1953.",
-        "Louis Pasteur developed the Rabies vaccine in 1885 and established microbial pasteurization."
+        "Alexander Fleming discovered Penicillin in 1928, launching modern antibiotics.",
+        "Wilhelm Röntgen developed X-Rays in 1895, unlocking diagnostic capabilities.",
+        "Edward Jenner formulated the smallpox vaccine in 1796, pioneering immunology.",
+        "Frederick Banting and Charles Best isolated Insulin in 1921, saving diabetic lives."
     ];
-
     const container = document.getElementById('medical-inventions-container');
     if (container) {
-        container.innerHTML = `<div id="medical-rotator-card" style="padding:15px; background: #e2e8f0; color:#334155; border-radius:8px; font-style:italic; font-size:0.95rem; text-align:center; border-left: 5px solid var(--accent); transition: all 0.5s;"></div>`;
-        let index = 0;
-        const card = document.getElementById('medical-rotator-card');
-        
-        function rotateQuotes() {
-            card.style.opacity = 0;
-            setTimeout(() => {
-                card.innerHTML = `💡 <b>Medical Milestone:</b> "${medicalQuotes[index]}"`;
-                card.style.opacity = 1;
-                index = (index + 1) % medicalQuotes.length;
-            }, 300);
+        container.innerHTML = `<div id="rotator-card" style="padding:12px; background:#e2e8f0; border-radius:8px; font-style:italic; text-align:center; border-left:5px solid var(--accent); margin-bottom:15px;"></div>`;
+        let i = 0;
+        function rotate() {
+            document.getElementById('rotator-card').innerHTML = `💡 <b>Milestone:</b> "${medicalQuotes[i]}"`;
+            i = (i + 1) % medicalQuotes.length;
         }
-        rotateQuotes();
-        setInterval(rotateQuotes, 7000); // Har 7 seconds me rotate hoga
+        rotate(); setInterval(rotate, 8000);
     }
 });
 
-
 // ========================================================
-// 3. CUSTOMER ONLINE ORDER HANDLING
+// 3. ONLINE ORDER PIPELINE (MANDATORY FIELDS FIXED)
 // ========================================================
 document.getElementById('online-order-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const pin = document.getElementById('cust-pin').value.trim();
+    const name = document.getElementById('cust-name').value.trim();
+    const phone = document.getElementById('cust-phone').value.trim();
     const bill = parseFloat(document.getElementById('cust-bill').value) || 0;
-    
+    const meds = document.getElementById('cust-meds').value.trim() || "See attached prescription photo";
+    const fileInput = document.getElementById('cust-photo');
+
     if (pin !== "785684") {
-        alert("❌ Order Terminated: We can only deliver home requests exclusively to PIN code 785684!");
+        alert("❌ Home delivery is strictly possible only within PIN code 785684!");
         return;
     }
 
-    let alertMsg = "✅ Order Registered successfully (COD Mode).";
-    if (bill >= 1599) {
-        alertMsg = "⚠️ Premium Order Detected (≥ ₹1599): Your order requires manual Advance Payment verification before dispatch!";
-    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const base64Img = event.target.result;
+        
+        const newOrder = { name, phone, pin, bill, meds, image: base64Img, id: Date.now() };
+        const orders = JSON.parse(localStorage.getItem('ndh_online_orders') || '[]');
+        orders.push(newOrder);
+        localStorage.setItem('ndh_online_orders', JSON.stringify(orders));
 
-    alert(alertMsg);
-    this.reset();
-    ViewManager.navigate('home-view');
+        alert("🎉 Online Order Submitted! Forwarded directly to Staff Dashboard.");
+        document.getElementById('online-order-form').reset();
+        ViewManager.navigate('home-view');
+    };
+    reader.readAsDataURL(file);
 });
 
-
 // ========================================================
-// 4. DOCTOR CONSULTATION FLOW
+// 4. DOCTOR DESK (UPDATED WITH ADVANCED FIELDS)
 // ========================================================
 window.DoctorDesk = {
-    submitPrescription: function() {
-        const name = document.getElementById('doc-patient-name').value.trim();
-        const rx = document.getElementById('doc-rx-content').value.trim();
+    submitPrescription: function(e) {
+        e.preventDefault();
+        const patient = {
+            name: document.getElementById('doc-pname').value.trim(),
+            age: document.getElementById('doc-page').value.trim(),
+            sex: document.getElementById('doc-psex').value,
+            symptoms: document.getElementById('doc-symptoms').value.trim(),
+            tests: document.getElementById('doc-tests').value.trim(),
+            rx: document.getElementById('doc-rx').value.trim(),
+            id: 'RX-' + Math.floor(1000 + Math.random() * 9000),
+            date: new Date().toLocaleDateString()
+        };
 
-        if (!name || !rx) {
-            alert("Please complete Patient Name and Rx Prescription lines!");
-            return;
-        }
+        const queue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
+        queue.push(patient);
+        localStorage.setItem('ndh_rx_queue', JSON.stringify(queue));
 
-        const rxQueue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
-        rxQueue.push({ name: name, rx: rx, timestamp: Date.now() });
-        localStorage.setItem('ndh_rx_queue', JSON.stringify(rxQueue));
-
-        alert("📤 Rx transmitted successfully to Pharmacy Counter Workflow!");
-        document.getElementById('doc-patient-name').value = "";
-        document.getElementById('doc-rx-content').value = "";
+        alert("📤 Rx Prescription directly routed to Staff counter!");
+        document.getElementById('doctor-form').reset();
         ViewManager.navigate('home-view');
     }
 };
 
-
 // ========================================================
-// 5. STAFF OPERATIONS, OFFLINE POS & UPI GENERATOR ENGINE
+// 5. STAFF DASHBOARD, PDF PRINTING & FOREVER STORAGE
 // ========================================================
 window.StaffDashboard = {
-    loadRxQueue: function() {
-        const container = document.getElementById('live-rx-queue');
-        if (!container) return;
-        container.innerHTML = "";
+    loadOnlineOrders: function() {
+        const tbody = document.getElementById('online-orders-queue');
+        tbody.innerHTML = "";
+        const orders = JSON.parse(localStorage.getItem('ndh_online_orders') || '[]');
 
-        const rxQueue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
-        
-        if (rxQueue.length === 0) {
-            container.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No active prescriptions from doctor desk.</td></tr>`;
+        if(orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No new online orders.</td></tr>`;
             return;
         }
 
-        rxQueue.forEach((item, index) => {
+        orders.forEach((ord, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${item.name}</b></td>
-                <td><div style="white-space:pre-line; font-family:monospace; background:#f8fafc; padding:6px; border-radius:4px; font-size:0.85rem;">${item.rx}</div></td>
+                <td><b>${ord.name}</b><br>${ord.phone}</td>
+                <td>PIN: ${ord.pin}<br><small>${ord.meds}</small></td>
+                <td><img src="${ord.image}" style="width:60px; height:60px; border-radius:4px; cursor:pointer;" onclick="window.open('${ord.image}')" title="Click to Expand"></td>
                 <td>
-                    <div style="display:flex; align-items:center; gap:5px;">
-                        <input type="number" id="rx-amt-${index}" placeholder="Amt (₹)" style="margin:0; width:90px; padding:6px;">
-                        <button onclick="StaffDashboard.processRxBilling(${index}, 'Cash')" class="btn-action btn-success" style="padding:6px 10px; font-size:0.8rem;">Cash</button>
-                        <button onclick="StaffDashboard.processRxBilling(${index}, 'QR')" class="btn-action" style="padding:6px 10px; background:#0284c7; font-size:0.8rem;">UPI QR</button>
-                    </div>
+                    <input type="number" id="online-amt-${index}" placeholder="Final Amt" style="width:90px; margin:0 0 5px 0; padding:5px;">
+                    <button onclick="StaffDashboard.payOnlineOrder(${index}, 'Cash')" class="btn-action btn-success" style="padding:4px 8px; font-size:0.8rem;">Cash</button>
+                    <button onclick="StaffDashboard.payOnlineOrder(${index}, 'QR')" class="btn-action btn-accent" style="padding:4px 8px; font-size:0.8rem;">QR</button>
                 </td>
             `;
-            container.appendChild(tr);
+            tbody.appendChild(tr);
         });
+    },
+
+    loadRxQueue: function() {
+        const tbody = document.getElementById('live-rx-queue');
+        tbody.innerHTML = "";
+        const queue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
+
+        if(queue.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No doctor prescriptions pending.</td></tr>`;
+            return;
+        }
+
+        queue.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${item.name}</b><br>${item.age} Yrs / ${item.sex}</td>
+                <td><small><b>Symptoms:</b> ${item.symptoms}<br><b>Tests:</b> ${item.tests}</small><br><div style="font-family:monospace; background:#f8fafc; padding:4px; margin-top:4px;">${item.rx}</div></td>
+                <td><button onclick="StaffDashboard.printRxPDF(${index})" class="btn-action" style="background:#6366f1; font-size:0.8rem; padding:6px 10px;">Print Rx PDF 🖨️</button></td>
+                <td>
+                    <input type="number" id="rx-amt-${index}" placeholder="Amt (₹)" style="width:80px; margin:0 0 5px 0; padding:5px;">
+                    <button onclick="StaffDashboard.payRx(${index}, 'Cash')" class="btn-action btn-success" style="padding:4px 8px; font-size:0.8rem;">Cash</button>
+                    <button onclick="StaffDashboard.payRx(${index}, 'QR')" class="btn-action btn-accent" style="padding:4px 8px; font-size:0.8rem;">QR</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    printRxPDF: function(index) {
+        const queue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
+        const p = queue[index];
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head><title>Prescription - ${p.name}</title></head>
+            <body style="font-family:sans-serif; padding:40px; color:#333;">
+                <div style="text-align:center; border-bottom:2px solid #0284c7; padding-bottom:10px;">
+                    <h2 style="margin:0; color:#0284c7;">NAMTI DRUG HOUSE</h2>
+                    <p style="margin:5px 0 0 0; font-size:0.9rem;">Sivasagar, Assam | Consultation Slip</p>
+                </div>
+                <div style="margin:20px 0; display:flex; justify-content:between; font-size:0.95rem; border-bottom:1px dashed #ccc; padding-bottom:10px;">
+                    <div><b>Patient Name:</b> ${p.name} &nbsp;&nbsp;&nbsp;&nbsp; <b>Age/Sex:</b> ${p.age} Yrs / ${p.sex}</div>
+                    <div style="margin-left:auto;"><b>Date:</b> ${p.date} &nbsp;&nbsp;&nbsp;&nbsp; <b>ID:</b> ${p.id}</div>
+                </div>
+                <div style="margin-bottom:15px;"><strong>Chief Symptoms:</strong><p style="margin:5px 0 0 10px; color:#555;">${p.symptoms}</p></div>
+                <div style="margin-bottom:20px;"><strong>Diagnostic Tests Referred:</strong><p style="margin:5px 0 0 10px; color:#555; font-style:italic;">${p.tests}</p></div>
+                <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+                <div style="font-size:1.2rem; font-weight:bold; color:#0284c7; margin-bottom:10px;">Rx (Medicines Advised)</div>
+                <div style="white-space:pre-wrap; font-family:monospace; background:#f9f9f9; padding:15px; border-radius:5px; font-size:1rem; line-height:1.5;">${p.rx}</div>
+                <div style="margin-top:100px; text-align:right; font-size:0.9rem; border-top:1px solid #ddd; padding-top:10px;">Authorized Signature / Namti Drug House</div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
     },
 
     processOfflinePOS: function(mode) {
         const amount = parseFloat(document.getElementById('pos-amount').value);
-        let customer = document.getElementById('pos-cust-name').value.trim() || "Walk-In Patient";
-
-        if (!amount || amount <= 0) {
-            alert("Please input a valid transaction amount!");
-            return;
-        }
+        let name = document.getElementById('pos-cust-name').value.trim() || "Walk-In Customer";
+        if (!amount || amount <= 0) { alert("Please input valid amount!"); return; }
 
         if (mode === 'Cash') {
-            alert(`💵 Counter Sale Closed! Received ₹${amount} in Cash from ${customer}.`);
+            alert(`💵 Counter Cash Collected: ₹${amount}`);
             document.getElementById('pos-amount').value = "";
-            document.getElementById('pos-cust-name').value = "";
         } else {
-            this.triggerUpiQrEngine(amount, `POS Sale: ${customer}`);
-            document.getElementById('pos-amount').value = "";
-            document.getElementById('pos-cust-name').value = "";
+            this.triggerUpiQr(amount, `POS Sale: ${name}`);
         }
     },
 
-    processRxBilling: function(index, mode) {
-        const amtField = document.getElementById(`rx-amt-${index}`);
-        const amount = parseFloat(amtField.value);
+    payOnlineOrder: function(index, mode) {
+        const amt = parseFloat(document.getElementById(`online-amt-${index}`).value);
+        if(!amt) { alert("Please input final calculation bill amount!"); return; }
+        const orders = JSON.parse(localStorage.getItem('ndh_online_orders') || '[]');
         
-        const rxQueue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
-        const patient = rxQueue[index];
-
-        if (!amount || amount <= 0) {
-            alert("Please fill the calculated medicine invoice amount first!");
-            return;
-        }
-
-        if (mode === 'Cash') {
-            alert(`💵 Bill Cleared via Cash! Collected ₹${amount} for Patient: ${patient.name}`);
-            this.removeRxFromQueue(index);
+        if(mode === 'Cash') {
+            alert(`💵 Online Order Closed via Cash payment: ₹${amt}`);
+            this.removeElement('ndh_online_orders', index);
+            this.loadOnlineOrders();
         } else {
-            this.triggerUpiQrEngine(amount, `Rx: ${patient.name}`, index);
+            this.triggerUpiQr(amt, `Online Order: ${orders[index].name}`, 'online', index);
         }
     },
 
-    triggerUpiQrEngine: function(amount, note, rxIndexToRemove = null) {
+    payRx: function(index, mode) {
+        const amt = parseFloat(document.getElementById(`rx-amt-${index}`).value);
+        if(!amt) { alert("Please input bill amount!"); return; }
+        const queue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
+
+        if(mode === 'Cash') {
+            alert(`💵 Doctor Rx Dispatched via Cash: ₹${amt}`);
+            this.removeElement('ndh_rx_queue', index);
+            this.loadRxQueue();
+        } else {
+            this.triggerUpiQr(amt, `Rx Patient: ${queue[index].name}`, 'rx', index);
+        }
+    },
+
+    triggerUpiQr: function(amount, note, type = null, targetIndex = null) {
         const upiId = "hussain.abidur@ybl";
-        const cleanNote = note.replace(/[^a-zA-Z0-9 ]/g, ""); // Standard string criteria
+        const cleanNote = note.replace(/[^a-zA-Z0-9 ]/g, "");
         const upiString = `upi://pay?pa=${upiId}&pn=NamtiDrugHouse&am=${amount}&cu=INR&tn=${encodeURIComponent(cleanNote)}`;
-        
-        // Global Dynamic QR Endpoint injection
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
-        
-        document.getElementById('qr-modal-details').textContent = `${note} | Bill: ₹${amount}`;
-        document.getElementById('qr-image-container').innerHTML = `<img src="${qrUrl}" alt="Scan QR Code" style="display:block; margin:0 auto; box-shadow:0 4px 10px rgba(0,0,0,0.1); border:4px solid white;">`;
-        
-        // Save targeted index reference to clear after close
-        if (rxIndexToRemove !== null) {
-            document.getElementById('qr-modal-overlay').setAttribute('data-target-rx', rxIndexToRemove);
-        } else {
-            document.getElementById('qr-modal-overlay').removeAttribute('data-target-rx');
-        }
 
-        document.getElementById('qr-modal-overlay').style.display = 'flex';
+        document.getElementById('qr-modal-details').textContent = `${note} | Total: ₹${amount}`;
+        document.getElementById('qr-image-container').innerHTML = `<img src="${qrUrl}" style="display:block; margin:0 auto; border:3px solid #16a34a; border-radius:4px;">`;
+        
+        const overlay = document.getElementById('qr-modal-overlay');
+        overlay.setAttribute('data-type', type);
+        overlay.setAttribute('data-idx', targetIndex);
+        overlay.style.display = 'flex';
     },
 
     closeQrModal: function() {
         const overlay = document.getElementById('qr-modal-overlay');
-        const rxIndex = overlay.getAttribute('data-target-rx');
-        
-        if (rxIndex !== null && rxIndex !== undefined) {
-            this.removeRxFromQueue(parseInt(rxIndex));
+        const type = overlay.getAttribute('data-type');
+        const idx = overlay.getAttribute('data-idx');
+
+        if (type === 'online' && idx !== null) {
+            this.removeElement('ndh_online_orders', parseInt(idx));
+            this.loadOnlineOrders();
+        } else if (type === 'rx' && idx !== null) {
+            this.removeElement('ndh_rx_queue', parseInt(idx));
+            this.loadRxQueue();
         }
-        
+
         overlay.style.display = 'none';
-        alert("🔒 Digital payment window synchronized & recorded!");
+        alert("🔒 Transaction verified and list updated successfully!");
     },
 
-    removeRxFromQueue: function(index) {
-        let rxQueue = JSON.parse(localStorage.getItem('ndh_rx_queue') || '[]');
-        rxQueue.splice(index, 1);
-        localStorage.setItem('ndh_rx_queue', JSON.stringify(rxQueue));
-        this.loadRxQueue();
+    removeElement: function(key, index) {
+        let arr = JSON.parse(localStorage.getItem(key) || '[]');
+        arr.splice(index, 1); // Delete tabhi hoga jab complete action execute hoga
+        localStorage.setItem(key, JSON.stringify(arr));
     }
 };
-            
-        
