@@ -379,6 +379,7 @@ window.StaffDashboard = {
             <html>
             <head>
                 <title>Print Prescription - ${rx.id}</title>
+                
                 <style>
                     body { font-family: 'Courier New', monospace; padding: 30px; color: #000; background: #fff; line-height: 1.5; }
                     .wrapper { max-width: 700px; margin: 0 auto; }
@@ -391,6 +392,50 @@ window.StaffDashboard = {
                 </style>
             </head>
             <body>
-                <div class="wrapper"
+                <div class="wrapper">
+                    <div class="header">
+                        <h2>NAMTI DRUG HOUSE</h2>
+                        <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Sivasagar, Assam | Consultation Desk Receipt</p>
+                    </div>
+                    <div class="dashed-line"></div>
+                    <p><b>Rx Token ID :</b> ${rx.id}</p>
+                    <p><b>Patient Name:</b> ${rx.name}</p>
+                    <p><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</p>
+                    <p><b>Visit Time :</b> ${rx.formattedDate}</p>
+                    <div class="thin-line"></div>
+                    <p><b>CHIEF SYMPTOMS & COMPLAINTS:</b></p>
+                    <p style="padding-left: 20px; color: #222;">${rx.symptoms}</p>
+                    <br>
+                    <p><b>DIAGNOSTIC TESTS REFERRED:</b></p>
+                    <p style="padding-left: 20px; font-style: italic; color: #222;">${rx.tests}</p>
+                    <div class="thin-line"></div>
+                    <p style="font-weight: bold; font-size: 1.15rem;">💊 Rx PRESCRIBED MEDICINES:</p>
+                    <div class="rx-box">${rx.rx}</div>
+                    <div class="dashed-line" style="margin-top: 50px;"></div>
+                    <p style="text-align: center; font-size: 0.85rem; color: #444;">Generated digitally via Doctor Consultation Desk Engine</p>
+                </div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function() { window.close(); }, 500);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    },
+
+    deletePermanentItem: function(type, index) {
+        if (confirm("🚨 Warning: Are you absolutely sure you want to permanently delete this operational record from portal memory?")) {
+            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            dataset.splice(index, 1);
+            localStorage.setItem(storageKey, JSON.stringify(dataset));
             
+            this.filterRecords(); 
+            alert("🗑️ Record expunged permanently.");
+        }
+    }
+};
             
