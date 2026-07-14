@@ -10,6 +10,7 @@ window.ViewManager = {
         if (viewId === 'staff-view') {
             StaffDashboard.loadRxQueue();
             StaffDashboard.loadOnlineOrdersQueue();
+            StaffDashboard.calculateRevenueLedger();
         }
     },
     secureNavigation: function(viewId, correctPassword) {
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================================
-// 3. ONLINE CUSTOMER DESK - STRICT LONG-TERM DATA BASE
+// 3. ONLINE CUSTOMER DESK - LOGISTICS
 // ========================================================
 document.getElementById('online-order-form').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -100,7 +101,7 @@ document.getElementById('online-order-form').addEventListener('submit', function
 });
 
 // ========================================================
-// 4. ADVANCED DOCTOR DIAGNOSTIC TRANSMISSION
+// 4. DOCTOR DIAGNOSTIC COUPLING
 // ========================================================
 window.DoctorDesk = {
     submitPrescription: function() {
@@ -136,7 +137,7 @@ window.DoctorDesk = {
 };
 
 // ========================================================
-// 5. STAFF CONSOLE OPERATIONS & PDF INVOICING PIPELINES
+// 5. STAFF OPERATIONS & ROBUST AUDITING ENGINE
 // ========================================================
 window.StaffDashboard = {
     loadRxQueue: function() {
@@ -209,6 +210,7 @@ window.StaffDashboard = {
         let customer = document.getElementById('pos-cust-name').value.trim() || "Walk-In Customer";
         if (!amount || amount <= 0) { alert("Please input a valid counter sale bill total!"); return; }
 
+        this.logRevenueTransaction(amount);
         if (mode === 'Cash') {
             alert(`💵 Store Sale Finished! Collected ₹${amount} in Cash via ${customer}.`);
             document.getElementById('pos-amount').value = ""; document.getElementById('pos-cust-name').value = "";
@@ -226,6 +228,7 @@ window.StaffDashboard = {
         const dataset = JSON.parse(localStorage.getItem(type === 'Rx' ? 'ndh_longterm_rx' : 'ndh_longterm_orders'));
         const activeItem = dataset[index];
 
+        this.logRevenueTransaction(finalPrice);
         if (mode === 'Cash') {
             alert(`💵 Transaction Settled via Cash! Collected ₹${finalPrice} for ${activeItem.name}.`);
         } else {
@@ -254,14 +257,72 @@ window.StaffDashboard = {
         document.getElementById('prescription-photo-modal').style.display = 'flex';
     },
 
+    // ADVANCED LEDGER LOGGING SYSTEM (PERMANENT RETENTION)
+    logRevenueTransaction: function(amount) {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
+        ledger.push({
+            amount: amount,
+            dateString: new Date().toDateString(), // Exact day parsing
+            timestamp: Date.now()
+        });
+        localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
+        this.calculateRevenueLedger();
+    },
+
+    calculateRevenueLedger: function() {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
+        const todayStr = new Date().toDateString();
+        
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        
+        let todaySum = 0;
+        let lastMonthSum = 0;
+        let grandTotal = 0;
+
+        ledger.forEach(tx => {
+            grandTotal += tx.amount;
+            if (tx.dateString === todayStr) {
+                todaySum += tx.amount;
+            }
+            
+            const txDate = new Date(tx.timestamp);
+            // Calculating previous consecutive calendar month data rules
+            let targetMonth = currentMonth - 1;
+            let targetYear = currentYear;
+            if (targetMonth < 0) {
+                targetMonth = 11;
+                targetYear--;
+            }
+            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
+                lastMonthSum += tx.amount;
+            }
+        });
+
+        document.getElementById('rev-today').textContent = `₹ ${todaySum.toFixed(2)}`;
+        document.getElementById('rev-month').textContent = `₹ ${lastMonthSum.toFixed(2)}`;
+        document.getElementById('rev-total').textContent = `₹ ${grandTotal.toFixed(2)}`;
+    },
+
+    clearRevenueMetrics: function() {
+        if(confirm("🚨 Owner Verification Required: Do you want to wipe all past audited financial analytics ledger history?")) {
+            localStorage.setItem('ndh_revenue_ledger', '[]');
+            this.calculateRevenueLedger();
+            alert("🧹 Financial logs wiped successfully.");
+        }
+    },
+
+    // 100% BLANK-SCREEN FREE SANDBOX PRINT PREVIEW SYSTEM
     printRxMedicalPdf: function(index) {
         const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
         const rx = rxData[index];
         if (!rx) return;
 
-        const printLayout = `
-            <div style="font-family:'Courier New', monospace; padding:30px; width:450px; margin:0 auto; border:2px solid #000; line-height:1.4;">
-                <h2 style="text-align:center; margin:0; letter-spacing:1px;">NAMTI DRUG HOUSE</h2>
+        const printArea = document.getElementById('printable-invoice-area');
+        printArea.innerHTML = `
+            <div style="font-family:'Courier New', monospace; padding:20px; width:100%; max-width:600px; margin:0 auto; color:#000; line-height:1.4;">
+                <h2 style="text-align:center; margin:0; font-size:1.6rem; font-weight:bold; letter-spacing:1px;">NAMTI DRUG HOUSE</h2>
                 <p style="text-align:center; font-size:0.85rem; margin:2px 0 10px 0;">Sivasagar, Assam | Consultation Counter Copy</p>
                 <div style="border-top:2px dashed #000; margin:10px 0;"></div>
                 <p><b>Rx Token ID :</b> ${rx.id}</p>
@@ -277,18 +338,14 @@ window.StaffDashboard = {
                 <div style="border-top:1px dashed #000; margin:10px 0;"></div>
                 <p style="font-weight:bold; font-size:1.1rem; margin:0 0 5px 0;">💊 Rx PRESCRIBED MEDICINES:</p>
                 <div style="white-space:pre-line; background:#f4f4f4; padding:10px; font-size:0.95rem; border-radius:4px;">${rx.rx}</div>
-                <div style="border-top:2px dashed #000; margin:30px 0 10px 0;"></div>
+                <div style="border-top:2px dashed #000; margin:40px 0 10px 0;"></div>
                 <p style="text-align:center; font-size:0.8rem;">Generated digitally via Doctor Consultation Desk Engine</p>
             </div>
         `;
 
-        const primaryStructure = document.body.innerHTML;
-        document.body.innerHTML = printLayout;
-        window.print();
-        document.body.innerHTML = primaryStructure;
-        
-        // Hot-reload components wiring after restoring layout state
-        window.location.reload();
+        // Direct isolated system trigger (Prevents breaking main viewport CSS rules)
+        window.print(); 
+        printArea.innerHTML = ""; // Flushing print buffer
     },
 
     deletePermanentItem: function(type, index) {
@@ -305,4 +362,5 @@ window.StaffDashboard = {
         }
     }
 };
+            
             
