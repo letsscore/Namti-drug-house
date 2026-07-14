@@ -390,7 +390,7 @@ window.StaffDashboard = {
         doc.setTextColor(160, 160, 160);
         doc.text("This is an electronically verified record generated at Pharmacy Console.", 15, 285);
 
-        // Document Export Stream
+              // Document Export Stream
         doc.save(`Prescription_${item.id}_${item.name.replace(/\s+/g, '_')}.pdf`);
     },
 
@@ -422,4 +422,133 @@ window.StaffDashboard = {
         };
 
         const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders')) || [];
-        existingOrders.push(mockOrder
+        existingOrders.push(mockOrder);
+        localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
+
+        this.logRevenueTransaction(amount);
+
+        if (mode === 'Cash') {
+            alert("💵 Store Sale Finished! Collected ₹" + amount + " in Cash correctly.");
+        } else {
+            this.generateSystemUpiQr(amount, `POS Sale: ${customer}`);
+        }
+
+        document.getElementById('pos-amount').value = "";
+        document.getElementById('pos-cust-name').value = "";
+        document.getElementById('pos-cust-phone').value = "";
+
+        const searchVal = document.getElementById('staff-search-input')?.value || "";
+        this.loadOnlineOrdersQueue(searchVal);
+    },
+
+    billingAction: function(type, itemId, mode) {
+        const amtField = document.getElementById(`${type.toLowerCase()}-price-${itemId}`);
+        const finalPrice = parseFloat(amtField?.value);
+
+        if (!finalPrice || finalPrice <= 0) {
+            alert("Please calculate items and insert final transaction amount first!");
+            return;
+        }
+
+        const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+        const dataset = JSON.parse(localStorage.getItem(storageKey)) || [];
+        const activeItem = dataset.find(item => item.id === itemId);
+
+        if (!activeItem) return;
+
+        this.logRevenueTransaction(finalPrice);
+
+        if (mode === 'Cash') {
+            alert(`💵 Transaction Settled! Collected ₹${finalPrice} for ${type} Order ${itemId}.`);
+        } else {
+            this.generateSystemUpiQr(finalPrice, `${type} Sale: ${activeItem.name}`);
+        }
+
+        // Clean element parameters post settlement execution
+        this.deleteRecord(type, itemId);
+    },
+
+    generateSystemUpiQr: function(amount, memo) {
+        const merchantUpi = "hussain.abidur@ybl";
+        const serializedMemo = memo.replace(/[^a-zA-Z0-9 ]/g, "");
+        const rawString = `upi://pay?pa=${merchantUpi}&pn=NamtiDrugHouse&am=${amount}&tn=${encodeURIComponent(serializedMemo)}&cu=INR`;
+        const finalQrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(rawString)}`;
+
+        document.getElementById('qr-modal-details').textContent = `${memo} | Settlement Total: ₹${amount}`;
+        document.getElementById('qr-image-container').innerHTML = `<img src="${finalQrEndpoint}" alt="UPI Dynamic QR" style="max-width:100%; border:4px solid #333; border-radius:8px;">`;
+        document.getElementById('qr-modal-overlay').style.display = 'flex';
+    },
+
+    closeQrModal: function() {
+        document.getElementById('qr-modal-overlay').style.display = 'none';
+        alert("🔒 Payment Window verified & logged successfully!");
+    },
+
+    viewPrescriptionImage: function(blobString) {
+        if (!blobString) {
+            alert("No prescription attachment for custom order.");
+            return;
+        }
+        document.getElementById('modal-rx-img-render').src = blobString;
+        document.getElementById('prescription-photo-modal').style.display = 'flex';
+    },
+
+    logRevenueTransaction: function(amount) {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger')) || [];
+        ledger.push({
+            amount: amount,
+            dateString: new Date().toDateString(),
+            timestamp: Date.now()
+        });
+        localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
+        this.calculateRevenueLedger();
+    },
+
+    calculateRevenueLedger: function() {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger')) || [];
+        const todayStr = new Date().toDateString();
+        
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+
+        let todaySum = 0;
+        let lastMonthSum = 0;
+        let grandTotal = 0;
+
+        ledger.forEach(tx => {
+            grandTotal += tx.amount;
+            if (tx.dateString === todayStr) {
+                todaySum += tx.amount;
+            }
+
+            const txDate = new Date(tx.timestamp);
+            let targetMonth = currentMonth - 1;
+            let targetYear = currentYear;
+            if (targetMonth < 0) {
+                targetMonth = 11;
+                targetYear--;
+            }
+
+            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
+                lastMonthSum += tx.amount;
+            }
+        });
+
+        const rToday = document.getElementById('rev-today');
+        const rMonth = document.getElementById('rev-month');
+        const rTotal = document.getElementById('rev-total');
+
+        if (rToday) rToday.textContent = `₹ ${todaySum.toFixed(2)}`;
+        if (rMonth) rMonth.textContent = `₹ ${lastMonthSum.toFixed(2)}`;
+        if (rTotal) rTotal.textContent = `₹ ${grandTotal.toFixed(2)}`;
+    },
+
+    clearRevenueMetrics: function() {
+        if (confirm("⚠️ Owner Verification Required: Do you want to wipe off ledger architecture?")) {
+            localStorage.setItem('ndh_revenue_ledger', '[]');
+            this.calculateRevenueLedger();
+            alert("✔ Financial logs wiped successfully.");
+        }
+    }
+};
