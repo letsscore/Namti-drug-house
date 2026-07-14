@@ -149,10 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         adminOrdersLog.appendChild(row);
     }
-    // STAGE 1: NATIVE DEEP LINK INTERFACE (0% Server Reliance - Never 404s)
+    // STAGE 1: HYBRID CLICKABLE SHORTCUT VIA WHATSAPP PIPELINE
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
-        const phoneText = rowItem.cells[0].querySelector('small').textContent;
+        const phoneText = rowItem.cells[0].querySelector('small').textContent.trim();
         const customerName = rowItem.cells[0].querySelector('strong').textContent;
         const billVal = parseFloat(rowItem.querySelector('.bill-input').value) || 0;
         
@@ -165,8 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const merchantName = encodeURIComponent("Namti Drug House");
         const note = encodeURIComponent("MedicineBill");
 
-        // The official universal URI string that forces Android to open the native App Chooser tray locally
-        const nativeUpiLink = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
+        // Native internal application URI for inside WhatsApp
+        const internalUpiLink = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
+
+        // WhatsApp formatting text block
+        const whatsappFormattedText = `Hello ${customerName},\nYour order is verified at *Namti Drug House*.\nTotal Bill: *Rs. ${billVal}*.\nMode: ${mode}.\n\n👉 Click link to pay via any UPI app:\n${internalUpiLink}\n\nOr pay to UPI ID: ${upiId}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -176,12 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
 
-        // Clean, bite-sized SMS structure that text applications cleanly parse into a hyperlink
-        const msg = `Hello ${customerName},\nYour order is verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}.\nMode: ${mode}.\n\nClick link to pay via any UPI App (GPay/PhonePe/Paytm):\n${nativeUpiLink}\n\nOr pay directly to UPI ID: ${upiId}`;
+        // SMS Message: Isme link 100% blue/clickable banega kyunki yeh HTTPS link hai
+        const smsMsg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Click this link to open WhatsApp & pay instantly: https://wa.me/91${phoneText}?text=${encodeURIComponent(whatsappFormattedText)}`;
         
-        window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
+        window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(smsMsg)}`;
         window.loadSavedSystemOrders();
     };
+
 
 
     // STAGE 2: VERIFY AND CONFIRM PAYMENT STATE
