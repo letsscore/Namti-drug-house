@@ -149,8 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         adminOrdersLog.appendChild(row);
     }
-
-    // STAGE 1: OFFICIAL MULTI-APP DIRECT SMART LINKS (Never 404s, fully clickable)
+    // STAGE 1: NATIVE DEEP LINK INTERFACE (0% Server Reliance - Never 404s)
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent;
@@ -163,12 +162,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let mode = (targetPin.trim() === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
         
         const upiId = "hussain.abidur@ybl";
-        const note = "MedicineBill";
+        const merchantName = encodeURIComponent("Namti Drug House");
+        const note = encodeURIComponent("MedicineBill");
 
-        // Bharat ke sabhi standard message apps me 100% kam karne wale dynamic app handlers
-        const gpayLink = `https://pay.google.com/gp/p/ui/pay?pa=${upiId}&pn=NamtiDrugHouse&am=${billVal}&cu=INR&tn=${note}`;
-        const phonepeLink = `phonepe://pay?pa=${upiId}&pn=NamtiDrugHouse&am=${billVal}&cu=INR&tn=${note}`;
-        const paytmLink = `paytmmp://pay?pa=${upiId}&pn=NamtiDrugHouse&am=${billVal}&cu=INR&tn=${note}`;
+        // The official universal URI string that forces Android to open the native App Chooser tray locally
+        const nativeUpiLink = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -178,12 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
 
-        // SMS body text formatting structured with alternative choice pipelines
-        const msg = `Hello ${customerName}, your order is verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}.\nMode: ${mode}.\n\nChoose your app to pay:\n1. Google Pay: ${gpayLink}\n2. PhonePe: ${phonepeLink}\n3. Paytm: ${paytmLink}\n\nOr use UPI ID: ${upiId}`;
+        // Clean, bite-sized SMS structure that text applications cleanly parse into a hyperlink
+        const msg = `Hello ${customerName},\nYour order is verified at Namti Drug House.\nTotal Bill: Rs. ${billVal}.\nMode: ${mode}.\n\nClick link to pay via any UPI App (GPay/PhonePe/Paytm):\n${nativeUpiLink}\n\nOr pay directly to UPI ID: ${upiId}`;
         
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(msg)}`;
         window.loadSavedSystemOrders();
     };
+
 
     // STAGE 2: VERIFY AND CONFIRM PAYMENT STATE
     window.markAsPaid = function(arrayIndex, buttonElement) {
