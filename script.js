@@ -383,4 +383,114 @@ window.StaffDashboard = {
                 targetMonth = 11;
                 targetYear--;
             }
-            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYea
+            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
+                lastMonthSum += tx.amount;
+            }
+        });
+
+        const rToday = document.getElementById('rev-today');
+        const rMonth = document.getElementById('rev-month');
+        const rTotal = document.getElementById('rev-total');
+
+        if(rToday) rToday.textContent = `₹ ${todaySum.toFixed(2)}`;
+        if(rMonth) rMonth.textContent = `₹ ${lastMonthSum.toFixed(2)}`;
+        if(rTotal) rTotal.textContent = `₹ ${grandTotal.toFixed(2)}`;
+    },
+
+    clearRevenueMetrics: function() {
+        if(confirm("🚨 Owner Verification Required: Do you want to wipe all past audited financial analytics ledger history?")) {
+            localStorage.setItem('ndh_revenue_ledger', '[]');
+            this.calculateRevenueLedger();
+            alert("🧹 Financial logs wiped successfully.");
+        }
+    },
+
+    // 100% FIXED BACKGROUND CONTENT INJECTION FOR NON-BLANK PDF
+    printRxMedicalPdf: function(itemId) {
+        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
+        const rx = rxData.find(item => item.id === itemId);
+        if (!rx) { alert("Prescription data corrupted or missing!"); return; }
+
+        const oldFrame = document.getElementById('ndh-print-frame');
+        if (oldFrame) oldFrame.remove();
+
+        const iframe = document.createElement('iframe');
+        iframe.id = 'ndh-print-frame';
+        iframe.style.position = 'fixed';
+        iframe.style.bottom = '0';
+        iframe.style.right = '0';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        iframe.style.opacity = '0.01';
+        iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+
+        const printDate = (rx.formattedDate && rx.formattedDate !== "undefined") ? rx.formattedDate : new Date(rx.timestamp || Date.now()).toLocaleDateString('en-IN');
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <html>
+            <head>
+                <title>Print Rx - ${rx.id}</title>
+                <style>
+                    body { font-family: 'Courier New', monospace; padding: 20px; color: #000; background: #fff; line-height: 1.5; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header h2 { margin: 0; font-size: 1.8rem; font-weight: bold; }
+                    .divider { border-top: 2px dashed #000; margin: 15px 0; }
+                    .field { margin: 6px 0; font-size: 1rem; }
+                    .rx-box { white-space: pre-line; background: #f9f9f9; padding: 12px; font-size: 1.05rem; border: 1px dashed #333; margin-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>NAMTI DRUG HOUSE</h2>
+                    <p>Sivasagar, Assam | Consultation Desk Receipt</p>
+                </div>
+                <div class="divider"></div>
+                <div class="field"><b>Rx Token ID :</b> ${rx.id}</div>
+                <div class="field"><b>Patient Name:</b> ${rx.name}</div>
+                <div class="field"><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</div>
+                <div class="field"><b>Visit Time :</b> ${printDate}</div>
+                <div class="divider"></div>
+                
+                <div style="font-weight:bold; margin-top:10px;">Symptoms:</div>
+                <div style="padding-left:10px; margin-bottom:10px;">${rx.symptoms || 'N/A'}</div>
+                
+                <div style="font-weight:bold;">Referred Tests:</div>
+                <div style="padding-left:10px; margin-bottom:10px;">${rx.tests || 'None'}</div>
+                
+                <div class="divider"></div>
+                <div style="font-weight:bold; font-size:1.1rem;">💊 Rx Medicines:</div>
+                <div class="rx-box">${rx.rx}</div>
+                
+                <div class="divider" style="margin-top: 40px;"></div>
+                <p style="text-align: center; font-size: 0.85rem;">Generated digitally via Doctor Desk Engine</p>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 800);
+    },
+
+    deletePermanentItem: function(type, itemId) {
+        if (confirm("🚨 Admin Authorization: Are you absolutely sure you want to permanently delete this operational record from portal memory? This action cannot be undone.")) {
+            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const updatedDataset = dataset.filter(item => item.id !== itemId);
+            localStorage.setItem(storageKey, JSON.stringify(updatedDataset));
+            
+            // Instantly refresh matching items grid
+            const searchVal = document.getElementById('staff-search-input').value.toLowerCase().trim();
+            this.loadRxQueue(searchVal);
+            this.loadOnlineOrdersQueue(searchVal);
+            
+            alert("🗑️ Record expunged permanently by Admin.");
+        }
+    }
+};
