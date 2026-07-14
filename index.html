@@ -18,14 +18,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--background); color: var(--primary); padding: 20px; }
 
-        /* HEADER & HERO DESIGN */
         .portal-header {
             text-align: center; background: linear-gradient(135deg, #1e293b, #0f172a);
             color: white; padding: 30px 20px; border-radius: 16px; margin-bottom: 25px;
         }
         .portal-header h1 { font-size: 2.2rem; margin-bottom: 5px; }
 
-        /* NAVIGATION SYSTEM */
         .view-container { display: none; max-width: 950px; margin: 0 auto; }
         .active-view { display: block; animation: fadeIn 0.3s ease-in-out; }
 
@@ -41,31 +39,34 @@
         .btn-success { background: var(--success); }
         .btn-back { background: #64748b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
 
-        /* REVENUE SHEET LAYOUT */
         .revenue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
         .revenue-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; border-bottom: 4px solid var(--accent); }
         .revenue-box h4 { font-size: 0.85rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
         .revenue-box p { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
 
-        /* UI CARDS */
         .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid var(--accent); }
         .form-row { display: flex; gap: 15px; }
         .form-row input, .form-row select { flex: 1; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0 16px 0; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; }
 
-        /* GRID TABLES FOR QUEUES */
         .table-responsive { overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
         th { background-color: #f8fafc; font-weight: 600; }
 
-        /* POPUP MODAL FOR UPI QR & INTERACTIVE PREVIEW */
         .qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .qr-box { background: white; padding: 25px; border-radius: 12px; text-align: center; max-width: 320px; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
 
-        /* SEARCH INTERFACE BAR */
         .search-wrapper { position: relative; display: flex; gap: 10px; margin-bottom: 20px; }
         .search-wrapper input { margin: 0; padding: 14px 40px 14px 14px; border: 2px solid var(--accent); }
+
+        /* PRINT STYLING CONFIGURATION */
+        #prescription-print-area { display: none; }
+        @media print {
+            body * { display: none !important; }
+            #prescription-print-area { display: block !important; width: 100% !important; margin: 0 !important; padding: 20px !important; }
+            #prescription-print-area * { display: block !important; }
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -80,15 +81,15 @@
         </div>
         <div id="medical-inventions-container"></div>
         <div class="menu-grid">
-            <button class="btn-main" onclick="ViewManager.navigate('customer-view')"><span>🛒</span>Customer Online Order</button>
-            <button class="btn-main" onclick="ViewManager.secureNavigation('doctor-view', 'doctor2026')"><span>👨‍⚕️</span>Doctor Consultation Desk</button>
-            <button class="btn-main" onclick="ViewManager.secureNavigation('staff-view', 'admin2026')"><span>🔑</span>Staff Dashboard Portal</button>
+            <button class="btn-main" onclick="window.ViewManager.navigate('customer-view')"><span>🛒</span>Customer Online Order</button>
+            <button class="btn-main" onclick="window.ViewManager.secureNavigation('doctor-view', 'doctor2026')"><span>👨‍⚕️</span>Doctor Consultation Desk</button>
+            <button class="btn-main" onclick="window.ViewManager.secureNavigation('staff-view', 'admin2026')"><span>🔑</span>Staff Dashboard Portal</button>
         </div>
     </div>
 
     <!-- ================= 2. ONLINE CUSTOMER DESK ================= -->
     <div id="customer-view" class="view-container">
-        <button class="btn-back" onclick="ViewManager.navigate('home-view')">⬅ Back to Home</button>
+        <button class="btn-back" onclick="window.ViewManager.navigate('home-view')">⬅ Back to Home</button>
         <div class="card">
             <h2>🛒 Online Order Desk</h2>
             <p style="background:#fffbeb; color:#b45309; padding:12px; border-radius:6px; font-size:0.9rem; margin:10px 0; border-left: 4px solid var(--warning);">
@@ -111,7 +112,7 @@
 
     <!-- ================= 3. EXTENDED DOCTOR DESK ================= -->
     <div id="doctor-view" class="view-container">
-        <button class="btn-back" onclick="ViewManager.navigate('home-view')">⬅ Back to Home</button>
+        <button class="btn-back" onclick="window.ViewManager.navigate('home-view')">⬅ Back to Home</button>
         <div class="card" style="border-top-color: var(--doctor-color);">
             <h2>👨‍⚕️ Doctor Consultation Desk</h2>
             <p style="color:#64748b; margin-bottom:15px;">Route real-time prescriptions directly to pharmacy station logs.</p>
@@ -133,20 +134,20 @@
                 <textarea id="doc-tests" placeholder="Diagnostic Tests Referred (e.g., CBC, Blood Sugar, X-Ray)..." style="height:60px;"></textarea>
                 <textarea id="doc-rx-content" placeholder="Rx: Medicines Prescribed (Name, Dosage Matrix, Duration) *" style="height:120px;" required></textarea>
                 
-                <button type="button" onclick="DoctorDesk.submitPrescription()" class="btn-action" style="background:var(--doctor-color); width:100%; padding:14px;">Send Rx to Counter Queue 📤</button>
+                <button type="button" onclick="window.DoctorDesk.submitPrescription()" class="btn-action" style="background:var(--doctor-color); width:100%; padding:14px;">Send Rx to Counter Queue 📤</button>
             </form>
         </div>
     </div>
 
     <!-- ================= 4. COMPREHENSIVE STAFF DASHBOARD ================= -->
     <div id="staff-view" class="view-container">
-        <button class="btn-back" onclick="ViewManager.navigate('home-view')">⬅ Back to Home</button>
+        <button class="btn-back" onclick="window.ViewManager.navigate('home-view')">⬅ Back to Home</button>
         
         <!-- LIVE AUDITED REVENUE MODULE -->
         <div class="card" style="border-top-color: #ec4899;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>📊 Financial Revenue Ledger Console</h2>
-                <button onclick="StaffDashboard.clearRevenueMetrics()" style="background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.75rem; padding:4px 8px; border-radius:4px; cursor:pointer;">Reset Analytics Memory 🔄</button>
+                <button onclick="window.StaffDashboard.clearRevenueMetrics()" style="background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.75rem; padding:4px 8px; border-radius:4px; cursor:pointer;">Reset Analytics Memory 🔄</button>
             </div>
             <div class="revenue-grid">
                 <div class="revenue-box">
@@ -169,7 +170,7 @@
             <h2>🔍 Global Customer Records Engine</h2>
             <p style="font-size: 0.85rem; color:#64748b; margin-bottom:10px;">Search details instantaneously across both doctor sheets and online order logs using Name or Phone.</p>
             <div class="search-wrapper">
-                <input type="text" id="staff-search-input" onkeyup="StaffDashboard.filterRecords()" placeholder="Type Customer/Patient Name or Phone Number to search...">
+                <input type="text" id="staff-search-input" onkeyup="window.StaffDashboard.filterRecords()" placeholder="Type Customer/Patient Name or Phone Number to search...">
             </div>
         </div>
 
@@ -182,8 +183,8 @@
                 <input type="number" id="pos-amount" placeholder="Total Sale Amount (₹) *" required>
             </div>
             <div style="display:flex; gap:10px;">
-                <button onclick="StaffDashboard.processOfflinePOS('Cash')" class="btn-action btn-success" style="flex:1;">Collect Cash 💵</button>
-                <button onclick="StaffDashboard.processOfflinePOS('QR')" class="btn-action" style="flex:1; background: #0284c7;">Generate UPI QR 📱</button>
+                <button onclick="window.StaffDashboard.processOfflinePOS('Cash')" class="btn-action btn-success" style="flex:1;">Collect Cash 💵</button>
+                <button onclick="window.StaffDashboard.processOfflinePOS('QR')" class="btn-action" style="flex:1; background: #0284c7;">Generate UPI QR 📱</button>
             </div>
         </div>
 
@@ -224,13 +225,13 @@
         </div>
     </div>
 
-    <!-- ================= 5. SYSTEM POPUPS AND MODAL WINDOWS ================= -->
+    <!-- ================= 5. POPUPS & INVISIBLE PRINT CONTAINER ================= -->
     <div id="qr-modal-overlay" class="qr-modal">
         <div class="qr-box">
             <h3 style="color:var(--success); margin-bottom:10px;">Scan to Complete Payment</h3>
             <p id="qr-modal-details" style="font-weight:600; margin-bottom:15px; font-size:1.1rem;"></p>
             <div id="qr-image-container" style="margin-bottom:15px;"></div>
-            <button onclick="StaffDashboard.closeQrModal()" class="btn-back" style="margin:0; width:100%;">Close & Synchronize Record</button>
+            <button onclick="window.StaffDashboard.closeQrModal()" class="btn-back" style="margin:0; width:100%;">Close & Synchronize Record</button>
         </div>
     </div>
 
@@ -242,9 +243,13 @@
         </div>
     </div>
 
+    <!-- SAFE HIDDEN DIV FOR ERROR-FREE PRINTING -->
+    <div id="prescription-print-area"></div>
+
     <script src="script.js"></script>
 </body>
-    </html>
+                    </html>
+    
     
 
     
