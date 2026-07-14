@@ -12,6 +12,7 @@
             --doctor-color: #8b5cf6;
             --background: #f1f5f9;
             --card-bg: #ffffff;
+            --warning: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -40,6 +41,12 @@
         .btn-success { background: var(--success); }
         .btn-back { background: #64748b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
 
+        /* REVENUE SHEET LAYOUT */
+        .revenue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .revenue-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; border-bottom: 4px solid var(--accent); }
+        .revenue-box h4 { font-size: 0.85rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+        .revenue-box p { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+
         /* UI CARDS */
         .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 5px solid var(--accent); }
         .form-row { display: flex; gap: 15px; }
@@ -57,9 +64,20 @@
         .qr-box { background: white; padding: 25px; border-radius: 12px; text-align: center; max-width: 320px; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* PRINT INTERFACING ARCHITECTURE */
+        #printable-invoice-area { display: none; }
+        @media print {
+            body * { display: none !important; }
+            #printable-invoice-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+            #printable-invoice-area * { display: block !important; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- HIDDEN SANDBOX AREA EXCLUSIVELY FOR SYSTEM PRINTING -->
+    <div id="printable-invoice-area"></div>
 
     <!-- ================= 1. MAIN HOME INTERFACE ================= -->
     <div id="home-view" class="view-container active-view">
@@ -105,7 +123,7 @@
             <h2>👨‍⚕️ Doctor Consultation Desk</h2>
             <p style="color:#64748b; margin-bottom:15px;">Route real-time prescriptions directly to pharmacy station logs.</p>
             
-            <form id="doctor-rx-form" onsubmit="DoctorDesk.submitPrescription(e)">
+            <form id="doctor-rx-form">
                 <input type="text" id="doc-patient-name" placeholder="Patient Name *" required>
                 
                 <div class="form-row">
@@ -131,6 +149,28 @@
     <div id="staff-view" class="view-container">
         <button class="btn-back" onclick="ViewManager.navigate('home-view')">⬅ Back to Home</button>
         
+        <!-- LIVE AUDITED REVENUE MODULE -->
+        <div class="card" style="border-top-color: #ec4899;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>📊 Financial Revenue Ledger Console</h2>
+                <button onclick="StaffDashboard.clearRevenueMetrics()" style="background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.75rem; padding:4px 8px; border-radius:4px; cursor:pointer;">Reset Analytics Memory 🔄</button>
+            </div>
+            <div class="revenue-grid">
+                <div class="revenue-box">
+                    <h4>Today's Revenue</h4>
+                    <p id="rev-today">₹ 0.00</p>
+                </div>
+                <div class="revenue-box" style="border-bottom-color: var(--success);">
+                    <h4>Last Month Revenue</h4>
+                    <p id="rev-month">₹ 0.00</p>
+                </div>
+                <div class="revenue-box" style="border-bottom-color: var(--warning);">
+                    <h4>Cumulative Sales</h4>
+                    <p id="rev-total">₹ 0.00</p>
+                </div>
+            </div>
+        </div>
+
         <!-- OFFLINE POS COUNTER -->
         <div class="card" style="border-top-color: var(--success);">
             <h2>🔌 Quick Offline Counter Sale (POS)</h2>
@@ -162,7 +202,7 @@
             </div>
         </div>
 
-        <!-- NEW: ONLINE ORDERS MONITOR PIPELINE -->
+        <!-- ONLINE ORDERS MONITOR PIPELINE -->
         <div class="card" style="border-top-color: #f59e0b;">
             <h2>📦 Incoming Online Customers Desk Orders</h2>
             <div class="table-responsive">
@@ -201,7 +241,7 @@
 
     <script src="script.js"></script>
 </body>
-    </html>
-                                                             
+                    </html>
+                        
 
     
