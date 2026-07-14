@@ -3,287 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namti Drug House - Advanced Master Portal</title>
+    <title>Namti Drug House - Secure Portal</title>
+    <!-- CSS same rakha hai design consistency ke liye -->
     <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #0284c7;
-            --success: #16a34a;
-            --warning: #f59e0b;
-            --danger: #dc2626;
-            --background: #f8fafc;
-            --surface: #ffffff;
-        }
-
+        :root { --primary: #0f172a; --accent: #0284c7; --success: #16a34a; --background: #f8fafc; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--background); color: var(--primary); padding: 20px; }
-
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--primary); color: #fff; padding: 15px 30px;
-            border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .nav-buttons button {
-            background: var(--accent); color: white; border: none; padding: 8px 16px;
-            border-radius: 6px; cursor: pointer; font-weight: 600; margin-left: 10px;
-        }
-
-        .view-container { display: none; }
-        .active-view { display: block; }
-        
-        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
-        @media (min-width: 1024px) { .dashboard-grid { grid-template-columns: 2fr 1fr; } }
-
-        .card { background: var(--surface); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .bg-doctor { border-top: 4px solid var(--accent); }
-        .bg-pos { border-top: 4px solid var(--success); }
-        
-        h3 { margin-bottom: 15px; font-size: 1.2rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
-        
-        .btn-submit { background: var(--success); color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
-        th { background: #f1f5f9; }
-
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
-        .badge-pending { background: #fef08a; color: #854d0e; }
-        .badge-delivery { background: #dcfce7; color: #15803d; }
-        .badge-rejected { background: #fee2e2; color: #991b1b; }
-
-        /* Custom Floating Popups */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        
-        #success-popup {
-            display: none; position: fixed; top: 20px; right: 20px; 
-            background: var(--success); color: white; padding: 15px 25px; 
-            border-radius: 8px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: bold;
-        }
-        
-        .notice-banner {
-            background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b;
-            padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; color: #b45309;
-        }
+        body { background-color: var(--background); padding: 20px; }
+        .nav-bar { background: var(--primary); color: white; padding: 15px; border-radius: 8px; display: flex; gap: 10px; margin-bottom: 20px; }
+        .view { display: none; }
+        .active { display: block; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        button { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- SUCCESS NOTIFICATION ALERTS -->
-    <div id="success-popup">✅ Action Completed Successfully!</div>
+    <div class="nav-bar">
+        <button onclick="changeView('customer')">🛒 Customer Order</button>
+        <button onclick="secureAccess('doctor', 'doctor2026')">👨‍⚕️ Doctor Desk</button>
+        <button onclick="secureAccess('staff', 'admin2026')">🔑 Staff Dashboard</button>
+    </div>
 
-    <header>
-        <div>
-            <h1>🏥 NAMTI DRUG HOUSE</h1>
-            <p style="font-size: 0.8rem; color: #94a3b8;">Sivasagar, Assam | Smart Pharmacy Management</p>
-        </div>
-        <div class="nav-buttons">
-            <button onclick="window.ViewManager.switchToCustomer()">🛒 Customer Order Desk</button>
-            <button onclick="window.ViewManager.switchToStaff()" style="background: #334155;">🔑 Staff Dashboard</button>
-        </div>
-    </header>
-
-    <!-- 1. 3D MEDICAL QUOTATION ROTATOR ROTATOR BOX -->
-    <div style="margin: 20px auto; max-width: 800px;">
-        <div id="medical-inventions-container">
-            <div style="text-align:center; padding:20px; background:#1e293b; color:#fff; border-radius:12px;">Initializing 3D Medical History Feed...</div>
+    <!-- VIEW 1: CUSTOMER -->
+    <div id="customer" class="view">
+        <div class="card">
+            <h3>📦 Online Order Desk</h3>
+            <div style="background:#fffbeb; padding:10px; border-left:4px solid #f59e0b; margin-bottom:15px; font-size:0.9rem;">
+                🚨 Delivery only in 785684. Bills ≥ ₹1599 need Advance Payment.
+            </div>
+            <form id="orderForm">
+                <input type="text" id="cName" placeholder="Name" required>
+                <input type="text" id="cPin" placeholder="PIN Code" required>
+                <input type="number" id="cBill" placeholder="Amount">
+                <button type="submit" style="background:var(--success); color:white; width:100%;">Submit</button>
+            </form>
         </div>
     </div>
 
-    <!-- VIEW A: CUSTOMER ONLINE WORKSPACE -->
-    <main id="customer-view" class="view-container active-view">
-        <div style="max-width: 650px; margin: 0 auto;" class="card">
-            <h3>📦 Place Online Medicine Order</h3>
-            
-            <!-- STALWART POLICY NOTICE BANNER -->
-            <div class="notice-banner">
-                🚨 <strong>Strict Delivery Guidelines:</strong><br>
-                1. Home delivery is available **ONLY** within PIN code <strong>785684</strong>. Orders outside this zone will be rejected.<br>
-                2. Orders below ₹1599 qualify for <strong>Pure Cash on Delivery (COD)</strong>.<br>
-                3. Orders of <strong>₹1599 or above</strong> strictly require <strong>Advance Payment</strong> verification before dispatch.
-            </div>
-            
-            <form id="order-submission-form">
-                <div class="form-group">
-                    <label>Your Name *</label>
-                    <input type="text" id="cust-name" required placeholder="Enter full name">
-                </div>
-                <div class="form-group">
-                    <label>Mobile Number *</label>
-                    <input type="tel" id="cust-phone" required placeholder="Enter 10-digit number">
-                </div>
-                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label>Village / Town *</label>
-                        <input type="text" id="cust-village" required placeholder="Village Name">
-                    </div>
-                    <div>
-                        <label>PIN Code (Delivery Area) *</label>
-                        <input type="text" id="cust-pincode" required placeholder="e.g., 785684">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>District *</label>
-                    <input type="text" id="cust-district" value="Sivasagar" required>
-                </div>
-                <div class="form-group">
-                    <label>Estimate Total Bill Amount (Optional - for payment routing verification)</label>
-                    <input type="number" id="cust-est-bill" placeholder="Enter rough estimate value (₹)">
-                </div>
-                <div class="form-group">
-                    <label>Write Medicines / Description</label>
-                    <textarea id="medicine-details" placeholder="Type medicine names or dosage instruction details here..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Upload Prescription Scan Image *</label>
-                    <input type="file" id="prescription-photo" accept="image/*" required>
-                </div>
-                <button type="submit" class="btn-submit">Submit Prescription Order 🚀</button>
-            </form>
-        </div>
-    </main>
-
-    <!-- VIEW B: STAFF MASTER INTERFACE CONTROL -->
-    <main id="staff-dashboard" class="view-container">
-        
-        <!-- DOCTOR LOG CABIN ENGINE -->
-        <div class="card bg-doctor">
+    <!-- VIEW 2: DOCTOR DESK (Home Page par) -->
+    <div id="doctor" class="view">
+        <div class="card" style="border-top:4px solid var(--accent);">
             <h3>👨‍⚕️ Doctor Consultation Desk</h3>
-            <form id="doctor-prescription-form" onsubmit="window.submitDoctorPrescriptionLog(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label>Patient Full Name *</label>
-                        <input type="text" id="doc-patient-name" required>
-                    </div>
-                    <div>
-                        <label>Patient Contact</label>
-                        <input type="text" id="doc-patient-phone">
-                    </div>
-                    <div>
-                        <label>Clinical Notes</label>
-                        <input type="text" id="doc-clinical-notes" placeholder="Diagnosis summary">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Rx Prescription System Configuration *</label>
-                    <textarea id="doc-rx-prescription" required style="height: 70px; font-family: monospace;" placeholder="Rx: Medicine name & frequency..."></textarea>
-                </div>
-                <button type="submit" style="background: var(--accent); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:bold;">Transmit Prescription to Pharmacy Counter 📤</button>
-            </form>
-        </div>
-
-        <!-- COUNTER POS OFFICE INTERFACE -->
-        <div class="card bg-pos">
-            <h3>🏬 Offline Counter POS Billing</h3>
-            <form id="pos-billing-form" onsubmit="window.processOfflineCounterSale(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <label>Walk-in Customer Name</label>
-                        <input type="text" id="pos-cust-name" value="Walk-in Customer">
-                    </div>
-                    <div>
-                        <label>Phone Number</label>
-                        <input type="text" id="pos-cust-phone">
-                    </div>
-                    <div>
-                        <label>Total Value Bill (₹) *</label>
-                        <input type="number" id="pos-total-bill" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Items Specification *</label>
-                    <textarea id="pos-medicine-list" required placeholder="Medicines data..."></textarea>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <button type="submit" style="background: var(--success); color:white; border:none; padding:12px 20px; border-radius:6px; cursor:pointer; font-weight:bold;">Process Sale & Display QR ⚡</button>
-                    <div id="pos-dynamic-qr-wrapper"></div>
-                </div>
-            </form>
-        </div>
-
-        <!-- GRID QUEUE LOG DISPATCH CORES -->
-        <div class="dashboard-grid">
-            <div class="left-column">
-                <div class="card">
-                    <h3>🚚 Online Incoming Web Requests Log</h3>
-                    <div style="overflow-x: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Customer</th>
-                                    <th>Address (PIN)</th>
-                                    <th>Prescription</th>
-                                    <th>Bill (₹)</th>
-                                    <th>Status</th>
-                                    <th>Operations</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-orders-log"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>📋 Doctor Prescriptions Live Feed Queue</h3>
-                    <div style="overflow-x: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Rx ID</th>
-                                    <th>Patient</th>
-                                    <th>Diagnosis</th>
-                                    <th>Rx Details</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="staff-prescription-log"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-column">
-                <div class="card" style="background: var(--primary); color: white; text-align: center; padding: 30px;">
-                    <h4 style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 10px;">DAILY BOOK ACCOUNTS</h4>
-                    <div id="total-revenue-display" style="font-size: 1.8rem; font-weight: bold; color: #38bdf8;">Total Revenue: ₹ 0.00</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- INVOICE DIALOG OVERLAYS -->
-    <div id="payment-modal-box" class="modal-overlay">
-        <div style="background: white; padding: 25px; border-radius: 8px; width: 350px;">
-            <div id="printable-receipt" style="font-family: monospace; text-align: center;">
-                <h3>NAMTI DRUG HOUSE</h3>
-                <p style="font-size:0.75rem;">Sivasagar, Assam</p>
-                <hr style="border-top: 1px dashed #000; margin:10px 0;">
-                <p style="text-align:left;">ID: <span id="rec-id"></span></p>
-                <p style="text-align:left;">Name: <span id="rec-name"></span></p>
-                <p style="text-align:left;">Phone: <span id="rec-phone"></span></p>
-                <p style="text-align:left;">Addr: <span id="rec-addr"></span></p>
-                <div class="receipt-amt-check"></div>
-            </div>
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button onclick="window.printReceipt()" style="flex:1; background:var(--success); color:white; padding:8px; border:none; border-radius:4px; cursor:pointer;">Print Slip 🖨️</button>
-                <button onclick="document.getElementById('payment-modal-box').style.display='none'" style="flex:1; background:#64748b; color:white; padding:8px; border:none; border-radius:4px; cursor:pointer;">Close</button>
-            </div>
+            <input type="text" id="dPatient" placeholder="Patient Name">
+            <textarea id="dRx" placeholder="Write Prescription..."></textarea>
+            <button onclick="logDoctorRx()" style="background:var(--accent); color:white;">Submit Rx</button>
         </div>
     </div>
 
-    <div id="prescription-preview-modal" class="modal-overlay" onclick="this.style.display='none'">
-        <div style="max-width: 80%; background: white; padding: 10px; border-radius: 8px;">
-            <img id="modal-target-image" src="" style="max-width:100%; max-height:75vh; display:block;">
+    <!-- VIEW 3: STAFF DASHBOARD -->
+    <div id="staff" class="view">
+        <div class="card">
+            <h3>🔑 Staff Master Dashboard</h3>
+            <div id="logs" style="font-size:0.9rem;">No new activity.</div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-    </html>
-                                                                                                  
+</html>
+
