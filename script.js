@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         adminOrdersLog.appendChild(row);
     }
-    // STAGE 1: HYBRID CLICKABLE SHORTCUT VIA WHATSAPP PIPELINE
+    // STAGE 1: PROFESSIONAL DYNAMIC QR GENERATOR INTERFACE
     window.executeSmsProcess = function(arrayIndex, buttonElement) {
         const rowItem = buttonElement.closest('tr');
         const phoneText = rowItem.cells[0].querySelector('small').textContent.trim();
@@ -162,14 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let mode = (targetPin.trim() === "785684" && billVal >= 1999) ? "Home Delivery" : "Self Collection";
         
         const upiId = "hussain.abidur@ybl";
-        const merchantName = encodeURIComponent("Namti Drug House");
-        const note = encodeURIComponent("MedicineBill");
+        const merchantName = "Namti Drug House";
 
-        // Native internal application URI for inside WhatsApp
-        const internalUpiLink = `upi://pay?pa=${upiId}&pn=${merchantName}&am=${billVal}&cu=INR&tn=${note}`;
-
-        // WhatsApp formatting text block
-        const whatsappFormattedText = `Hello ${customerName},\nYour order is verified at *Namti Drug House*.\nTotal Bill: *Rs. ${billVal}*.\nMode: ${mode}.\n\n👉 Click link to pay via any UPI app:\n${internalUpiLink}\n\nOr pay to UPI ID: ${upiId}`;
+        // Create a standard secure UPI string
+        const upiRawPayload = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${billVal}&cu=INR&tn=MedicineBill`;
+        
+        // This generates a global open-source safe QR image link that opens instantly on any phone browser
+        const qrScreenUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiRawPayload)}`;
 
         const currentOrders = JSON.parse(localStorage.getItem('namti_orders') || '[]');
         if (currentOrders[arrayIndex]) {
@@ -179,12 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('namti_orders', JSON.stringify(currentOrders));
         }
 
-        // SMS Message: Isme link 100% blue/clickable banega kyunki yeh HTTPS link hai
-        const smsMsg = `Hello ${customerName}, your order is verified at Namti Drug House. Total Bill: Rs. ${billVal}. Click this link to open WhatsApp & pay instantly: https://wa.me/91${phoneText}?text=${encodeURIComponent(whatsappFormattedText)}`;
+        // Professional Standard SMS Layout (HTTPS link is 100% clickable and blue in Android)
+        const smsMsg = `Hello ${customerName},\nYour invoice is ready at Namti Drug House.\nNet Payable: Rs. ${billVal}\n\n👉 Click below to view your Payment QR Code & pay instantly:\n${qrScreenUrl}\n\nThank you for choosing us!`;
         
         window.location.href = `sms:+91${phoneText}?body=${encodeURIComponent(smsMsg)}`;
         window.loadSavedSystemOrders();
     };
+
 
 
 
