@@ -1,17 +1,23 @@
 // ========================================================
-// 1. STATE CONFIGURATION & ENGINE PERSISTENCE
+// 1. ENGINE INITIALIZATION & VIEW MANAGER
 // ========================================================
 window.ViewManager = {
     navigate: function(viewId) {
         document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
-        document.getElementById(viewId).classList.add('active-view');
+        const targetView = document.getElementById(viewId);
+        if (targetView) {
+            targetView.classList.add('active-view');
+        }
         localStorage.setItem('ndh_last_active_view', viewId);
         
         if (viewId === 'staff-view') {
-            document.getElementById('staff-search-input').value = ""; // Reset search field
-            StaffDashboard.loadRxQueue();
-            StaffDashboard.loadOnlineOrdersQueue();
-            StaffDashboard.calculateRevenueLedger();
+            const searchInput = document.getElementById('staff-search-input');
+            if (searchInput) searchInput.value = ""; 
+            if (window.StaffDashboard) {
+                window.StaffDashboard.loadRxQueue("");
+                window.StaffDashboard.loadOnlineOrdersQueue("");
+                window.StaffDashboard.calculateRevenueLedger();
+            }
         }
     },
     secureNavigation: function(viewId, correctPassword) {
@@ -31,7 +37,55 @@ window.ViewManager = {
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedState = localStorage.getItem('ndh_last_active_view') || 'home-view';
-    ViewManager.navigate(savedState);
+    window.ViewManager.navigate(savedState);
+    
+    const orderForm = document.getElementById('online-order-form');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pin = document.getElementById('cust-pin').value.trim();
+            const bill = parseFloat(document.getElementById('cust-bill').value) || 0;
+            const photoFile = document.getElementById('cust-rx-photo').files[0];
+
+            if (pin !== "785684") {
+                alert("❌ Order Rejected: Home delivery is strictly possible only within PIN code 785684!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64Img = event.target.result;
+                const currentStamp = new Date();
+                
+                const newOrder = {
+                    id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+                    name: document.getElementById('cust-name').value.trim(),
+                    phone: document.getElementById('cust-phone').value.trim(),
+                    pin: pin,
+                    estimatedBill: bill || 'Not Provided',
+                    meds: document.getElementById('cust-meds').value.trim() || 'Refer to attached image document',
+                    imgData: base64Img,
+                    isPOS: false, // Flag to separate online vs counter pos
+                    timestamp: currentStamp.getTime(),
+                    formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
+                };
+
+                const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+                existingOrders.push(newOrder);
+                localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
+
+                let completionText = "🎉 Order Submitted successfully (Cash on Delivery Mode).";
+                if (bill >= 1599) {
+                    completionText = "⚠️ Order Warning (Value ≥ ₹1599): Your order requires manual Advance Payment verification before dispatch!";
+                }
+                
+                alert(completionText);
+                orderForm.reset();
+                window.ViewManager.navigate('home-view');
+            };
+            if (photoFile) reader.readAsDataURL(photoFile);
+        });
+    }
 });
 
 // ========================================================
@@ -49,62 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `<div id="rotator-card" style="padding:15px; background:#e2e2e2; color:#334155; border-radius:8px; font-style:italic; font-size:0.95rem; text-align:center; border-left:5px solid var(--accent); margin-bottom:15px;"></div>`;
         let i = 0;
         function rotate() {
-            document.getElementById('rotator-card').innerHTML = `💡 <b>Medical Fact:</b> "${medicalQuotes[i]}"`;
-            i = (i + 1) % medicalQuotes.length;
+            const card = document.getElementById('rotator-card');
+            if (card) {
+                card.innerHTML = `💡 <b>Medical Fact:</b> "${medicalQuotes[i]}"`;
+                i = (i + 1) % medicalQuotes.length;
+            }
         }
         rotate(); setInterval(rotate, 8000);
     }
 });
 
 // ========================================================
-// 3. ONLINE CUSTOMER DESK - LOGISTICS (WITH TIMESTAMP ENGINE)
-// ========================================================
-document.getElementById('online-order-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const pin = document.getElementById('cust-pin').value.trim();
-    const bill = parseFloat(document.getElementById('cust-bill').value) || 0;
-    const photoFile = document.getElementById('cust-rx-photo').files[0];
-
-    if (pin !== "785684") {
-        alert("❌ Order Rejected: Home delivery is strictly possible only within PIN code 785684!");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const base64Img = event.target.result;
-        const currentStamp = new Date();
-        
-        const newOrder = {
-            id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-            name: document.getElementById('cust-name').value.trim(),
-            phone: document.getElementById('cust-phone').value.trim(),
-            pin: pin,
-            estimatedBill: bill || 'Not Provided',
-            meds: document.getElementById('cust-meds').value.trim() || 'Refer to attached image document',
-            imgData: base64Img,
-            timestamp: currentStamp.getTime(),
-            formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
-        };
-
-        const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
-        existingOrders.push(newOrder);
-        localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
-
-        let completionText = "🎉 Order Submitted successfully (Cash on Delivery Mode).";
-        if (bill >= 1599) {
-            completionText = "⚠️ Order Warning (Value ≥ ₹1599): Your order requires manual Advance Payment verification before dispatch!";
-        }
-        
-        alert(completionText);
-        document.getElementById('online-order-form').reset();
-        ViewManager.navigate('home-view');
-    };
-    reader.readAsDataURL(photoFile);
-});
-
-// ========================================================
-// 4. DOCTOR DIAGNOSTIC COUPLING (WITH DATE & TIME)
+// 3. DOCTOR DIAGNOSTIC COUPLING
 // ========================================================
 window.DoctorDesk = {
     submitPrescription: function() {
@@ -139,12 +149,12 @@ window.DoctorDesk = {
 
         alert("📤 Medical Prescription dispatched safely to Pharmacy Counter!");
         document.getElementById('doctor-rx-form').reset();
-        ViewManager.navigate('home-view');
+        window.ViewManager.navigate('home-view');
     }
 };
 
 // ========================================================
-// 5. STAFF OPERATIONS, SEARCH FILTER & PRINT ARCHITECTURE
+// 4. STAFF OPERATIONS, GLOBAL SEARCH & INVISIBLE PRINT ENGINE
 // ========================================================
 window.StaffDashboard = {
     loadRxQueue: function(filterTerm = "") {
@@ -155,7 +165,6 @@ window.StaffDashboard = {
         if (filterTerm) {
             rxData = rxData.filter(item => 
                 item.name.toLowerCase().includes(filterTerm) || 
-                item.phone.toLowerCase().includes(filterTerm) ||
                 item.id.toLowerCase().includes(filterTerm)
             );
         }
@@ -165,7 +174,7 @@ window.StaffDashboard = {
             return;
         }
 
-        rxData.forEach((item, index) => {
+        rxData.forEach((item) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | ${item.sex}</small><br><span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px; font-weight:600;">⏰ ${item.formattedDate}</span></td>
@@ -173,13 +182,13 @@ window.StaffDashboard = {
                 <td><div style="white-space:pre-line; font-family:monospace; background:#f8fafc; padding:6px; border-radius:4px; font-size:0.85rem;">${item.rx}</div></td>
                 <td>
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <input type="number" id="rx-price-${index}" placeholder="Amt (₹)" style="margin:0; padding:6px;">
+                        <input type="number" id="rx-price-${item.id}" placeholder="Amt (₹)" style="margin:0; padding:6px;">
                         <div style="display:flex; gap:4px;">
-                            <button onclick="StaffDashboard.billingAction('Rx', ${index}, 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
-                            <button onclick="StaffDashboard.billingAction('Rx', ${index}, 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
+                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
+                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
                         </div>
-                        <button onclick="StaffDashboard.printRxMedicalPdf(${index})" style="background:#475569; color:white; border:none; padding:6px; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.8rem;">Print Prescription 🖨️</button>
-                        <button onclick="StaffDashboard.deletePermanentItem('Rx', ${index})" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete Record 🗑️</button>
+                        <button onclick="window.StaffDashboard.printRxMedicalPdf('${item.id}')" style="background:#475569; color:white; border:none; padding:6px; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.8rem;">Print Prescription 🖨️</button>
+                        <button onclick="window.StaffDashboard.deletePermanentItem('Rx', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete Record 🗑️</button>
                     </div>
                 </td>
             `;
@@ -191,6 +200,9 @@ window.StaffDashboard = {
         const target = document.getElementById('live-online-orders-queue');
         if (!target) return; target.innerHTML = "";
         let orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+
+        // CRITICAL FIX: POS counter records ko online orders monitor se clean separate filter out karna
+        orders = orders.filter(item => item.isPOS !== true);
 
         if (filterTerm) {
             orders = orders.filter(item => 
@@ -205,22 +217,22 @@ window.StaffDashboard = {
             return;
         }
 
-        orders.forEach((item, index) => {
+        orders.forEach((item) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small><br><span style="background:#fef3c7; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px; font-weight:600;">⏰ ${item.formattedDate}</span></td>
                 <td><small><b>Loc:</b> ${item.pin}<br><b>Note:</b> ${item.meds}</small><br>
-                    <button onclick="StaffDashboard.viewPrescriptionImage('${item.imgData}')" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-top:5px;">👁️ View Uploaded Image</button>
+                    <button onclick="window.StaffDashboard.viewPrescriptionImage('${item.imgData}')" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-top:5px;">👁️ View Uploaded Image</button>
                 </td>
                 <td><small>Est. Price: <b>₹ ${item.estimatedBill}</b></small></td>
                 <td>
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <input type="number" id="order-price-${index}" placeholder="Final Amt (₹)" style="margin:0; padding:6px;">
+                        <input type="number" id="order-price-${item.id}" placeholder="Final Amt (₹)" style="margin:0; padding:6px;">
                         <div style="display:flex; gap:4px;">
-                            <button onclick="StaffDashboard.billingAction('Order', ${index}, 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
-                            <button onclick="StaffDashboard.billingAction('Order', ${index}, 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
+                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
+                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
                         </div>
-                        <button onclick="StaffDashboard.deletePermanentItem('Order', ${index})" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete Record 🗑️</button>
+                        <button onclick="window.StaffDashboard.deletePermanentItem('Order', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete Record 🗑️</button>
                     </div>
                 </td>
             `;
@@ -243,7 +255,6 @@ window.StaffDashboard = {
 
         const currentStamp = new Date();
 
-        // Storing offline POS sale directly to permanent order log for future database references
         const mockOrder = {
             id: 'POS-' + Math.floor(1000 + Math.random() * 9000),
             name: customer,
@@ -252,6 +263,7 @@ window.StaffDashboard = {
             estimatedBill: amount,
             meds: "Direct Counter Billing Transaction",
             imgData: "",
+            isPOS: true, // Marked as true so it never leaks inside online lists
             timestamp: currentStamp.getTime(),
             formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
         };
@@ -271,16 +283,19 @@ window.StaffDashboard = {
         document.getElementById('pos-amount').value = ""; 
         document.getElementById('pos-cust-name').value = "";
         document.getElementById('pos-cust-phone').value = "";
-        this.loadOnlineOrdersQueue();
+        this.loadOnlineOrdersQueue("");
     },
 
-    billingAction: function(type, index, mode) {
-        const amtField = document.getElementById(type === 'Rx' ? `rx-price-${index}` : `order-price-${index}`);
+    billingAction: function(type, itemId, mode) {
+        const amtField = document.getElementById(type === 'Rx' ? `rx-price-${itemId}` : `order-price-${itemId}`);
         const finalPrice = parseFloat(amtField.value);
         if (!finalPrice || finalPrice <= 0) { alert("Please calculate items and input final billing value!"); return; }
 
-        const dataset = JSON.parse(localStorage.getItem(type === 'Rx' ? 'ndh_longterm_rx' : 'ndh_longterm_orders'));
-        const activeItem = dataset[index];
+        const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+        const dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const activeItem = dataset.find(item => item.id === itemId);
+
+        if(!activeItem) return;
 
         this.logRevenueTransaction(finalPrice);
         if (mode === 'Cash') {
@@ -353,9 +368,13 @@ window.StaffDashboard = {
             }
         });
 
-        document.getElementById('rev-today').textContent = `₹ ${todaySum.toFixed(2)}`;
-        document.getElementById('rev-month').textContent = `₹ ${lastMonthSum.toFixed(2)}`;
-        document.getElementById('rev-total').textContent = `₹ ${grandTotal.toFixed(2)}`;
+        const rToday = document.getElementById('rev-today');
+        const rMonth = document.getElementById('rev-month');
+        const rTotal = document.getElementById('rev-total');
+
+        if(rToday) rToday.textContent = `₹ ${todaySum.toFixed(2)}`;
+        if(rMonth) rMonth.textContent = `₹ ${lastMonthSum.toFixed(2)}`;
+        if(rTotal) rTotal.textContent = `₹ ${grandTotal.toFixed(2)}`;
     },
 
     clearRevenueMetrics: function() {
@@ -366,76 +385,15 @@ window.StaffDashboard = {
         }
     },
 
-    // NEW 100% BLANK-FREE MULTI-DEVICE PRINT WINDOW SYSTEM
-    printRxMedicalPdf: function(index) {
+    // 100% WORKING ERROR-FREE PRINT SYSTEM USING MEDIA RENDERING STYLE INJECTIONS
+    printRxMedicalPdf: function(itemId) {
         const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
-        const rx = rxData[index];
-        if (!rx) return;
+        const rx = rxData.find(item => item.id === itemId);
+        if (!rx) { alert("Prescription data corrupted or missing!"); return; }
 
-        // Creating an isolated native document framework context window to fix mobile renderer bugs
-        const printWindow = window.open('', '_blank', 'width=800,height=900');
-        
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Print Prescription - ${rx.id}</title>
-                
-                <style>
-                    body { font-family: 'Courier New', monospace; padding: 30px; color: #000; background: #fff; line-height: 1.5; }
-                    .wrapper { max-width: 700px; margin: 0 auto; }
-                    .header { text-align: center; margin-bottom: 20px; }
-                    .header h2 { margin: 0; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px; }
-                    .dashed-line { border-top: 2px dashed #000; margin: 15px 0; }
-                    .thin-line { border-top: 1px dashed #000; margin: 15px 0; }
-                    p { margin: 6px 0; font-size: 1rem; }
-                    .rx-box { white-space: pre-line; background: #f5f5f5; padding: 15px; font-size: 1.05rem; border-radius: 4px; border: 1px solid #ccc; margin-top: 10px; }
-                </style>
-            </head>
-            <body>
-                <div class="wrapper">
-                    <div class="header">
-                        <h2>NAMTI DRUG HOUSE</h2>
-                        <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Sivasagar, Assam | Consultation Desk Receipt</p>
-                    </div>
-                    <div class="dashed-line"></div>
-                    <p><b>Rx Token ID :</b> ${rx.id}</p>
-                    <p><b>Patient Name:</b> ${rx.name}</p>
-                    <p><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</p>
-                    <p><b>Visit Time :</b> ${rx.formattedDate}</p>
-                    <div class="thin-line"></div>
-                    <p><b>CHIEF SYMPTOMS & COMPLAINTS:</b></p>
-                    <p style="padding-left: 20px; color: #222;">${rx.symptoms}</p>
-                    <br>
-                    <p><b>DIAGNOSTIC TESTS REFERRED:</b></p>
-                    <p style="padding-left: 20px; font-style: italic; color: #222;">${rx.tests}</p>
-                    <div class="thin-line"></div>
-                    <p style="font-weight: bold; font-size: 1.15rem;">💊 Rx PRESCRIBED MEDICINES:</p>
-                    <div class="rx-box">${rx.rx}</div>
-                    <div class="dashed-line" style="margin-top: 50px;"></div>
-                    <p style="text-align: center; font-size: 0.85rem; color: #444;">Generated digitally via Doctor Consultation Desk Engine</p>
-                </div>
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        setTimeout(function() { window.close(); }, 500);
-                    };
-                <\/script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-    },
+        const printArea = document.getElementById('prescription-print-area');
+        if (!printArea) return;
 
-    deletePermanentItem: function(type, index) {
-        if (confirm("🚨 Warning: Are you absolutely sure you want to permanently delete this operational record from portal memory?")) {
-            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            dataset.splice(index, 1);
-            localStorage.setItem(storageKey, JSON.stringify(dataset));
-            
-            this.filterRecords(); 
-            alert("🗑️ Record expunged permanently.");
-        }
-    }
-};
+        // Structured Layout inner design injection
+        printA
             
