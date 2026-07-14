@@ -8,6 +8,7 @@ window.ViewManager = {
         localStorage.setItem('ndh_last_active_view', viewId);
         
         if (viewId === 'staff-view') {
+            document.getElementById('staff-search-input').value = ""; // Reset search field
             StaffDashboard.loadRxQueue();
             StaffDashboard.loadOnlineOrdersQueue();
             StaffDashboard.calculateRevenueLedger();
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const container = document.getElementById('medical-inventions-container');
     if (container) {
-        container.innerHTML = `<div id="rotator-card" style="padding:15px; background:#e2e8f0; color:#334155; border-radius:8px; font-style:italic; font-size:0.95rem; text-align:center; border-left:5px solid var(--accent); margin-bottom:15px;"></div>`;
+        container.innerHTML = `<div id="rotator-card" style="padding:15px; background:#e2e2e2; color:#334155; border-radius:8px; font-style:italic; font-size:0.95rem; text-align:center; border-left:5px solid var(--accent); margin-bottom:15px;"></div>`;
         let i = 0;
         function rotate() {
             document.getElementById('rotator-card').innerHTML = `💡 <b>Medical Fact:</b> "${medicalQuotes[i]}"`;
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================================
-// 3. ONLINE CUSTOMER DESK - LOGISTICS
+// 3. ONLINE CUSTOMER DESK - LOGISTICS (WITH TIMESTAMP ENGINE)
 // ========================================================
 document.getElementById('online-order-form').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -72,6 +73,7 @@ document.getElementById('online-order-form').addEventListener('submit', function
     const reader = new FileReader();
     reader.onload = function(event) {
         const base64Img = event.target.result;
+        const currentStamp = new Date();
         
         const newOrder = {
             id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
@@ -81,7 +83,8 @@ document.getElementById('online-order-form').addEventListener('submit', function
             estimatedBill: bill || 'Not Provided',
             meds: document.getElementById('cust-meds').value.trim() || 'Refer to attached image document',
             imgData: base64Img,
-            timestamp: Date.now()
+            timestamp: currentStamp.getTime(),
+            formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
         };
 
         const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
@@ -101,7 +104,7 @@ document.getElementById('online-order-form').addEventListener('submit', function
 });
 
 // ========================================================
-// 4. DOCTOR DIAGNOSTIC COUPLING
+// 4. DOCTOR DIAGNOSTIC COUPLING (WITH DATE & TIME)
 // ========================================================
 window.DoctorDesk = {
     submitPrescription: function() {
@@ -115,15 +118,19 @@ window.DoctorDesk = {
             return;
         }
 
+        const currentStamp = new Date();
+
         const newRxRecord = {
             id: 'RX-' + Math.floor(1000 + Math.random() * 9000),
             name: name,
+            phone: "Doctor Desk Direct", 
             age: age,
             sex: sex,
             symptoms: document.getElementById('doc-symptoms').value.trim() || 'N/A',
             tests: document.getElementById('doc-tests').value.trim() || 'None Referred',
             rx: rx,
-            timestamp: Date.now()
+            timestamp: currentStamp.getTime(),
+            formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
         };
 
         const existingRx = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
@@ -137,23 +144,31 @@ window.DoctorDesk = {
 };
 
 // ========================================================
-// 5. STAFF OPERATIONS & ROBUST AUDITING ENGINE
+// 5. STAFF OPERATIONS, SEARCH FILTER & PRINT ARCHITECTURE
 // ========================================================
 window.StaffDashboard = {
-    loadRxQueue: function() {
+    loadRxQueue: function(filterTerm = "") {
         const target = document.getElementById('live-rx-queue');
         if (!target) return; target.innerHTML = "";
-        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
+        let rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
+
+        if (filterTerm) {
+            rxData = rxData.filter(item => 
+                item.name.toLowerCase().includes(filterTerm) || 
+                item.phone.toLowerCase().includes(filterTerm) ||
+                item.id.toLowerCase().includes(filterTerm)
+            );
+        }
 
         if (rxData.length === 0) {
-            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No doctor prescriptions logged in permanent state.</td></tr>`;
+            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No matching prescriptions found.</td></tr>`;
             return;
         }
 
         rxData.forEach((item, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | Sex: ${item.sex}</small></td>
+                <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | ${item.sex}</small><br><span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px; font-weight:600;">⏰ ${item.formattedDate}</span></td>
                 <td><small><b>Symptoms:</b> ${item.symptoms}<br><b>Tests:</b> ${item.tests}</small></td>
                 <td><div style="white-space:pre-line; font-family:monospace; background:#f8fafc; padding:6px; border-radius:4px; font-size:0.85rem;">${item.rx}</div></td>
                 <td>
@@ -172,20 +187,28 @@ window.StaffDashboard = {
         });
     },
 
-    loadOnlineOrdersQueue: function() {
+    loadOnlineOrdersQueue: function(filterTerm = "") {
         const target = document.getElementById('live-online-orders-queue');
         if (!target) return; target.innerHTML = "";
-        const orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+        let orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+
+        if (filterTerm) {
+            orders = orders.filter(item => 
+                item.name.toLowerCase().includes(filterTerm) || 
+                item.phone.toLowerCase().includes(filterTerm) ||
+                item.id.toLowerCase().includes(filterTerm)
+            );
+        }
 
         if (orders.length === 0) {
-            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No customer online requests listed.</td></tr>`;
+            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No matching customer requests listed.</td></tr>`;
             return;
         }
 
         orders.forEach((item, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small></td>
+                <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small><br><span style="background:#fef3c7; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px; font-weight:600;">⏰ ${item.formattedDate}</span></td>
                 <td><small><b>Loc:</b> ${item.pin}<br><b>Note:</b> ${item.meds}</small><br>
                     <button onclick="StaffDashboard.viewPrescriptionImage('${item.imgData}')" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-top:5px;">👁️ View Uploaded Image</button>
                 </td>
@@ -205,19 +228,50 @@ window.StaffDashboard = {
         });
     },
 
+    filterRecords: function() {
+        const query = document.getElementById('staff-search-input').value.toLowerCase().trim();
+        this.loadRxQueue(query);
+        this.loadOnlineOrdersQueue(query);
+    },
+
     processOfflinePOS: function(mode) {
         const amount = parseFloat(document.getElementById('pos-amount').value);
         let customer = document.getElementById('pos-cust-name').value.trim() || "Walk-In Customer";
+        let phone = document.getElementById('pos-cust-phone').value.trim() || "N/A";
+        
         if (!amount || amount <= 0) { alert("Please input a valid counter sale bill total!"); return; }
 
+        const currentStamp = new Date();
+
+        // Storing offline POS sale directly to permanent order log for future database references
+        const mockOrder = {
+            id: 'POS-' + Math.floor(1000 + Math.random() * 9000),
+            name: customer,
+            phone: phone,
+            pin: "Counter Sale",
+            estimatedBill: amount,
+            meds: "Direct Counter Billing Transaction",
+            imgData: "",
+            timestamp: currentStamp.getTime(),
+            formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
+        };
+
+        const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+        existingOrders.push(mockOrder);
+        localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
+
         this.logRevenueTransaction(amount);
+        
         if (mode === 'Cash') {
             alert(`💵 Store Sale Finished! Collected ₹${amount} in Cash via ${customer}.`);
-            document.getElementById('pos-amount').value = ""; document.getElementById('pos-cust-name').value = "";
         } else {
             this.generateSystemUpiQr(amount, `POS Sale: ${customer}`);
-            document.getElementById('pos-amount').value = ""; document.getElementById('pos-cust-name').value = "";
         }
+
+        document.getElementById('pos-amount').value = ""; 
+        document.getElementById('pos-cust-name').value = "";
+        document.getElementById('pos-cust-phone').value = "";
+        this.loadOnlineOrdersQueue();
     },
 
     billingAction: function(type, index, mode) {
@@ -253,16 +307,16 @@ window.StaffDashboard = {
     },
 
     viewPrescriptionImage: function(blobString) {
+        if(!blobString) { alert("No prescription attachment for custom counter billing."); return; }
         document.getElementById('modal-rx-img-render').src = blobString;
         document.getElementById('prescription-photo-modal').style.display = 'flex';
     },
 
-    // ADVANCED LEDGER LOGGING SYSTEM (PERMANENT RETENTION)
     logRevenueTransaction: function(amount) {
         const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
         ledger.push({
             amount: amount,
-            dateString: new Date().toDateString(), // Exact day parsing
+            dateString: new Date().toDateString(),
             timestamp: Date.now()
         });
         localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
@@ -288,7 +342,6 @@ window.StaffDashboard = {
             }
             
             const txDate = new Date(tx.timestamp);
-            // Calculating previous consecutive calendar month data rules
             let targetMonth = currentMonth - 1;
             let targetYear = currentYear;
             if (targetMonth < 0) {
@@ -313,54 +366,31 @@ window.StaffDashboard = {
         }
     },
 
-    // 100% BLANK-SCREEN FREE SANDBOX PRINT PREVIEW SYSTEM
+    // NEW 100% BLANK-FREE MULTI-DEVICE PRINT WINDOW SYSTEM
     printRxMedicalPdf: function(index) {
         const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
         const rx = rxData[index];
         if (!rx) return;
 
-        const printArea = document.getElementById('printable-invoice-area');
-        printArea.innerHTML = `
-            <div style="font-family:'Courier New', monospace; padding:20px; width:100%; max-width:600px; margin:0 auto; color:#000; line-height:1.4;">
-                <h2 style="text-align:center; margin:0; font-size:1.6rem; font-weight:bold; letter-spacing:1px;">NAMTI DRUG HOUSE</h2>
-                <p style="text-align:center; font-size:0.85rem; margin:2px 0 10px 0;">Sivasagar, Assam | Consultation Counter Copy</p>
-                <div style="border-top:2px dashed #000; margin:10px 0;"></div>
-                <p><b>Rx Token ID :</b> ${rx.id}</p>
-                <p><b>Patient Name:</b> ${rx.name}</p>
-                <p><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</p>
-                <p><b>Date/Time  :</b> ${new Date(rx.timestamp).toLocaleString()}</p>
-                <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                <p><b>CHIEF SYMPTOMS & COMPLAINTS:</b></p>
-                <p style="padding-left:15px; font-size:0.9rem;">${rx.symptoms}</p>
-                <br>
-                <p><b>DIAGNOSTIC TESTS REFERRED:</b></p>
-                <p style="padding-left:15px; font-size:0.9rem; font-style:italic;">${rx.tests}</p>
-                <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                <p style="font-weight:bold; font-size:1.1rem; margin:0 0 5px 0;">💊 Rx PRESCRIBED MEDICINES:</p>
-                <div style="white-space:pre-line; background:#f4f4f4; padding:10px; font-size:0.95rem; border-radius:4px;">${rx.rx}</div>
-                <div style="border-top:2px dashed #000; margin:40px 0 10px 0;"></div>
-                <p style="text-align:center; font-size:0.8rem;">Generated digitally via Doctor Consultation Desk Engine</p>
-            </div>
-        `;
-
-        // Direct isolated system trigger (Prevents breaking main viewport CSS rules)
-        window.print(); 
-        printArea.innerHTML = ""; // Flushing print buffer
-    },
-
-    deletePermanentItem: function(type, index) {
-        if (confirm("🚨 Warning: Are you absolutely sure you want to permanently delete this operational record from portal memory?")) {
-            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            dataset.splice(index, 1);
-            localStorage.setItem(storageKey, JSON.stringify(dataset));
-            
-            if (type === 'Rx') this.loadRxQueue();
-            else this.loadOnlineOrdersQueue();
-            
-            alert("🗑️ Record expunged permanently.");
-        }
-    }
-};
+        // Creating an isolated native document framework context window to fix mobile renderer bugs
+        const printWindow = window.open('', '_blank', 'width=800,height=900');
+        
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Print Prescription - ${rx.id}</title>
+                <style>
+                    body { font-family: 'Courier New', monospace; padding: 30px; color: #000; background: #fff; line-height: 1.5; }
+                    .wrapper { max-width: 700px; margin: 0 auto; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header h2 { margin: 0; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px; }
+                    .dashed-line { border-top: 2px dashed #000; margin: 15px 0; }
+                    .thin-line { border-top: 1px dashed #000; margin: 15px 0; }
+                    p { margin: 6px 0; font-size: 1rem; }
+                    .rx-box { white-space: pre-line; background: #f5f5f5; padding: 15px; font-size: 1.05rem; border-radius: 4px; border: 1px solid #ccc; margin-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="wrapper"
             
             
