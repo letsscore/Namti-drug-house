@@ -39,6 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedState = localStorage.getItem('ndh_last_active_view') || 'home-view';
     window.ViewManager.navigate(savedState);
     
+    // Global Search Event Handler Setup
+    const searchField = document.getElementById('staff-search-input');
+    if (searchField) {
+        searchField.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            if (window.StaffDashboard) {
+                window.StaffDashboard.loadRxQueue(query);
+                window.StaffDashboard.loadOnlineOrdersQueue(query);
+            }
+        });
+    }
+
     const orderForm = document.getElementById('online-order-form');
     if (orderForm) {
         orderForm.addEventListener('submit', function(e) {
@@ -65,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     estimatedBill: bill || 'Not Provided',
                     meds: document.getElementById('cust-meds').value.trim() || 'Refer to attached image document',
                     imgData: base64Img,
-                    isPOS: false, // Flag to separate online vs counter pos
+                    isPOS: false,
                     timestamp: currentStamp.getTime(),
                     formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
                 };
@@ -74,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 existingOrders.push(newOrder);
                 localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
 
-                let completionText = "🎉 Order Submitted successfully (Cash on Delivery Mode).";
+                let completionText = "🎉 Order Submitted successfully (Cash on Delivery Mode). Record saved permanently.";
                 if (bill >= 1599) {
                     completionText = "⚠️ Order Warning (Value ≥ ₹1599): Your order requires manual Advance Payment verification before dispatch!";
                 }
@@ -147,34 +159,35 @@ window.DoctorDesk = {
         existingRx.push(newRxRecord);
         localStorage.setItem('ndh_longterm_rx', JSON.stringify(existingRx));
 
-        alert("📤 Medical Prescription dispatched safely to Pharmacy Counter!");
+        alert("📤 Medical Prescription dispatched safely to Pharmacy Counter! Saved in continuous history logs.");
         document.getElementById('doctor-rx-form').reset();
         window.ViewManager.navigate('home-view');
     }
 };
 
 // ========================================================
-// 4. STAFF OPERATIONS, GLOBAL SEARCH & INVISIBLE PRINT ENGINE
+// 4. STAFF DASHBOARD, LOG MEMORIES & SANDBOX PRINT IFRAME ENGINE
 // ========================================================
 window.StaffDashboard = {
     loadRxQueue: function(filterTerm = "") {
         const target = document.getElementById('live-rx-queue');
         if (!target) return; target.innerHTML = "";
-        let rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
+        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
 
+        let filtered = rxData;
         if (filterTerm) {
-            rxData = rxData.filter(item => 
+            filtered = rxData.filter(item => 
                 item.name.toLowerCase().includes(filterTerm) || 
                 item.id.toLowerCase().includes(filterTerm)
             );
         }
 
-        if (rxData.length === 0) {
+        if (filtered.length === 0) {
             target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No matching prescriptions found.</td></tr>`;
             return;
         }
 
-        rxData.forEach((item) => {
+        filtered.forEach((item) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | ${item.sex}</small><br><span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px; font-weight:600;">⏰ ${item.formattedDate}</span></td>
@@ -187,7 +200,7 @@ window.StaffDashboard = {
                             <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
                             <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
                         </div>
-                        <button onclick="window.StaffDashboard.printRxMedicalPdf('${item.id}')" style="background:#475569; color:white; border:none; padding:6px; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.8rem;">Print Prescription 🖨️</button>
+                        <button onclick="window.StaffDashboard.printRxMedicalPdf('${item.id}')" style="background:#475569; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.85rem;">Print Prescription 🖨️</button>
                         <button onclick="window.StaffDashboard.deletePermanentItem('Rx', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete Record 🗑️</button>
                     </div>
                 </td>
@@ -199,25 +212,25 @@ window.StaffDashboard = {
     loadOnlineOrdersQueue: function(filterTerm = "") {
         const target = document.getElementById('live-online-orders-queue');
         if (!target) return; target.innerHTML = "";
-        let orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+        const orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
 
-        // CRITICAL FIX: POS counter records ko online orders monitor se clean separate filter out karna
-        orders = orders.filter(item => item.isPOS !== true);
+        // Counter POS records clean filtration
+        let filtered = orders.filter(item => item.isPOS !== true);
 
         if (filterTerm) {
-            orders = orders.filter(item => 
+            filtered = filtered.filter(item => 
                 item.name.toLowerCase().includes(filterTerm) || 
                 item.phone.toLowerCase().includes(filterTerm) ||
                 item.id.toLowerCase().includes(filterTerm)
             );
         }
 
-        if (orders.length === 0) {
+        if (filtered.length === 0) {
             target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No matching customer requests listed.</td></tr>`;
             return;
         }
 
-        orders.forEach((item) => {
+        filtered.forEach((item) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small><br><span style="background:#fef3c7; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px; font-weight:600;">⏰ ${item.formattedDate}</span></td>
@@ -240,12 +253,6 @@ window.StaffDashboard = {
         });
     },
 
-    filterRecords: function() {
-        const query = document.getElementById('staff-search-input').value.toLowerCase().trim();
-        this.loadRxQueue(query);
-        this.loadOnlineOrdersQueue(query);
-    },
-
     processOfflinePOS: function(mode) {
         const amount = parseFloat(document.getElementById('pos-amount').value);
         let customer = document.getElementById('pos-cust-name').value.trim() || "Walk-In Customer";
@@ -263,7 +270,7 @@ window.StaffDashboard = {
             estimatedBill: amount,
             meds: "Direct Counter Billing Transaction",
             imgData: "",
-            isPOS: true, // Marked as true so it never leaks inside online lists
+            isPOS: true,
             timestamp: currentStamp.getTime(),
             formattedDate: currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})
         };
@@ -275,7 +282,7 @@ window.StaffDashboard = {
         this.logRevenueTransaction(amount);
         
         if (mode === 'Cash') {
-            alert(`💵 Store Sale Finished! Collected ₹${amount} in Cash via ${customer}.`);
+            alert(`💵 Store Sale Finished! Collected ₹${amount} in Cash via ${customer}. Record saved in ledger database.`);
         } else {
             this.generateSystemUpiQr(amount, `POS Sale: ${customer}`);
         }
@@ -283,7 +290,10 @@ window.StaffDashboard = {
         document.getElementById('pos-amount').value = ""; 
         document.getElementById('pos-cust-name').value = "";
         document.getElementById('pos-cust-phone').value = "";
-        this.loadOnlineOrdersQueue("");
+        
+        // Dynamic reload without cleaning search data
+        const searchVal = document.getElementById('staff-search-input').value.toLowerCase().trim();
+        this.loadOnlineOrdersQueue(searchVal);
     },
 
     billingAction: function(type, itemId, mode) {
@@ -297,9 +307,10 @@ window.StaffDashboard = {
 
         if(!activeItem) return;
 
+        // Save price details dynamically to revenue node without mutating original structural details
         this.logRevenueTransaction(finalPrice);
         if (mode === 'Cash') {
-            alert(`💵 Transaction Settled via Cash! Collected ₹${finalPrice} for ${activeItem.name}.`);
+            alert(`💵 Transaction Settled! Collected ₹${finalPrice} for ${activeItem.name}. Structural details remain saved.`);
         } else {
             this.generateSystemUpiQr(finalPrice, `${type} Sale: ${activeItem.name}`);
         }
@@ -382,61 +393,7 @@ window.StaffDashboard = {
             localStorage.setItem('ndh_revenue_ledger', '[]');
             this.calculateRevenueLedger();
             alert("🧹 Financial logs wiped successfully.");
-        }
-    },
-
- // 100% WORKING ERROR-FREE PRINT SYSTEM USING MEDIA RENDERING STYLE INJECTIONS
-    printRxMedicalPdf: function(itemId) {
-        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
-        const rx = rxData.find(item => item.id === itemId);
-        if (!rx) { alert("Prescription data corrupted or missing!"); return; }
-
-        const printArea = document.getElementById('prescription-print-area');
-        if (!printArea) return;
-
-        // Structured Layout inner design injection
-        printArea.innerHTML = `
-            <div style="font-family: 'Courier New', monospace; padding: 20px; color: #000; background: #fff; line-height: 1.5;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0; font-size: 1.8rem; font-weight: bold; letter-spacing: 1px;">NAMTI DRUG HOUSE</h2>
-                    <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Sivasagar, Assam | Consultation Desk Receipt</p>
-                </div>
-                <div style="border-top: 2px dashed #000; margin: 15px 0;"></div>
-                <p><b>Rx Token ID :</b> ${rx.id}</p>
-                <p><b>Patient Name:</b> ${rx.name}</p>
-                <p><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</p>
-                <p><b>Visit Time :</b> ${rx.formattedDate}</p>
-                <div style="border-top: 1px dashed #000; margin: 15px 0;"></div>
-                <p><b>CHIEF SYMPTOMS & COMPLAINTS:</b></p>
-                <p style="padding-left: 20px; color: #222;">${rx.symptoms}</p>
-                <br>
-                <p><b>DIAGNOSTIC TESTS REFERRED:</b></p>
-                <p style="padding-left: 20px; font-style: italic; color: #222;">${rx.tests}</p>
-                <div style="border-top: 1px dashed #000; margin: 15px 0;"></div>
-                <p style="font-weight: bold; font-size: 1.15rem;">💊 Rx PRESCRIBED MEDICINES:</p>
-                <div style="white-space: pre-line; background: #f5f5f5; padding: 15px; font-size: 1.05rem; border-radius: 4px; border: 1px solid #ccc; margin-top: 10px;">${rx.rx}</div>
-                <div style="border-top: 2px dashed #000; margin-top: 50px;"></div>
-                <p style="text-align: center; font-size: 0.85rem; color: #444; margin-top: 10px;">Generated digitally via Doctor Consultation Desk Engine</p>
-            </div>
-        `;
-
-        // Direct hardware trigger sequence without external window openings
-        setTimeout(() => {
-            window.print();
-            printArea.innerHTML = ""; // Clean context after driver receives printable assets
-        }, 300);
-    },
-
-    deletePermanentItem: function(type, itemId) {
-        if (confirm("🚨 Warning: Are you absolutely sure you want to permanently delete this operational record from portal memory?")) {
-            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            
-            dataset = dataset.filter(item => item.id !== itemId);
-            localStorage.setItem(storageKey, JSON.stringify(dataset));
-            
-            this.filterRecords(); 
-            alert("🗑️ Record expunged permanently.");
+   ert("🗑️ Record expunged permanently.");
         }
     }
 };
