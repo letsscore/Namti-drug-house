@@ -71,7 +71,24 @@
             <h1>➕ NAMTI DRUG HOUSE</h1>
             <p>Sivasagar, Assam | Healthcare Dashboard Ecosystem</p>
         </div>
+        
         <div id="medical-inventions-container"></div>
+
+        <!-- NEW FACILITY: CUSTOMER DOWNLOAD RECEIPT ENGINE -->
+        <div class="card" style="border-top-color: #06b6d4;">
+            <h3 style="color:#0f172a; margin-bottom: 8px;">📄 View or Download Your Prescription / Medicine Payment Receipt</h3>
+            <p style="font-size: 0.85rem; color:#64748b; margin-bottom:15px;">Enter your absolute transaction credentials below to compile a real-time printable copy.</p>
+            <form id="customer-receipt-download-form" onsubmit="window.HomeReceiptEngine.searchAndPrint(event)">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                    <input type="text" id="dl-cust-name" placeholder="Full Registered Name *" required>
+                    <input type="text" id="dl-cust-phone" placeholder="Registered Phone Number *" required>
+                    <input type="date" id="dl-visit-date" required>
+                    <input type="text" id="dl-doc-name" placeholder="Doctor Name (Optional)">
+                </div>
+                <button type="submit" class="btn-action" style="background: #06b6d4; width: 100%; padding: 12px; margin-top: 5px;">Fetch & Print Document 🖨️</button>
+            </form>
+        </div>
+
         <div class="menu-grid">
             <button class="btn-main" onclick="window.ViewManager.navigate('customer-view')"><span>🛒</span>Customer Online Order</button>
             <button class="btn-main" onclick="window.ViewManager.secureNavigation('doctor-view', 'doctor2026')"><span>👨‍⚕️</span>Doctor Consultation Desk</button>
@@ -157,14 +174,7 @@
             </div>
         </div>
 
-        <!-- SEARCH ENGINE MODULE -->
-        <div class="card" style="border-top-color: var(--accent);">
-            <h2>🔍 Global Customer Records Engine</h2>
-            <p style="font-size: 0.85rem; color:#64748b; margin-bottom:10px;">Search details instantaneously across both doctor sheets and online order logs using Name or Phone.</p>
-            <div class="search-wrapper">
-                <input type="text" id="staff-search-input" placeholder="Type Customer/Patient Name, ID or Phone to search...">
-            </div>
-        </div>
+        <!-- GLOBAL CUSTOMER ENGINE HAS BEEN REMOVED PER INSTANCE RULES -->
 
         <!-- OFFLINE POS COUNTER -->
         <div class="card" style="border-top-color: var(--success);">
@@ -237,7 +247,8 @@
 
     <script src="script.js"></script>
 </body>
-            </html>
+                    </html>
+                    
                                                       
     
 
