@@ -15,6 +15,8 @@ window.ViewManager = {
                 window.StaffDashboard.loadRxQueue();
                 window.StaffDashboard.loadOnlineOrdersQueue();
                 window.StaffDashboard.calculateRevenueLedger();
+                window.StaffDashboard.updateCustomerFigures();
+                window.StaffDashboard.renderHistoryTable();
             }
         }
     },
@@ -36,6 +38,7 @@ window.ViewManager = {
 document.addEventListener('DOMContentLoaded', () => {
     const savedState = localStorage.getItem('ndh_last_active_view') || 'home-view';
     window.ViewManager.navigate(savedState);
+    window.PromotionalSMS.checkAndTriggerSMS(); // Hook Promotional SMS Check on startup
 
     const orderForm = document.getElementById('online-order-form');
     if (orderForm) {
@@ -121,6 +124,7 @@ window.DoctorDesk = {
         const age = document.getElementById('doc-patient-age').value.trim();
         const sex = document.getElementById('doc-patient-sex').value;
         const rx = document.getElementById('doc-rx-content').value.trim();
+        const referDoc = document.getElementById('doc-refer-details').value.trim();
 
         if (!name || !age || !sex || !rx) {
             alert("Please fill out all mandatory fields marked with an asterisk (*).");
@@ -136,6 +140,7 @@ window.DoctorDesk = {
             phone: "", 
             age: age,
             sex: sex,
+            referDoc: referDoc || "Self / Internal NDH Consultation",
             symptoms: document.getElementById('doc-symptoms').value.trim() || 'N/A',
             tests: document.getElementById('doc-tests').value.trim() || 'None Referred',
             rx: rx,
@@ -173,7 +178,6 @@ window.HomeReceiptEngine = {
         const searchMonth = parsedSearchDate.getMonth();
         const searchYear = parsedSearchDate.getFullYear();
 
-        // Scan Universal Ledger Backend Records
         const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
         
         let targetMatch = universalLedger.find(item => {
@@ -184,7 +188,6 @@ window.HomeReceiptEngine = {
             return nameMatch && phoneMatch && dateMatch;
         });
 
-        // Fallback checks directly into standalone initial structures if not found in ledger
         if (!targetMatch) {
             const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
             let matchedRx = rxData.find(item => {
@@ -263,6 +266,7 @@ window.HomeReceiptEngine = {
                 <div class="field"><b>Customer Name:</b> ${targetMatch.name}</div>
                 <div class="field"><b>Phone Number :</b> ${targetMatch.phone}</div>
                 <div class="field"><b>Date & Time  :</b> ${printDate}</div>
+                <div class="field"><b>Referrer     :</b> ${targetMatch.referDoc || 'Walk-in Direct'}</div>
                 ${targetMatch.age ? `<div class="field"><b>Age / Sex    :</b> ${targetMatch.age} Yrs / ${targetMatch.sex}</div>` : ''}
                 <div class="divider"></div>
                 
@@ -288,11 +292,10 @@ window.HomeReceiptEngine = {
                     <div class="divider"></div>
                     <div style="font-weight:bold; font-size:1rem;">📋 ORIGINAL DOCTOR PRESCRIPTION (Rx):</div>
                     <div class="rx-box">${targetMatch.rx}</div>
-                    <div style="margin-top:5px; font-size:0.85rem;"><small><b>Symptoms:</b> ${targetMatch.symptoms} | <b>Tests:</b> ${targetMatch.tests}</small></div>
                 ` : ''}
                 
                 <div class="divider" style="margin-top: 30px;"></div>
-                <p style="text-align: center; font-size: 0.8rem;">Thank You! Access your receipt instantly anytime using your Credentials.</p>
+                <p style="text-align: center; font-size: 0.8rem;">Thank You! Access your receipt instantly anytime.</p>
             </body>
             </html>
         `);
@@ -307,9 +310,22 @@ window.HomeReceiptEngine = {
 };
 
 // ========================================================
-// 5. STAFF DASHBOARD & BREAKDOWN POS LEDGER ENGINE
+// 5. STAFF DASHBOARD & LEDGER HISTORY ENGINE
 // ========================================================
 window.StaffDashboard = {
+    switchTab: function(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-content'));
+        
+        document.getElementById(`tab-${tabName}-btn`).classList.add('active-tab');
+        document.getElementById(`tab-${tabName}-content`).classList.add('active-content');
+
+        if(tabName === 'analytics') {
+            this.updateCustomerFigures();
+            this.renderHistoryTable();
+        }
+    },
+
     addPosRow: function() {
         const container = document.getElementById('pos-items-container');
         const row = document.createElement('div');
@@ -332,6 +348,7 @@ window.StaffDashboard = {
     processOfflinePOS: function(mode) {
         let customer = document.getElementById('pos-cust-name').value.trim() || "Walk-In Customer";
         let phone = document.getElementById('pos-cust-phone').value.trim() || "0000000000";
+        let referDoc = document.getElementById('pos-refer-doc').value.trim() || "Direct Counter Self";
         
         let itemsBreakdown = [];
         let calculatedTotal = 0;
@@ -360,6 +377,7 @@ window.StaffDashboard = {
             id: 'POS-' + Math.floor(1000 + Math.random() * 9000),
             name: customer,
             phone: phone,
+            referDoc: referDoc,
             itemsBreakdown: itemsBreakdown,
             finalPrice: calculatedTotal,
             isPOS: true,
@@ -367,23 +385,24 @@ window.StaffDashboard = {
             formattedDate: defaultDateStr
         };
 
-        // Store into Global Universal Memory Ledger Database
         const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
         universalLedger.push(transactionRecord);
         localStorage.setItem('ndh_universal_ledger', JSON.stringify(universalLedger));
 
         this.logRevenueTransaction(calculatedTotal);
+        this.updateCustomerFigures();
         
         if (mode === 'Cash') {
-            alert(`💵 Counter POS Invoice Woven! Collected ₹${calculatedTotal.toFixed(2)} in Cash.`);
+            alert(`💵 Counter POS Invoice Processed! Collected ₹${calculatedTotal.toFixed(2)}.`);
         } else {
             let itemSummary = itemsBreakdown.map(i => `${i.name}: ₹${i.mrp}`).join('\n');
-            this.generateSystemUpiQr(calculatedTotal, `POS Walk-in: ${customer}\n${itemSummary}`);
+            this.generateSystemUpiQr(calculatedTotal, `POS: ${customer}\n${itemSummary}`);
         }
 
-        // Reset POS Controls
+        // Reset inputs
         document.getElementById('pos-cust-name').value = "";
         document.getElementById('pos-cust-phone').value = "";
+        document.getElementById('pos-refer-doc').value = "";
         document.getElementById('pos-items-container').innerHTML = `
             <div class="dynamic-item-row">
                 <input type="text" class="pos-med-name" placeholder="Medicine Name" style="margin:0;">
@@ -399,7 +418,7 @@ window.StaffDashboard = {
         const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
 
         if (rxData.length === 0) {
-            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No prescriptions logged from Doctor Desk.</td></tr>`;
+            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No prescriptions logged.</td></tr>`;
             return;
         }
 
@@ -407,257 +426,4 @@ window.StaffDashboard = {
             const displayDate = item.formattedDate || new Date(item.timestamp).toLocaleDateString('en-IN');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | ${item.sex}</small><br><span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px;">⏰ ${displayDate}</span></td>
-                <td><div style="font-family:monospace; font-size:0.85rem; background:#f8fafc; padding:6px; border-radius:4px;">${item.rx}</div></td>
-                <td>
-                    <div id="rx-breakdown-container-${item.id}">
-                        <div class="dynamic-item-row">
-                            <input type="text" class="rx-med-name-${item.id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-                            <input type="number" class="rx-med-mrp-${item.id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-                        </div>
-                    </div>
-                    <button type="button" onclick="window.StaffDashboard.addRxRow('${item.id}')" style="margin-top:4px; padding:2px 6px; font-size:0.75rem;">+ Add Row</button>
-                </td>
-                <td>
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <input type="text" id="rx-phone-field-${item.id}" placeholder="Cust Phone *" style="padding:6px; margin:0; font-size:0.85rem;" required>
-                        <div style="display:flex; gap:4px;">
-                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Collect Cash</button>
-                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
-                        </div>
-                        <button onclick="window.StaffDashboard.printRxMedicalPdf('${item.id}')" style="background:#475569; color:white; border:none; padding:6px; border-radius:4px; font-size:0.8rem; cursor:pointer;">Print Pure Rx 🖨️</button>
-                        <button onclick="window.StaffDashboard.deletePermanentItem('Rx', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete 🗑️</button>
-                    </div>
-                </td>
-            `;
-            target.appendChild(tr);
-        });
-    },
-
-    addRxRow: function(id) {
-        const container = document.getElementById(`rx-breakdown-container-${id}`);
-        const row = document.createElement('div');
-        row.className = 'dynamic-item-row';
-        row.style.marginTop = '4px';
-        row.innerHTML = `
-            <input type="text" class="rx-med-name-${id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-            <input type="number" class="rx-med-mrp-${id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-        `;
-        container.appendChild(row);
-    },
-
-    loadOnlineOrdersQueue: function() {
-        const target = document.getElementById('live-online-orders-queue');
-        if (!target) return; target.innerHTML = "";
-        const orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
-        let baseOrders = orders.filter(item => item.isPOS !== true);
-
-        if (baseOrders.length === 0) {
-            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No custom online customer desk requests listed.</td></tr>`;
-            return;
-        }
-
-        baseOrders.forEach((item) => {
-            const displayDate = item.formattedDate || new Date(item.timestamp).toLocaleDateString('en-IN');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small><br><span style="background:#fef3c7; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px;">⏰ ${displayDate}</span></td>
-                <td><small><b>Note:</b> ${item.meds}</small><br>
-                    <button onclick="window.StaffDashboard.viewPrescriptionImage('${item.imgData}')" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-top:5px;">👁️ View Attachment</button>
-                </td>
-                <td>
-                    <div id="order-breakdown-container-${item.id}">
-                        <div class="dynamic-item-row">
-                            <input type="text" class="order-med-name-${item.id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-                            <input type="number" class="order-med-mrp-${item.id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-                        </div>
-                    </div>
-                    <button type="button" onclick="window.StaffDashboard.addOrderRow('${item.id}')" style="margin-top:4px; padding:2px 6px; font-size:0.75rem;">+ Add Row</button>
-                </td>
-                <td>
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <div style="display:flex; gap:4px;">
-                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
-                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
-                        </div>
-                        <button onclick="window.StaffDashboard.deletePermanentItem('Order', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:bold;">Delete 🗑️</button>
-                    </div>
-                </td>
-            `;
-            target.appendChild(tr);
-        });
-    },
-
-    addOrderRow: function(id) {
-        const container = document.getElementById(`order-breakdown-container-${id}`);
-        const row = document.createElement('div');
-        row.className = 'dynamic-item-row';
-        row.style.marginTop = '4px';
-        row.innerHTML = `
-            <input type="text" class="order-med-name-${id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-            <input type="number" class="order-med-mrp-${id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-        `;
-        container.appendChild(row);
-    },
-
-    billingAction: function(type, itemId, mode) {
-        const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-        const dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        const activeItem = dataset.find(item => item.id === itemId);
-
-        if(!activeItem) return;
-
-        let phoneValue = activeItem.phone;
-        if(type === 'Rx') {
-            phoneValue = document.getElementById(`rx-phone-field-${itemId}`).value.trim();
-            if(!phoneValue) { alert("Please input active Customer Phone number to bind secure fetch keys!"); return; }
-        }
-
-        // Parse individual items & calculate aggregate bill sum
-        let itemsBreakdown = [];
-        let grandTotal = 0;
-
-        const selectorPrefix = (type === 'Rx') ? `.rx-med-name-${itemId}` : `.order-med-name-${itemId}`;
-        const pricePrefix = (type === 'Rx') ? `.rx-med-mrp-${itemId}` : `.order-med-mrp-${itemId}`;
-
-        const itemNames = document.querySelectorAll(selectorPrefix);
-        const itemPrices = document.querySelectorAll(pricePrefix);
-
-        itemNames.forEach((el, index) => {
-            const name = el.value.trim();
-            const mrp = parseFloat(itemPrices[index].value) || 0;
-            if(name) {
-                itemsBreakdown.push({ name: name, mrp: mrp });
-                grandTotal += mrp;
-            }
-        });
-
-        if(itemsBreakdown.length === 0 || grandTotal <= 0) {
-            alert("❌ Operational Error: Enter at least one medicine item and individual price row!");
-            return;
-        }
-
-        // Compose Unified Ledger Object
-        const finalizedTransaction = {
-            ...activeItem,
-            phone: phoneValue,
-            itemsBreakdown: itemsBreakdown,
-            finalPrice: grandTotal,
-            timestamp: new Date().getTime()
-        };
-
-        const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-        universalLedger.push(finalizedTransaction);
-        localStorage.setItem('ndh_universal_ledger', JSON.stringify(universalLedger));
-
-        this.logRevenueTransaction(grandTotal);
-
-        // Splice from temporary workflow pipeline queues
-        const filteredTemp = dataset.filter(i => i.id !== itemId);
-        localStorage.setItem(storageKey, JSON.stringify(filteredTemp));
-
-        if(mode === 'Cash') {
-            alert(`💵 Bill Settled and fully backed up! Collected ₹${grandTotal.toFixed(2)} in Cash.`);
-            this.loadRxQueue();
-            this.loadOnlineOrdersQueue();
-        } else {
-            let itemSummary = itemsBreakdown.map(i => `${i.name}: ₹${i.mrp}`).join('\n');
-            this.generateSystemUpiQr(grandTotal, `Settlement: ${activeItem.name}\n${itemSummary}`);
-            this.loadRxQueue();
-            this.loadOnlineOrdersQueue();
-        }
-    },
-
-    generateSystemUpiQr: function(amount, memo) {
-        const merchantUpi = "hussain.abidur@ybl";
-        const cleanMemo = memo.split('\n')[0].replace(/[^a-zA-Z0-9 ]/g, "");
-        const rawString = `upi://pay?pa=${merchantUpi}&pn=NamtiDrugHouse&am=${amount}&cu=INR&tn=${encodeURIComponent(cleanMemo)}`;
-        const finalQrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(rawString)}`;
-
-        document.getElementById('qr-modal-details').textContent = `${memo}\n\nGrand Total Due: ₹${amount.toFixed(2)}`;
-        document.getElementById('qr-image-container').innerHTML = `<img src="${finalQrEndpoint}" alt="UPI Dynamic QR Engine" style="display:block; margin:0 auto; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.15);">`;
-        document.getElementById('qr-modal-overlay').style.display = 'flex';
-    },
-
-    closeQrModal: function() {
-        document.getElementById('qr-modal-overlay').style.display = 'none';
-    },
-
-    viewPrescriptionImage: function(blobString) {
-        if(!blobString) { alert("No attachment provided."); return; }
-        document.getElementById('modal-rx-img-render').src = blobString;
-        document.getElementById('prescription-photo-modal').style.display = 'flex';
-    },
-
-    logRevenueTransaction: function(amount) {
-        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
-        ledger.push({ amount: amount, dateString: new Date().toDateString(), timestamp: Date.now() });
-        localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
-        this.calculateRevenueLedger();
-    },
-
-    calculateRevenueLedger: function() {
-        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
-        const todayStr = new Date().toDateString();
-        const now = new Date();
-        
-        let todaySum = 0, lastMonthSum = 0, grandTotal = 0;
-
-        ledger.forEach(tx => {
-            grandTotal += tx.amount;
-            if (tx.dateString === todayStr) todaySum += tx.amount;
-            
-            const txDate = new Date(tx.timestamp);
-            let targetMonth = now.getMonth() - 1;
-            let targetYear = now.getFullYear();
-            if (targetMonth < 0) { targetMonth = 11; targetYear--; }
-            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
-                lastMonthSum += tx.amount;
-            }
-        });
-
-        if(document.getElementById('rev-today')) document.getElementById('rev-today').textContent = `₹ ${todaySum.toFixed(2)}`;
-        if(document.getElementById('rev-month')) document.getElementById('rev-month').textContent = `₹ ${lastMonthSum.toFixed(2)}`;
-        if(document.getElementById('rev-total')) document.getElementById('rev-total').textContent = `₹ ${grandTotal.toFixed(2)}`;
-    },
-
-    clearRevenueMetrics: function() {
-        if(confirm("Wipe all revenue ledger data memory?")) {
-            localStorage.setItem('ndh_revenue_ledger', '[]');
-            this.calculateRevenueLedger();
-        }
-    },
-
-    printRxMedicalPdf: function(itemId) {
-        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
-        const rx = rxData.find(item => item.id === itemId);
-        if (!rx) return;
-
-        const oldFrame = document.getElementById('ndh-print-frame');
-        if (oldFrame) oldFrame.remove();
-
-        const iframe = document.createElement('iframe');
-        iframe.id = 'ndh-print-frame';
-        iframe.style.position = 'fixed';
-        iframe.style.bottom = '0';
-        iframe.style.width = '1px';
-        iframe.style.height = '1px';
-        iframe.style.opacity = '0.01';
-        document.body.appendChild(iframe);
-
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(`<html><body onload="window.print()"><h3>${rx.id} - ${rx.name}</h3><pre>${rx.rx}</pre></body></html>`);
-        doc.close();
-    },
-
-    deletePermanentItem: function(type, itemId) {
-        if (confirm("Delete this queue record?")) {
-            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            localStorage.setItem(storageKey, JSON.stringify(dataset.filter(item => item.id !== itemId)));
-            this.loadRxQueue();
-            this.loadOnlineOrdersQueue();
-        }
-    }
-};
+                <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | ${item.sex}</small><br><span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px;">⏰ $
