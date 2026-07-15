@@ -362,4 +362,220 @@ window.StaffDashboard = {
         if (!amount || amount <= 0) { alert("Please input a valid counter sale bill total!"); return; }
 
         const currentStamp = new Date();
-        const defaultDateStr = currentS
+        const defaultDateStr = currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
+
+        const mockOrder = {
+            id: 'POS-' + Math.floor(1000 + Math.random() * 9000),
+            name: customer,
+            phone: phone,
+            pin: "Counter Sale",
+            estimatedBill: amount,
+            meds: "Direct Counter Billing Transaction",
+            imgData: "",
+            isPOS: true,
+            timestamp: currentStamp.getTime(),
+            formattedDate: defaultDateStr
+        };
+
+        const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+        existingOrders.push(mockOrder);
+        localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
+
+        this.logRevenueTransaction(amount);
+        
+        if (mode === 'Cash') {
+            alert(`💵 Store Sale Finished! Collected ₹${amount} in Cash via ${customer}. Record saved in ledger database.`);
+        } else {
+            this.generateSystemUpiQr(amount, `POS Sale: ${customer}`);
+        }
+
+        document.getElementById('pos-amount').value = ""; 
+        document.getElementById('pos-cust-name').value = "";
+        document.getElementById('pos-cust-phone').value = "";
+        
+        this.loadOnlineOrdersQueue();
+    },
+
+    billingAction: function(type, itemId, mode) {
+        const amtField = document.getElementById(type === 'Rx' ? `rx-price-${itemId}` : `order-price-${itemId}`);
+        const finalPrice = parseFloat(amtField.value);
+        if (!finalPrice || finalPrice <= 0) { alert("Please calculate items and input final billing value!"); return; }
+
+        const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+        const dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const activeItem = dataset.find(item => item.id === itemId);
+
+        if(!activeItem) return;
+
+        this.logRevenueTransaction(finalPrice);
+        if (mode === 'Cash') {
+            alert(`💵 Transaction Settled! Collected ₹${finalPrice} for ${activeItem.name}. Structural details remain saved.`);
+        } else {
+            this.generateSystemUpiQr(finalPrice, `${type} Sale: ${activeItem.name}`);
+        }
+    },
+
+    generateSystemUpiQr: function(amount, memo) {
+        const merchantUpi = "hussain.abidur@ybl";
+        const serializedMemo = memo.replace(/[^a-zA-Z0-9 ]/g, "");
+        const rawString = `upi://pay?pa=${merchantUpi}&pn=NamtiDrugHouse&am=${amount}&cu=INR&tn=${encodeURIComponent(serializedMemo)}`;
+        const finalQrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(rawString)}`;
+
+        document.getElementById('qr-modal-details').textContent = `${memo} | Invoice: ₹${amount}`;
+        document.getElementById('qr-image-container').innerHTML = `<img src="${finalQrEndpoint}" alt="UPI Dynamic QR Engine" style="display:block; margin:0 auto; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.15);">`;
+        document.getElementById('qr-modal-overlay').style.display = 'flex';
+    },
+
+    closeQrModal: function() {
+        document.getElementById('qr-modal-overlay').style.display = 'none';
+        alert("🔒 Payment Window verified & logged successfully!");
+    },
+
+    viewPrescriptionImage: function(blobString) {
+        if(!blobString) { alert("No prescription attachment for custom counter billing."); return; }
+        document.getElementById('modal-rx-img-render').src = blobString;
+        document.getElementById('prescription-photo-modal').style.display = 'flex';
+    },
+
+    logRevenueTransaction: function(amount) {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
+        ledger.push({
+            amount: amount,
+            dateString: new Date().toDateString(),
+            timestamp: Date.now()
+        });
+        localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
+        this.calculateRevenueLedger();
+    },
+
+    calculateRevenueLedger: function() {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
+        const todayStr = new Date().toDateString();
+        
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        
+        let todaySum = 0;
+        let lastMonthSum = 0;
+        let grandTotal = 0;
+
+        ledger.forEach(tx => {
+            grandTotal += tx.amount;
+            if (tx.dateString === todayStr) {
+                todaySum += tx.amount;
+            }
+            
+            const txDate = new Date(tx.timestamp);
+            let targetMonth = currentMonth - 1;
+            let targetYear = currentYear;
+            if (targetMonth < 0) {
+                targetMonth = 11;
+                targetYear--;
+            }
+            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
+                lastMonthSum += tx.amount;
+            }
+        });
+
+        const rToday = document.getElementById('rev-today');
+        const rMonth = document.getElementById('rev-month');
+        const rTotal = document.getElementById('rev-total');
+
+        if(rToday) rToday.textContent = `₹ ${todaySum.toFixed(2)}`;
+        if(rMonth) rMonth.textContent = `₹ ${lastMonthSum.toFixed(2)}`;
+        if(rTotal) rTotal.textContent = `₹ ${grandTotal.toFixed(2)}`;
+    },
+
+    clearRevenueMetrics: function() {
+        if(confirm("🚨 Owner Verification Required: Do you want to wipe all past audited financial analytics ledger history?")) {
+            localStorage.setItem('ndh_revenue_ledger', '[]');
+            this.calculateRevenueLedger();
+            alert("🧹 Financial logs wiped successfully.");
+        }
+    },
+
+    printRxMedicalPdf: function(itemId) {
+        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
+        const rx = rxData.find(item => item.id === itemId);
+        if (!rx) { alert("Prescription data corrupted or missing!"); return; }
+
+        const oldFrame = document.getElementById('ndh-print-frame');
+        if (oldFrame) oldFrame.remove();
+
+        const iframe = document.createElement('iframe');
+        iframe.id = 'ndh-print-frame';
+        iframe.style.position = 'fixed';
+        iframe.style.bottom = '0';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        iframe.style.opacity = '0.01';
+        document.body.appendChild(iframe);
+
+        const printDate = (rx.formattedDate && rx.formattedDate !== "undefined") ? rx.formattedDate : new Date(rx.timestamp || Date.now()).toLocaleDateString('en-IN');
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <html>
+            <head>
+                <title>Print Rx - ${rx.id}</title>
+                <style>
+                    body { font-family: 'Courier New', monospace; padding: 20px; color: #000; background: #fff; line-height: 1.5; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header h2 { margin: 0; font-size: 1.8rem; font-weight: bold; }
+                    .divider { border-top: 2px dashed #000; margin: 15px 0; }
+                    .field { margin: 6px 0; font-size: 1rem; }
+                    .rx-box { white-space: pre-line; background: #f9f9f9; padding: 12px; font-size: 1.05rem; border: 1px dashed #333; margin-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>NAMTI DRUG HOUSE</h2>
+                    <p>Sivasagar, Assam | Consultation Desk Receipt</p>
+                </div>
+                <div class="divider"></div>
+                <div class="field"><b>Rx Token ID :</b> ${rx.id}</div>
+                <div class="field"><b>Patient Name:</b> ${rx.name}</div>
+                <div class="field"><b>Age / Sex  :</b> ${rx.age} Yrs / ${rx.sex}</div>
+                <div class="field"><b>Visit Time :</b> ${printDate}</div>
+                <div class="divider"></div>
+                
+                <div style="font-weight:bold; margin-top:10px;">Symptoms:</div>
+                <div style="padding-left:10px; margin-bottom:10px;">${rx.symptoms || 'N/A'}</div>
+                
+                <div style="font-weight:bold;">Referred Tests:</div>
+                <div style="padding-left:10px; margin-bottom:10px;">${rx.tests || 'None'}</div>
+                
+                <div class="divider"></div>
+                <div style="font-weight:bold; font-size:1.1rem;">💊 Rx Medicines:</div>
+                <div class="rx-box">${rx.rx}</div>
+                
+                <div class="divider" style="margin-top: 40px;"></div>
+                <p style="text-align: center; font-size: 0.85rem;">Generated digitally via Doctor Desk Engine</p>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 800);
+    },
+
+    deletePermanentItem: function(type, itemId) {
+        if (confirm("🚨 Admin Authorization: Are you absolutely sure you want to permanently delete this operational record from portal memory? This action cannot be undone.")) {
+            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const updatedDataset = dataset.filter(item => item.id !== itemId);
+            localStorage.setItem(storageKey, JSON.stringify(updatedDataset));
+            
+            this.loadRxQueue();
+            this.loadOnlineOrdersQueue();
+            
+            alert("🗑️ Record expunged permanently by Admin.");
+        }
+    }
+};
