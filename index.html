@@ -36,7 +36,7 @@
         }
         .btn-main:hover { transform: translateY(-4px); border-color: var(--accent); color: var(--accent); }
         
-        .btn-action { color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-action { color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; text-align: center; }
         .btn-success { background: var(--success); }
         .btn-back { background: #64748b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
 
@@ -77,14 +77,13 @@
             <p>Sivasagar, Assam | Healthcare Dashboard Ecosystem</p>
         </div>
         
-        <div id="medical-inventions-container"></div>
         <div id="sms-notification-bar" style="display:none; margin-bottom:15px; background:#dcfce7; color:#166534; padding:12px; border-radius:8px; font-weight:600; text-align:center; border: 1px solid #bbf7d0;"></div>
 
         <!-- CUSTOMER DUAL PRINT DOCUMENT HUB -->
         <div class="card" style="border-top-color: #06b6d4;">
             <h3 style="color:#0f172a; margin-bottom: 8px;">📄 Patient Document Fetcher & Printer Station</h3>
             <p style="font-size: 0.85rem; color:#64748b; margin-bottom:15px;">Search data history parameters to generate standalone Medical Prescription sheets or separate Financial GST Bills.</p>
-            <form id="customer-receipt-download-form">
+            <form id="customer-receipt-download-form" onsubmit="event.preventDefault();">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
                     <input type="text" id="dl-cust-name" placeholder="Full Patient Name *" required>
                     <input type="text" id="dl-cust-phone" placeholder="Registered Phone Number *" required>
@@ -134,7 +133,7 @@
             <h2>👨‍⚕️ Doctor Consultation Desk</h2>
             <p style="color:#64748b; margin-bottom:15px;">Route medical health tracking documents instantly to the pharmacy desk engine logs.</p>
             
-            <form id="doctor-rx-form">
+            <form id="doctor-rx-form" onsubmit="event.preventDefault();">
                 <input type="text" id="doc-patient-name" placeholder="Patient Name *" required>
                 <div class="form-row">
                     <input type="number" id="doc-patient-age" placeholder="Patient Age *" required>
@@ -160,9 +159,9 @@
         <button class="btn-back" onclick="window.ViewManager.navigate('home-view')">⬅ Back to Home</button>
         
         <div class="card" style="border-top-color: #ec4899;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2>📊 Operational Figures & Metrics Console</h2>
-                <button onclick="window.StaffDashboard.clearRevenueMetrics()" style="background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.75rem; padding:4px 8px; border-radius:4px; cursor:pointer;">Reset System Memory 🔄</button>
+                <button onclick="window.StaffDashboard.clearRevenueMetrics()" style="background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.75rem; padding:6px 8px; border-radius:4px; cursor:pointer;">Reset System Memory 🔄</button>
             </div>
             
             <div style="margin-bottom:15px;">
@@ -303,4 +302,4 @@
             <h3 style="color:var(--success); margin-bottom:10px;">Scan to Complete Payment</h3>
             <div id="qr-modal-details" style="font-weight:600; margin-bottom:10px; font-size:0.9rem; white-space: pre-wrap; text-align: left; background: #f8fafc; padding: 8px; border-radius: 6px;"></div>
             <div id="qr-image-container" style="margin-bottom:15px;"></div>
-            <button onclick="window.StaffDashboard.closeQrModal()" class="btn-back" style="margin
+            <button onclick="window.StaffDashboard.closeQrMod" style="margin
