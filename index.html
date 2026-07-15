@@ -296,10 +296,24 @@
         </div>
     </div>
 
-    <!-- ================= 5. POPUPS & OVERLAYS ================= -->
+ <!-- ================= 5. POPUPS & OVERLAYS ================= -->
     <div id="qr-modal-overlay" class="qr-modal">
         <div class="qr-box">
             <h3 style="color:var(--success); margin-bottom:10px;">Scan to Complete Payment</h3>
             <div id="qr-modal-details" style="font-weight:600; margin-bottom:10px; font-size:0.9rem; white-space: pre-wrap; text-align: left; background: #f8fafc; padding: 8px; border-radius: 6px;"></div>
             <div id="qr-image-container" style="margin-bottom:15px;"></div>
-            <button onclick="window.StaffDashboard.closeQrMod" style="margin
+            <button onclick="window.StaffDashboard.closeQrModal()" class="btn-back" style="margin:0; width:100%;">Close & Sync</button>
+        </div>
+    </div>
+
+    <div id="prescription-photo-modal" class="qr-modal" onclick="this.style.display='none'">
+        <div style="background:white; padding:15px; border-radius:10px; max-width:500px; position:relative;" onclick="event.stopPropagation();">
+            <p style="font-weight:bold; margin-bottom:10px;">Uploaded Prescription Document Preview</p>
+            <img id="modal-rx-img-render" src="" style="width:100%; max-height:450px; object-fit:contain; border-radius:6px;">
+            <button onclick="document.getElementById('prescription-photo-modal').style.display='none'" class="btn-back" style="margin-top:10px; width:100%;">Close Preview</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
