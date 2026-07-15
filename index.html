@@ -55,10 +55,9 @@
         th { background-color: #f8fafc; font-weight: 600; }
 
         .qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .qr-box { background: white; padding: 25px; border-radius: 12px; text-align: center; max-width: 320px; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
+        .qr-box { background: white; padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
 
-        .search-wrapper { position: relative; display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-wrapper input { margin: 0; padding: 14px 40px 14px 14px; border: 2px solid var(--accent); }
+        .dynamic-item-row { display: flex; gap: 8px; margin-bottom: 8px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -74,10 +73,10 @@
         
         <div id="medical-inventions-container"></div>
 
-        <!-- NEW FACILITY: CUSTOMER DOWNLOAD RECEIPT ENGINE -->
+        <!-- CUSTOMER DOWNLOAD RECEIPT ENGINE -->
         <div class="card" style="border-top-color: #06b6d4;">
             <h3 style="color:#0f172a; margin-bottom: 8px;">📄 View or Download Your Prescription / Medicine Payment Receipt</h3>
-            <p style="font-size: 0.85rem; color:#64748b; margin-bottom:15px;">Enter your absolute transaction credentials below to compile a real-time printable copy.</p>
+            <p style="font-size: 0.85rem; color:#64748b; margin-bottom:15px;">Enter details below to pull your itemized printable slip or prescription data file.</p>
             <form id="customer-receipt-download-form" onsubmit="window.HomeReceiptEngine.searchAndPrint(event)">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
                     <input type="text" id="dl-cust-name" placeholder="Full Registered Name *" required>
@@ -128,7 +127,6 @@
             
             <form id="doctor-rx-form">
                 <input type="text" id="doc-patient-name" placeholder="Patient Name *" required>
-                
                 <div class="form-row">
                     <input type="number" id="doc-patient-age" placeholder="Patient Age *" required>
                     <select id="doc-patient-sex" required>
@@ -138,9 +136,8 @@
                         <option value="Other">Other</option>
                     </select>
                 </div>
-
                 <textarea id="doc-symptoms" placeholder="Patient Symptoms / Chief Complaints..." style="height:70px;"></textarea>
-                <textarea id="doc-tests" placeholder="Diagnostic Tests Referred (e.g., CBC, Blood Sugar, X-Ray)..." style="height:60px;"></textarea>
+                <textarea id="doc-tests" placeholder="Diagnostic Tests Referred (e.g., CBC, Blood Sugar)..." style="height:60px;"></textarea>
                 <textarea id="doc-rx-content" placeholder="Rx: Medicines Prescribed (Name, Dosage Matrix, Duration) *" style="height:120px;" required></textarea>
                 
                 <button type="button" onclick="window.DoctorDesk.submitPrescription()" class="btn-action" style="background:var(--doctor-color); width:100%; padding:14px;">Send Rx to Counter Queue 📤</button>
@@ -174,16 +171,29 @@
             </div>
         </div>
 
-        <!-- GLOBAL CUSTOMER ENGINE HAS BEEN REMOVED PER INSTANCE RULES -->
-
-        <!-- OFFLINE POS COUNTER -->
+        <!-- QUICK OFFLINE COUNTER SALE (POS) WITH BREAKDOWN -->
         <div class="card" style="border-top-color: var(--success);">
             <h2>🔌 Quick Offline Counter Sale (POS)</h2>
             <div style="display: flex; gap: 10px; margin-top:10px;">
-                <input type="text" id="pos-cust-name" placeholder="Walk-in Customer Name (Optional)">
-                <input type="text" id="pos-cust-phone" placeholder="Customer Phone (Optional)">
-                <input type="number" id="pos-amount" placeholder="Total Sale Amount (₹) *" required>
+                <input type="text" id="pos-cust-name" placeholder="Walk-in Customer Name">
+                <input type="text" id="pos-cust-phone" placeholder="Customer Phone">
             </div>
+            
+            <div style="margin: 10px 0;">
+                <label style="font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 5px;">Add Medicine Breakdown Items:</label>
+                <div id="pos-items-container">
+                    <div class="dynamic-item-row">
+                        <input type="text" class="pos-med-name" placeholder="Medicine Name" style="margin:0;">
+                        <input type="number" class="pos-med-mrp" placeholder="MRP (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
+                    </div>
+                </div>
+                <button type="button" onclick="window.StaffDashboard.addPosRow()" style="margin-top: 5px; padding: 4px 8px; font-size: 0.8rem; background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">+ Add More Medicine Row</button>
+            </div>
+
+            <div style="margin: 10px 0; font-weight: bold; font-size: 1.1rem; color: var(--success);">
+                Calculated Total Amount: ₹ <span id="pos-calculated-total">0.00</span>
+            </div>
+
             <div style="display:flex; gap:10px;">
                 <button onclick="window.StaffDashboard.processOfflinePOS('Cash')" class="btn-action btn-success" style="flex:1;">Collect Cash 💵</button>
                 <button onclick="window.StaffDashboard.processOfflinePOS('QR')" class="btn-action" style="flex:1; background: #0284c7;">Generate UPI QR 📱</button>
@@ -192,14 +202,14 @@
 
         <!-- DOCTOR PRESCRIPTIONS QUEUE -->
         <div class="card" style="border-top-color: var(--doctor-color);">
-            <h2>📥 Live Doctor Prescriptions Logs</h2>
+            <h2>📥 Live Doctor Prescriptions Logs (Process Invoice with Items MRP)</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>Patient Info & Visit Time</th>
-                            <th>Clinical Metrics</th>
-                            <th>Prescribed Medication</th>
+                            <th>Clinical Metrics / Prescribed</th>
+                            <th>Itemized Billing Breakdown (Add Medicine & MRP)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -217,7 +227,7 @@
                         <tr>
                             <th>Customer Info & Order Time</th>
                             <th>Requirements & Photo</th>
-                            <th>Pricing Settlement & Invoice</th>
+                            <th>Itemized Billing Breakdown (Add Medicine & MRP)</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -231,7 +241,7 @@
     <div id="qr-modal-overlay" class="qr-modal">
         <div class="qr-box">
             <h3 style="color:var(--success); margin-bottom:10px;">Scan to Complete Payment</h3>
-            <p id="qr-modal-details" style="font-weight:600; margin-bottom:15px; font-size:1.1rem;"></p>
+            <div id="qr-modal-details" style="font-weight:600; margin-bottom:10px; font-size:1rem; white-space: pre-wrap; text-align: left; background: #f8fafc; padding: 8px; border-radius: 6px;"></div>
             <div id="qr-image-container" style="margin-bottom:15px;"></div>
             <button onclick="window.StaffDashboard.closeQrModal()" class="btn-back" style="margin:0; width:100%;">Close & Synchronize Record</button>
         </div>
@@ -248,8 +258,7 @@
     <script src="script.js"></script>
 </body>
                     </html>
-                    
-                                                      
+                        
     
 
     
