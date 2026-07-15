@@ -80,18 +80,20 @@
         <div id="medical-inventions-container"></div>
         <div id="sms-notification-bar" style="display:none; margin-bottom:15px; background:#dcfce7; color:#166534; padding:12px; border-radius:8px; font-weight:600; text-align:center; border: 1px solid #bbf7d0;"></div>
 
-        <!-- CUSTOMER DOWNLOAD RECEIPT ENGINE -->
+        <!-- CUSTOMER DUAL PRINT DOCUMENT HUB -->
         <div class="card" style="border-top-color: #06b6d4;">
-            <h3 style="color:#0f172a; margin-bottom: 8px;">📄 View or Download Your Prescription / Medicine Payment Receipt</h3>
-            <p style="font-size: 0.85rem; color:#64748b; margin-bottom:15px;">Enter details below to pull your itemized printable slip or prescription data file.</p>
-            <form id="customer-receipt-download-form" onsubmit="window.HomeReceiptEngine.searchAndPrint(event)">
+            <h3 style="color:#0f172a; margin-bottom: 8px;">📄 Patient Document Fetcher & Printer Station</h3>
+            <p style="font-size: 0.85rem; color:#64748b; margin-bottom:15px;">Search data history parameters to generate standalone Medical Prescription sheets or separate Financial GST Bills.</p>
+            <form id="customer-receipt-download-form">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                    <input type="text" id="dl-cust-name" placeholder="Full Registered Name *" required>
+                    <input type="text" id="dl-cust-name" placeholder="Full Patient Name *" required>
                     <input type="text" id="dl-cust-phone" placeholder="Registered Phone Number *" required>
                     <input type="date" id="dl-visit-date" required>
-                    <input type="text" id="dl-doc-name" placeholder="Doctor/Hospital (Optional)">
                 </div>
-                <button type="submit" class="btn-action" style="background: #06b6d4; width: 100%; padding: 12px; margin-top: 5px;">Fetch & Print Document 🖨️</button>
+                <div style="display:flex; gap:10px; margin-top: 10px;">
+                    <button type="button" onclick="window.HomeReceiptEngine.searchAndPrint('prescription')" class="btn-action" style="background: var(--doctor-color); flex:1; padding: 12px;">🖨️ Print Clinical Prescription Only</button>
+                    <button type="button" onclick="window.HomeReceiptEngine.searchAndPrint('receipt')" class="btn-action" style="background: #06b6d4; flex:1; padding: 12px;">🧾 Print Financial GST Receipt</button>
+                </div>
             </form>
         </div>
 
@@ -108,7 +110,7 @@
         <div class="card">
             <h2>🛒 Online Order Desk</h2>
             <p style="background:#fffbeb; color:#b45309; padding:12px; border-radius:6px; font-size:0.9rem; margin:10px 0; border-left: 4px solid var(--warning);">
-                🚨 <b>Strict Home Delivery COD Rules:</b> Available exclusively within PIN code <b>785684</b>. Any orders matching or exceeding estimated bill value of <b>₹1599</b> will trigger mandatory digital Advance Payment verification before dispatch sequence!
+                🚨 <b>Strict Home Delivery COD Rules:</b> Available exclusively within PIN code <b>785684</b>. Orders matching or exceeding estimated value of <b>₹1599</b> require advance verification!
             </p>
             <form id="online-order-form">
                 <input type="text" id="cust-name" placeholder="Customer Name *" required>
@@ -130,7 +132,7 @@
         <button class="btn-back" onclick="window.ViewManager.navigate('home-view')">⬅ Back to Home</button>
         <div class="card" style="border-top-color: var(--doctor-color);">
             <h2>👨‍⚕️ Doctor Consultation Desk</h2>
-            <p style="color:#64748b; margin-bottom:15px;">Route real-time prescriptions directly to pharmacy station logs.</p>
+            <p style="color:#64748b; margin-bottom:15px;">Route medical health tracking documents instantly to the pharmacy desk engine logs.</p>
             
             <form id="doctor-rx-form">
                 <input type="text" id="doc-patient-name" placeholder="Patient Name *" required>
@@ -153,24 +155,22 @@
         </div>
     </div>
 
-    <!-- ================= 4. COMPREHENSIVE STAFF DASHBOARD ================= -->
+    <!-- ================= 4. STAFF DASHBOARD ================= -->
     <div id="staff-view" class="view-container">
         <button class="btn-back" onclick="window.ViewManager.navigate('home-view')">⬅ Back to Home</button>
         
-        <!-- STATS & AUDITED REVENUE MODULE -->
         <div class="card" style="border-top-color: #ec4899;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h2>📊 Operational Figures & Metrics Console</h2>
                 <button onclick="window.StaffDashboard.clearRevenueMetrics()" style="background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.75rem; padding:4px 8px; border-radius:4px; cursor:pointer;">Reset System Memory 🔄</button>
             </div>
             
-            <!-- Dynamic Navigation Tab Strips -->
             <div style="margin-bottom:15px;">
                 <button class="tab-btn active-tab" id="tab-billing-btn" onclick="window.StaffDashboard.switchTab('billing')">Live Processing Counter</button>
                 <button class="tab-btn" id="tab-analytics-btn" onclick="window.StaffDashboard.switchTab('analytics')">📜 Permanent CRM Customer Records History</button>
             </div>
 
-            <!-- TAB BLOCK A: CORE BILLING PIPELINES -->
+            <!-- TAB BLOCK A: BILLING PIPELINES -->
             <div id="tab-billing-content" class="tab-content active-content">
                 <div class="revenue-grid">
                     <div class="revenue-box">
@@ -187,9 +187,9 @@
                     </div>
                 </div>
 
-                <!-- QUICK OFFLINE COUNTER SALE (POS) -->
+                <!-- QUICK OFFLINE SALE INCLUDES AUTOMATIC GST COMPUTE -->
                 <div class="card" style="border-top-color: var(--success); padding: 15px; margin-top: 15px;">
-                    <h3>🔌 Quick Offline Counter Sale (POS)</h3>
+                    <h3>🔌 Quick Offline Counter Sale (POS) <span style="font-size:0.8rem; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; font-weight:normal;">Auto GST (12%) Active</span></h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top:10px;">
                         <input type="text" id="pos-cust-name" placeholder="Walk-in Customer Name" style="margin:0;">
                         <input type="text" id="pos-cust-phone" placeholder="Customer Phone" style="margin:0;">
@@ -201,14 +201,16 @@
                         <div id="pos-items-container">
                             <div class="dynamic-item-row">
                                 <input type="text" class="pos-med-name" placeholder="Medicine Name" style="margin:0;">
-                                <input type="number" class="pos-med-mrp" placeholder="MRP (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
+                                <input type="number" class="pos-med-mrp" placeholder="MRP Price Incl. Tax (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
                             </div>
                         </div>
                         <button type="button" onclick="window.StaffDashboard.addPosRow()" style="margin-top: 5px; padding: 4px 8px; font-size: 0.8rem; background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">+ Add More Medicine Row</button>
                     </div>
 
-                    <div style="margin: 10px 0; font-weight: bold; font-size: 1.1rem; color: var(--success);">
-                        Calculated Total Amount: ₹ <span id="pos-calculated-total">0.00</span>
+                    <div style="margin: 10px 0; background:#f8fafc; padding:10px; border-radius:6px; font-size: 0.95rem;">
+                        <div>Base Taxable Amount: ₹<span id="pos-calculated-base">0.00</span></div>
+                        <div style="color:#64748b; font-size:0.85rem;">CGST (6%): ₹<span id="pos-calculated-cgst">0.00</span> | SGST (6%): ₹<span id="pos-calculated-sgst">0.00</span></div>
+                        <div style="margin-top:5px; font-weight: bold; font-size: 1.1rem; color: var(--success);">Grand Total Payable: ₹<span id="pos-calculated-total">0.00</span></div>
                     </div>
 
                     <div style="display:flex; gap:10px;">
@@ -217,7 +219,7 @@
                     </div>
                 </div>
 
-                <!-- DOCTOR PRESCRIPTIONS QUEUE -->
+                <!-- CLINICAL QUEUE LOGS -->
                 <div class="card" style="border-top-color: var(--doctor-color); padding:15px;">
                     <h3>📥 Live Doctor Prescriptions Logs</h3>
                     <div class="table-responsive">
@@ -225,8 +227,8 @@
                             <thead>
                                 <tr>
                                     <th>Patient Info & Visit Time</th>
-                                    <th>Clinical Metrics / Prescribed</th>
-                                    <th>Itemized Billing & Referral</th>
+                                    <th>Clinical Prescribed Lines</th>
+                                    <th>Billing & Auto GST Setup</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -235,7 +237,7 @@
                     </div>
                 </div>
 
-                <!-- ONLINE ORDERS MONITOR PIPELINE -->
+                <!-- ONLINE REQUESTS QUEUE -->
                 <div class="card" style="border-top-color: #f59e0b; padding:15px;">
                     <h3>📦 Incoming Online Customers Desk Orders</h3>
                     <div class="table-responsive">
@@ -244,7 +246,7 @@
                                 <tr>
                                     <th>Customer Info & Order Time</th>
                                     <th>Requirements & Photo</th>
-                                    <th>Itemized Billing & Referral</th>
+                                    <th>Billing & Auto GST Setup</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -254,7 +256,7 @@
                 </div>
             </div>
 
-            <!-- TAB BLOCK B: NEW DYNAMIC ANALYTICS & LEDGER HISTORY ENGINE -->
+            <!-- TAB BLOCK B: NEW DYNAMIC ANALYTICS -->
             <div id="tab-analytics-content" class="tab-content">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
                     <div class="revenue-box" style="border-bottom-color: var(--purple);">
@@ -281,8 +283,8 @@
                                 <tr>
                                     <th>Date & ID</th>
                                     <th>Customer Information</th>
-                                    <th>Referrer Doctor/Hospital</th>
-                                    <th>Settled Items & Prices (MRP)</th>
+                                    <th>Referrer</th>
+                                    <th>Settled Items (Incl. GST breakdown)</th>
                                     <th>Grand Total</th>
                                     <th>Operation</th>
                                 </tr>
@@ -299,20 +301,6 @@
     <div id="qr-modal-overlay" class="qr-modal">
         <div class="qr-box">
             <h3 style="color:var(--success); margin-bottom:10px;">Scan to Complete Payment</h3>
-            <div id="qr-modal-details" style="font-weight:600; margin-bottom:10px; font-size:1rem; white-space: pre-wrap; text-align: left; background: #f8fafc; padding: 8px; border-radius: 6px;"></div>
+            <div id="qr-modal-details" style="font-weight:600; margin-bottom:10px; font-size:0.9rem; white-space: pre-wrap; text-align: left; background: #f8fafc; padding: 8px; border-radius: 6px;"></div>
             <div id="qr-image-container" style="margin-bottom:15px;"></div>
-            <button onclick="window.StaffDashboard.closeQrModal()" class="btn-back" style="margin:0; width:100%;">Close & Synchronize Record</button>
-        </div>
-    </div>
-
-    <div id="prescription-photo-modal" class="qr-modal" onclick="this.style.display='none'">
-        <div style="background:white; padding:15px; border-radius:10px; max-width:500px; position:relative;">
-            <p style="font-weight:bold; margin-bottom:10px;">Uploaded Prescription Document Preview</p>
-            <img id="modal-rx-img-render" src="" style="width:100%; max-height:450px; object-fit:contain; border-radius:6px;">
-            <p style="font-size:0.8rem; text-align:center; color:#64748b; margin-top:5px;">Click anywhere to close</p>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+            <button onclick="window.StaffDashboard.closeQrModal()" class="btn-back" style="margin
