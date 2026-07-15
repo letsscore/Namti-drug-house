@@ -5,9 +5,7 @@ window.ViewManager = {
     navigate: function(viewId) {
         document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
         const targetView = document.getElementById(viewId);
-        if (targetView) {
-            targetView.classList.add('active-view');
-        }
+        if (targetView) targetView.classList.add('active-view');
         localStorage.setItem('ndh_last_active_view', viewId);
         
         if (viewId === 'staff-view') {
@@ -38,7 +36,7 @@ window.ViewManager = {
 document.addEventListener('DOMContentLoaded', () => {
     const savedState = localStorage.getItem('ndh_last_active_view') || 'home-view';
     window.ViewManager.navigate(savedState);
-    window.PromotionalSMS.checkAndTriggerSMS(); // Hook Promotional SMS Check on startup
+    window.PromotionalSMS.checkAndTriggerSMS();
 
     const orderForm = document.getElementById('online-order-form');
     if (orderForm) {
@@ -49,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const photoFile = document.getElementById('cust-rx-photo').files[0];
 
             if (pin !== "785684") {
-                alert("❌ Order Rejected: Home delivery is strictly possible only within PIN code 785684!");
+                alert("❌ Order Rejected: Delivery localized only within PIN code 785684!");
                 return;
             }
 
@@ -57,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = function(event) {
                 const base64Img = event.target.result;
                 const currentStamp = new Date();
-                const defaultDateStr = currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
                 
                 const newOrder = {
                     id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
@@ -65,23 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     phone: document.getElementById('cust-phone').value.trim(),
                     pin: pin,
                     estimatedBill: bill || 'Not Provided',
-                    meds: document.getElementById('cust-meds').value.trim() || 'Refer to attached image document',
+                    meds: document.getElementById('cust-meds').value.trim() || 'Refer to image',
                     imgData: base64Img,
-                    isPOS: false,
                     timestamp: currentStamp.getTime(),
-                    formattedDate: defaultDateStr
+                    formattedDate: currentStamp.toLocaleDateString('en-IN') + ' ' + currentStamp.toLocaleTimeString('en-IN')
                 };
 
                 const existingOrders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
                 existingOrders.push(newOrder);
                 localStorage.setItem('ndh_longterm_orders', JSON.stringify(existingOrders));
 
-                let completionText = "🎉 Order Submitted successfully (Cash on Delivery Mode). Record saved permanently.";
-                if (bill >= 1599) {
-                    completionText = "⚠️ Order Warning (Value ≥ ₹1599): Your order requires manual Advance Payment verification before dispatch!";
-                }
-                
-                alert(completionText);
+                alert(bill >= 1599 ? "⚠️ Advance Payment verification mandatory before dispatch!" : "🎉 Order Submitted successfully!");
                 orderForm.reset();
                 window.ViewManager.navigate('home-view');
             };
@@ -91,32 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================================
-// 2. PHARMACEUTICAL ROTATOR
-// ========================================================
-document.addEventListener('DOMContentLoaded', () => {
-    const medicalQuotes = [
-        "Alexander Fleming discovered Penicillin in 1928, launching the modern era of lifesaving antibiotics.",
-        "Wilhelm Röntgen developed X-Rays in 1895, unlocking non-invasive diagnostic capabilities.",
-        "Edward Jenner formulated the smallpox vaccine in 1796, pioneering the science of immunology.",
-        "Frederick Banting and Charles Best isolated Insulin in 1921, saving diabetic patients globally."
-    ];
-    const container = document.getElementById('medical-inventions-container');
-    if (container) {
-        container.innerHTML = `<div id="rotator-card" style="padding:15px; background:#e2e2e2; color:#334155; border-radius:8px; font-style:italic; font-size:0.95rem; text-align:center; border-left:5px solid var(--accent); margin-bottom:15px;"></div>`;
-        let i = 0;
-        function rotate() {
-            const card = document.getElementById('rotator-card');
-            if (card) {
-                card.innerHTML = `💡 <b>Medical Fact:</b> "${medicalQuotes[i]}"`;
-                i = (i + 1) % medicalQuotes.length;
-            }
-        }
-        rotate(); setInterval(rotate, 8000);
-    }
-});
-
-// ========================================================
-// 3. DOCTOR DESK SUBMISSION
+// 2. DOCTOR DESK SUBMISSION
 // ========================================================
 window.DoctorDesk = {
     submitPrescription: function() {
@@ -127,203 +93,238 @@ window.DoctorDesk = {
         const referDoc = document.getElementById('doc-refer-details').value.trim();
 
         if (!name || !age || !sex || !rx) {
-            alert("Please fill out all mandatory fields marked with an asterisk (*).");
+            alert("Please fill out all mandatory fields (*).");
             return;
         }
 
         const currentStamp = new Date();
-        const defaultDateStr = currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
 
         const newRxRecord = {
             id: 'RX-' + Math.floor(1000 + Math.random() * 9000),
             name: name,
-            phone: "", 
             age: age,
             sex: sex,
-            referDoc: referDoc || "Self / Internal NDH Consultation",
+            referDoc: referDoc || "Internal Consultation Desk",
             symptoms: document.getElementById('doc-symptoms').value.trim() || 'N/A',
-            tests: document.getElementById('doc-tests').value.trim() || 'None Referred',
+            tests: document.getElementById('doc-tests').value.trim() || 'None',
             rx: rx,
             timestamp: currentStamp.getTime(),
-            formattedDate: defaultDateStr
+            formattedDate: currentStamp.toLocaleDateString('en-IN') + ' ' + currentStamp.toLocaleTimeString('en-IN')
         };
 
         const existingRx = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
         existingRx.push(newRxRecord);
         localStorage.setItem('ndh_longterm_rx', JSON.stringify(existingRx));
 
-        alert("📤 Medical Prescription dispatched safely to Pharmacy Counter Queue!");
+        alert("📤 Medical Prescription dispatched safely to Counter Queue!");
         document.getElementById('doctor-rx-form').reset();
         window.ViewManager.navigate('home-view');
     }
 };
 
 // ========================================================
-// 4. UNIFIED CUSTOMER SEARCH & RECEIPT PRINT ENGINE
+// 3. DUAL SEPARATE PRINT ENGINE: INVOICE VS stand-alone Rx
 // ========================================================
 window.HomeReceiptEngine = {
-    searchAndPrint: function(e) {
-        e.preventDefault();
+    searchAndPrint: function(printMode) {
         const searchName = document.getElementById('dl-cust-name').value.toLowerCase().trim();
         const searchPhone = document.getElementById('dl-cust-phone').value.trim();
         const searchDateInput = document.getElementById('dl-visit-date').value;
 
         if(!searchName || !searchPhone || !searchDateInput) {
-            alert("Please fill out all mandatory fields.");
+            alert("Please fill out Name, Phone, and Visit Date fields to isolate documentation!");
             return;
         }
 
-        const parsedSearchDate = new Date(searchDateInput);
-        const searchDay = parsedSearchDate.getDate();
-        const searchMonth = parsedSearchDate.getMonth();
-        const searchYear = parsedSearchDate.getFullYear();
-
+        const targetDate = new Date(searchDateInput);
         const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
+        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
         
-        let targetMatch = universalLedger.find(item => {
-            const txDate = new Date(item.timestamp || Date.now());
-            const dateMatch = (txDate.getDate() === searchDay && txDate.getMonth() === searchMonth && txDate.getFullYear() === searchYear);
-            const nameMatch = item.name && item.name.toLowerCase().includes(searchName);
-            const phoneMatch = item.phone && item.phone.includes(searchPhone);
-            return nameMatch && phoneMatch && dateMatch;
+        let matchingTransaction = universalLedger.find(item => {
+            const txD = new Date(item.timestamp);
+            return txD.toDateString() === targetDate.toDateString() &&
+                   item.name.toLowerCase().includes(searchName) &&
+                   item.phone.includes(searchPhone);
         });
 
-        if (!targetMatch) {
-            const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
-            let matchedRx = rxData.find(item => {
-                const txDate = new Date(item.timestamp || Date.now());
-                const dateMatch = (txDate.getDate() === searchDay && txDate.getMonth() === searchMonth && txDate.getFullYear() === searchYear);
-                const nameMatch = item.name && item.name.toLowerCase().includes(searchName);
-                return nameMatch && dateMatch;
-            });
-            if(matchedRx) {
-                targetMatch = {
-                    ...matchedRx,
-                    phone: searchPhone,
-                    itemsBreakdown: [],
-                    finalPrice: 0,
-                    mode: "Consultation Queue Print"
-                };
+        let matchingRx = rxData.find(item => {
+            const txD = new Date(item.timestamp);
+            return txD.toDateString() === targetDate.toDateString() &&
+                   item.name.toLowerCase().includes(searchName);
+        });
+
+        if (!matchingTransaction && matchingRx) {
+            matchingTransaction = {
+                id: matchingRx.id, name: matchingRx.name, phone: searchPhone,
+                referDoc: matchingRx.referDoc, itemsBreakdown: [], finalPrice: 0,
+                timestamp: matchingRx.timestamp, formattedDate: matchingRx.formattedDate
+            };
+        }
+
+        if (printMode === 'prescription') {
+            const rxToPrint = matchingRx || (matchingTransaction && matchingTransaction.rx ? matchingTransaction : null);
+            if (!rxToPrint) { alert("❌ Clinical Prescription record not found for these parameters!"); return; }
+            this.executePrintPrescription(rxToPrint);
+        } else {
+            if (!matchingTransaction || (matchingTransaction.finalPrice === 0 && matchingTransaction.itemsBreakdown.length === 0)) {
+                alert("❌ Financial Billing data not settled yet for this parameters!"); return; 
             }
+            this.executePrintReceipt(matchingTransaction);
         }
+    },
 
-        if (!targetMatch) {
-            alert("❌ No matching billing data or invoice file found! Please verify parameters.");
-            return;
-        }
-
-        const oldFrame = document.getElementById('ndh-print-frame');
-        if (oldFrame) oldFrame.remove();
-
-        const iframe = document.createElement('iframe');
-        iframe.id = 'ndh-print-frame';
-        iframe.style.position = 'fixed';
-        iframe.style.bottom = '0';
-        iframe.style.width = '1px';
-        iframe.style.height = '1px';
-        iframe.style.opacity = '0.01';
-        document.body.appendChild(iframe);
-
-        const printDate = targetMatch.formattedDate || new Date(targetMatch.timestamp).toLocaleDateString('en-IN');
+    executePrintPrescription: function(rx) {
+        const iframe = this.getCleanIframe();
         const doc = iframe.contentWindow.document;
         doc.open();
-        
-        let itemsHTML = "";
-        if(targetMatch.itemsBreakdown && targetMatch.itemsBreakdown.length > 0) {
-            targetMatch.itemsBreakdown.forEach((med, index) => {
-                itemsHTML += `<tr>
-                    <td>${index+1}. ${med.name}</td>
-                    <td style="text-align: right;">₹ ${parseFloat(med.mrp).toFixed(2)}</td>
-                </tr>`;
-            });
-        } else {
-            itemsHTML = `<tr><td colspan="2">No custom items structured. Direct settlement.</td></tr>`;
-        }
-
         doc.write(`
             <html>
             <head>
-                <title>Invoice Receipt - ${targetMatch.id}</title>
                 <style>
-                    body { font-family: 'Courier New', monospace; padding: 15px; color: #000; background: #fff; line-height: 1.4; font-size: 14px; }
-                    .header { text-align: center; margin-bottom: 15px; }
-                    .header h2 { margin: 0; font-size: 1.5rem; font-weight: bold; }
-                    .divider { border-top: 2px dashed #000; margin: 12px 0; }
-                    .field { margin: 4px 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    th, td { padding: 6px; text-align: left; }
-                    th { border-bottom: 1px dashed #000; }
-                    .rx-box { white-space: pre-line; background: #f5f5f5; padding: 10px; border: 1px dashed #000; margin-top: 10px; }
+                    body { font-family: 'Segoe UI', Arial; padding: 25px; color: #334155; line-height: 1.5; }
+                    .letterhead { text-align: center; border-bottom: 3px double #0f172a; padding-bottom: 10px; margin-bottom: 20px; }
+                    .letterhead h2 { margin: 0; color: #0f172a; letter-spacing: 1px; }
+                    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 14px; background: #f8fafc; padding: 12px; border-radius: 6px; }
+                    .rx-symbol { font-size: 28px; font-weight: bold; color: #8b5cf6; margin: 15px 0 5px 0; }
+                    .content-box { white-space: pre-line; min-height: 150px; font-size: 16px; border-left: 4px solid #8b5cf6; padding-left: 15px; margin-bottom: 20px; }
+                    .footer { text-align: center; font-size: 12px; color: #64748b; margin-top: 50px; border-top: 1px dashed #cbd5e1; padding-top: 10px; }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <h2>NAMTI DRUG HOUSE</h2>
-                    <p>Sivasagar, Assam<br>Itemized Customer Payment Receipt</p>
+                <div class="letterhead">
+                    <h2>NAMTI DRUG HOUSE (CLINICAL DESK)</h2>
+                    <p>Sivasagar, Assam | Healthcare Support Point</p>
                 </div>
-                <div class="divider"></div>
-                <div class="field"><b>Invoice ID   :</b> ${targetMatch.id}</div>
-                <div class="field"><b>Customer Name:</b> ${targetMatch.name}</div>
-                <div class="field"><b>Phone Number :</b> ${targetMatch.phone}</div>
-                <div class="field"><b>Date & Time  :</b> ${printDate}</div>
-                <div class="field"><b>Referrer     :</b> ${targetMatch.referDoc || 'Walk-in Direct'}</div>
-                ${targetMatch.age ? `<div class="field"><b>Age / Sex    :</b> ${targetMatch.age} Yrs / ${targetMatch.sex}</div>` : ''}
-                <div class="divider"></div>
-                
-                <h4 style="margin: 5px 0;">📦 MEDICINE BILLING breakdown:</h4>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Medicine Description</th>
-                            <th style="text-align: right;">MRP (Price)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itemsHTML}
-                    </tbody>
-                </table>
-                
-                <div class="divider"></div>
-                <div style="text-align: right; font-size: 1.1rem; font-weight: bold;">
-                    GRAND TOTAL SETTLED: ₹ ${parseFloat(targetMatch.finalPrice || 0).toFixed(2)}
+                <div class="meta-grid">
+                    <div><b>Patient Name:</b> ${rx.name} ${rx.age ? `(${rx.age} Yrs / ${rx.sex})` : ''}</div>
+                    <div><b>Date:</b> ${rx.formattedDate || new Date(rx.timestamp).toLocaleDateString('en-IN')}</div>
+                    <div><b>Referrer/Consultant:</b> ${rx.referDoc || 'Internal Staff'}</div>
+                    <div><b>Document ID:</b> ${rx.id}</div>
                 </div>
-
-                ${targetMatch.rx ? `
-                    <div class="divider"></div>
-                    <div style="font-weight:bold; font-size:1rem;">📋 ORIGINAL DOCTOR PRESCRIPTION (Rx):</div>
-                    <div class="rx-box">${targetMatch.rx}</div>
-                ` : ''}
-                
-                <div class="divider" style="margin-top: 30px;"></div>
-                <p style="text-align: center; font-size: 0.8rem;">Thank You! Access your receipt instantly anytime.</p>
+                ${rx.symptoms && rx.symptoms !== 'N/A' ? `<p><b>Chief Symptoms:</b> ${rx.symptoms}</p>` : ''}
+                ${rx.tests && rx.tests !== 'None' ? `<p><b>Diagnostic Advice:</b> ${rx.tests}</p>` : ''}
+                <div class="rx-symbol">℞</div>
+                <div class="content-box">${rx.rx || 'No medication logs configured.'}</div>
+                <div class="footer">This document represents a pure medical consultation chart record. Contains zero financial billing figures.</div>
             </body>
             </html>
         `);
         doc.close();
+        this.triggerPrint(iframe);
+    },
 
+    executePrintReceipt: function(tx) {
+        const iframe = this.getCleanIframe();
+        const doc = iframe.contentWindow.document;
+        doc.open();
+
+        let tableRows = "";
+        let calculatedBase = 0;
+        let calculatedCgst = 0;
+        let calculatedSgst = 0;
+
+        tx.itemsBreakdown.forEach((item, index) => {
+            const totalMrp = parseFloat(item.mrp || 0);
+            const basePrice = totalMrp / 1.12;
+            const taxComponent = totalMrp - basePrice;
+            const halfTax = taxComponent / 2;
+
+            calculatedBase += basePrice;
+            calculatedCgst += halfTax;
+            calculatedSgst += halfTax;
+
+            tableRows += `<tr>
+                <td>${index+1}. ${item.name}</td>
+                <td>₹${basePrice.toFixed(2)}</td>
+                <td>6%</td>
+                <td>6%</td>
+                <td style="text-align:right; font-weight:600;">₹${totalMrp.toFixed(2)}</td>
+            </tr>`;
+        });
+
+        doc.write(`
+            <html>
+            <head>
+                <style>
+                    body { font-family: 'Courier New', monospace; padding: 15px; font-size: 13px; line-height: 1.4; color: #000; }
+                    .text-center { text-align: center; }
+                    .dashed-line { border-top: 1px dashed #000; margin: 10px 0; }
+                    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                    th, td { padding: 4px; text-align: left; }
+                    th { border-bottom: 1px dashed #000; }
+                    .totals-box { text-align: right; font-size: 13px; margin-top: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="text-center">
+                    <h3>NAMTI DRUG HOUSE</h3>
+                    <p>Sivasagar, Assam<br>TAX INVOICE / CASH MEMO</p>
+                </div>
+                <div class="dashed-line"></div>
+                <div><b>Bill No  :</b> ${tx.id}</div>
+                <div><b>Customer :</b> ${tx.name} (${tx.phone})</div>
+                <div><b>Date     :</b> ${tx.formattedDate || new Date(tx.timestamp).toLocaleDateString('en-IN')}</div>
+                <div><b>Referrer :</b> ${tx.referDoc}</div>
+                <div class="dashed-line"></div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Desc</th>
+                            <th>Base Vol</th>
+                            <th>CGST</th>
+                            <th>SGST</th>
+                            <th style="text-align:right;">Total (MRP)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+                <div class="dashed-line"></div>
+                <div class="totals-box">
+                    Total Taxable Base: ₹${calculatedBase.toFixed(2)}<br>
+                    Integrated CGST: ₹${calculatedCgst.toFixed(2)}<br>
+                    Integrated SGST: ₹${calculatedSgst.toFixed(2)}<br>
+                    <span style="font-size:15px; font-weight:bold;">GRAND PAYABLE (INCL. GST): ₹${parseFloat(tx.finalPrice).toFixed(2)}</span>
+                </div>
+                <div class="dashed-line"></div>
+                <p class="text-center" style="font-size:11px;">Thank You! This is a dedicated itemized tax document. No health data embedded.</p>
+            </body>
+            </html>
+        `);
+        doc.close();
+        this.triggerPrint(iframe);
+    },
+
+    getCleanIframe: function() {
+        const old = document.getElementById('ndh-print-frame');
+        if (old) old.remove();
+        const iframe = document.createElement('iframe');
+        iframe.id = 'ndh-print-frame';
+        iframe.style.position = 'fixed';
+        iframe.style.opacity = '0.01';
+        document.body.appendChild(iframe);
+        return iframe;
+    },
+
+    triggerPrint: function(iframe) {
         setTimeout(() => {
             iframe.contentWindow.focus();
             iframe.contentWindow.print();
-            document.getElementById('customer-receipt-download-form').reset();
-        }, 800);
+        }, 600);
     }
 };
 
 // ========================================================
-// 5. STAFF DASHBOARD & LEDGER HISTORY ENGINE
+// 4. STAFF DASHBOARD & REAL-TIME GST CALCULATIONS
 // ========================================================
 window.StaffDashboard = {
     switchTab: function(tabName) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-content'));
-        
         document.getElementById(`tab-${tabName}-btn`).classList.add('active-tab');
         document.getElementById(`tab-${tabName}-content`).classList.add('active-content');
-
-        if(tabName === 'analytics') {
-            this.updateCustomerFigures();
-            this.renderHistoryTable();
-        }
+        if(tabName === 'analytics') { this.updateCustomerFigures(); this.renderHistoryTable(); }
     },
 
     addPosRow: function() {
@@ -332,17 +333,26 @@ window.StaffDashboard = {
         row.className = 'dynamic-item-row';
         row.innerHTML = `
             <input type="text" class="pos-med-name" placeholder="Medicine Name" style="margin:0;">
-            <input type="number" class="pos-med-mrp" placeholder="MRP (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
+            <input type="number" class="pos-med-mrp" placeholder="MRP Price Incl. Tax (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
         `;
         container.appendChild(row);
     },
 
     syncPosTotal: function() {
-        let sum = 0;
+        let grandTotal = 0;
         document.querySelectorAll('.pos-med-mrp').forEach(input => {
-            sum += parseFloat(input.value) || 0;
+            grandTotal += parseFloat(input.value) || 0;
         });
-        document.getElementById('pos-calculated-total').textContent = sum.toFixed(2);
+        
+        // 12% Internal Tax Reverse Engineering Logic
+        const baseAmount = grandTotal / 1.12;
+        const totalTax = grandTotal - baseAmount;
+        const cgstSgst = totalTax / 2;
+
+        document.getElementById('pos-calculated-base').textContent = baseAmount.toFixed(2);
+        document.getElementById('pos-calculated-cgst').textContent = cgstSgst.toFixed(2);
+        document.getElementById('pos-calculated-sgst').textContent = cgstSgst.toFixed(2);
+        document.getElementById('pos-calculated-total').textContent = grandTotal.toFixed(2);
     },
 
     processOfflinePOS: function(mode) {
@@ -351,65 +361,55 @@ window.StaffDashboard = {
         let referDoc = document.getElementById('pos-refer-doc').value.trim() || "Direct Counter Self";
         
         let itemsBreakdown = [];
-        let calculatedTotal = 0;
+        let grandTotal = 0;
 
         const names = document.querySelectorAll('.pos-med-name');
         const mrps = document.querySelectorAll('.pos-med-mrp');
 
         names.forEach((el, index) => {
-            const medName = el.value.trim();
-            const medMrp = parseFloat(mrps[index].value) || 0;
-            if(medName) {
-                itemsBreakdown.push({ name: medName, mrp: medMrp });
-                calculatedTotal += medMrp;
+            const mName = el.value.trim();
+            const mMrp = parseFloat(mrps[index].value) || 0;
+            if(mName && mMrp > 0) {
+                itemsBreakdown.push({ name: mName, mrp: mMrp });
+                grandTotal += mMrp;
             }
         });
 
-        if (itemsBreakdown.length === 0 || calculatedTotal <= 0) {
-            alert("❌ Please add at least one medicine item with its respective MRP price!");
-            return;
-        }
+        if (itemsBreakdown.length === 0) { alert("Add at least one medicine with valid numeric value!"); return; }
 
         const currentStamp = new Date();
-        const defaultDateStr = currentStamp.toLocaleDateString('en-IN') + ' | ' + currentStamp.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
-
-        const transactionRecord = {
+        const finalizedTx = {
             id: 'POS-' + Math.floor(1000 + Math.random() * 9000),
-            name: customer,
-            phone: phone,
-            referDoc: referDoc,
-            itemsBreakdown: itemsBreakdown,
-            finalPrice: calculatedTotal,
-            isPOS: true,
+            name: customer, phone: phone, referDoc: referDoc,
+            itemsBreakdown: itemsBreakdown, finalPrice: grandTotal,
             timestamp: currentStamp.getTime(),
-            formattedDate: defaultDateStr
+            formattedDate: currentStamp.toLocaleDateString('en-IN') + ' ' + currentStamp.toLocaleTimeString('en-IN')
         };
 
         const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-        universalLedger.push(transactionRecord);
+        universalLedger.push(finalizedTx);
         localStorage.setItem('ndh_universal_ledger', JSON.stringify(universalLedger));
 
-        this.logRevenueTransaction(calculatedTotal);
-        this.updateCustomerFigures();
+        this.logRevenueTransaction(grandTotal);
         
         if (mode === 'Cash') {
-            alert(`💵 Counter POS Invoice Processed! Collected ₹${calculatedTotal.toFixed(2)}.`);
+            alert(`💵 Bill Settled via Cash (GST Applied)! Amount: ₹${grandTotal.toFixed(2)}.`);
         } else {
-            let itemSummary = itemsBreakdown.map(i => `${i.name}: ₹${i.mrp}`).join('\n');
-            this.generateSystemUpiQr(calculatedTotal, `POS: ${customer}\n${itemSummary}`);
+            this.generateSystemUpiQr(grandTotal, `Invoice ${finalizedTx.id} - Total Due`);
         }
 
-        // Reset inputs
+        // Reset elements
         document.getElementById('pos-cust-name').value = "";
         document.getElementById('pos-cust-phone').value = "";
         document.getElementById('pos-refer-doc').value = "";
         document.getElementById('pos-items-container').innerHTML = `
             <div class="dynamic-item-row">
                 <input type="text" class="pos-med-name" placeholder="Medicine Name" style="margin:0;">
-                <input type="number" class="pos-med-mrp" placeholder="MRP (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
+                <input type="number" class="pos-med-mrp" placeholder="MRP Price Incl. Tax (₹)" style="margin:0;" oninput="window.StaffDashboard.syncPosTotal()">
             </div>
         `;
-        document.getElementById('pos-calculated-total').textContent = "0.00";
+        this.syncPosTotal();
+        this.updateCustomerFigures();
     },
 
     loadRxQueue: function() {
@@ -418,398 +418,11 @@ window.StaffDashboard = {
         const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
 
         if (rxData.length === 0) {
-            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No prescriptions logged.</td></tr>`;
+            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No medical prescriptions waiting.</td></tr>`;
             return;
         }
 
         rxData.forEach((item) => {
-            const displayDate = item.formattedDate || new Date(item.timestamp).toLocaleDateString('en-IN');
-            const tr = document.createElement('tr');
+            tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${item.id}</b><br>${item.name}<br><small>Age: ${item.age} | ${item.sex}</small><br><span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px;">⏰ ${displayDate}</span></td>
-                <td><div style="font-family:monospace; font-size:0.85rem; background:#f8fafc; padding:6px; border-radius:4px;">${item.rx}</div></td>
-                <td>
-                    <div style="margin-bottom:6px;">
-                        <input type="text" id="rx-refer-field-${item.id}" value="${item.referDoc || ''}" placeholder="Refer Doctor / Hospital" style="padding:6px; margin:0; font-size:0.8rem; background:#fffbeb;">
-                    </div>
-                    <div id="rx-breakdown-container-${item.id}">
-                        <div class="dynamic-item-row">
-                            <input type="text" class="rx-med-name-${item.id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-                            <input type="number" class="rx-med-mrp-${item.id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-                        </div>
-                    </div>
-                    <button type="button" onclick="window.StaffDashboard.addRxRow('${item.id}')" style="margin-top:4px; padding:2px 6px; font-size:0.75rem;">+ Add Row</button>
-                </td>
-                <td>
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <input type="text" id="rx-phone-field-${item.id}" placeholder="Cust Phone *" style="padding:6px; margin:0; font-size:0.85rem;" required>
-                        <div style="display:flex; gap:4px;">
-                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
-                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
-                        </div>
-                        <button onclick="window.StaffDashboard.deletePermanentItem('Rx', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete 🗑️</button>
-                    </div>
-                </td>
-            `;
-            target.appendChild(tr);
-        });
-    },
-
-    addRxRow: function(id) {
-        const container = document.getElementById(`rx-breakdown-container-${id}`);
-        const row = document.createElement('div');
-        row.className = 'dynamic-item-row';
-        row.style.marginTop = '4px';
-        row.innerHTML = `
-            <input type="text" class="rx-med-name-${id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-            <input type="number" class="rx-med-mrp-${id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-        `;
-        container.appendChild(row);
-    },
-
-    loadOnlineOrdersQueue: function() {
-        const target = document.getElementById('live-online-orders-queue');
-        if (!target) return; target.innerHTML = "";
-        const orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
-        let baseOrders = orders.filter(item => item.isPOS !== true);
-
-        if (baseOrders.length === 0) {
-            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No online requests.</td></tr>`;
-            return;
-        }
-
-        baseOrders.forEach((item) => {
-            const displayDate = item.formattedDate || new Date(item.timestamp).toLocaleDateString('en-IN');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small><br><span style="background:#fef3c7; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px;">⏰ ${displayDate}</span></td>
-                <td><small><b>Note:</b> ${item.meds}</small><br>
-                    <button onclick="window.StaffDashboard.viewPrescriptionImage('${item.imgData}')" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-top:5px;">👁️ View Pic</button>
-                </td>
-                <td>
-                    <div style="margin-bottom:6px;">
-                        <input type="text" id="order-refer-field-${item.id}" placeholder="Refer Doctor / Hospital" style="padding:6px; margin:0; font-size:0.8rem; background:#fffbeb;">
-                    </div>
-                    <div id="order-breakdown-container-${item.id}">
-                        <div class="dynamic-item-row">
-                            <input type="text" class="order-med-name-${item.id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-                            <input type="number" class="order-med-mrp-${item.id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-                        </div>
-                    </div>
-                    <button type="button" onclick="window.StaffDashboard.addOrderRow('${item.id}')" style="margin-top:4px; padding:2px 6px; font-size:0.75rem;">+ Add Row</button>
-                </td>
-                <td>
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <div style="display:flex; gap:4px;">
-                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
-                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
-                        </div>
-                        <button onclick="window.StaffDashboard.deletePermanentItem('Order', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete</button>
-                    </div>
-                </td>
-            `;
-            target.appendChild(tr);
-        });
-    },
-
-    addOrderRow: function(id) {
-        const container = document.getElementById(`order-breakdown-container-${id}`);
-        const row = document.createElement('div');
-        row.className = 'dynamic-item-row';
-        row.style.marginTop = '4px';
-        row.innerHTML = `
-            <input type="text" class="order-med-name-${id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
-            <input type="number" class="order-med-mrp-${id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
-        `;
-        container.appendChild(row);
-    },
-
-    billingAction: function(type, itemId, mode) {
-        const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-        const dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        const activeItem = dataset.find(item => item.id === itemId);
-
-        if(!activeItem) return;
-
-        let phoneValue = activeItem.phone;
-        if(type === 'Rx') {
-            phoneValue = document.getElementById(`rx-phone-field-${itemId}`).value.trim();
-            if(!phoneValue) { alert("Please input active Customer Phone number!"); return; }
-        }
-
-        let referDocFieldId = (type === 'Rx') ? `rx-refer-field-${itemId}` : `order-refer-field-${itemId}`;
-        let extractedReferValue = document.getElementById(referDocFieldId).value.trim() || "NDH Dynamic Internal Walk-in";
-
-        let itemsBreakdown = [];
-        let grandTotal = 0;
-
-        const selectorPrefix = (type === 'Rx') ? `.rx-med-name-${itemId}` : `.order-med-name-${itemId}`;
-        const pricePrefix = (type === 'Rx') ? `.rx-med-mrp-${itemId}` : `.order-med-mrp-${itemId}`;
-
-        const itemNames = document.querySelectorAll(selectorPrefix);
-        const itemPrices = document.querySelectorAll(pricePrefix);
-
-        itemNames.forEach((el, index) => {
-            const name = el.value.trim();
-            const mrp = parseFloat(itemPrices[index].value) || 0;
-            if(name) {
-                itemsBreakdown.push({ name: name, mrp: mrp });
-                grandTotal += mrp;
-            }
-        });
-
-        if(itemsBreakdown.length === 0 || grandTotal <= 0) {
-            alert("❌ Operational Error: Enter at least one medicine item along with MRP!");
-            return;
-        }
-
-        const finalizedTransaction = {
-            ...activeItem,
-            phone: phoneValue,
-            referDoc: extractedReferValue,
-            itemsBreakdown: itemsBreakdown,
-            finalPrice: grandTotal,
-            timestamp: new Date().getTime()
-        };
-
-        const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-        universalLedger.push(finalizedTransaction);
-        localStorage.setItem('ndh_universal_ledger', JSON.stringify(universalLedger));
-
-        this.logRevenueTransaction(grandTotal);
-
-        const filteredTemp = dataset.filter(i => i.id !== itemId);
-        localStorage.setItem(storageKey, JSON.stringify(filteredTemp));
-
-        if(mode === 'Cash') {
-            alert(`💵 Bill Settled permanently! Collected ₹${grandTotal.toFixed(2)}.`);
-            this.loadRxQueue();
-            this.loadOnlineOrdersQueue();
-        } else {
-            let itemSummary = itemsBreakdown.map(i => `${i.name}: ₹${i.mrp}`).join('\n');
-            this.generateSystemUpiQr(grandTotal, `Settlement: ${activeItem.name}\n${itemSummary}`);
-            this.loadRxQueue();
-            this.loadOnlineOrdersQueue();
-        }
-        this.updateCustomerFigures();
-    },
-
-    updateCustomerFigures: function() {
-        const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-        const now = new Date();
-        const todayStr = now.toDateString();
-
-        let todayCount = 0;
-        let lastMonthCount = 0;
-        let lastYearCount = 0;
-
-        universalLedger.forEach(item => {
-            const txDate = new Date(item.timestamp || Date.now());
-            
-            // Today check
-            if (txDate.toDateString() === todayStr) {
-                todayCount++;
-            }
-            
-            // Last Month check
-            let lmMonth = now.getMonth() - 1;
-            let lmYear = now.getFullYear();
-            if(lmMonth < 0) { lmMonth = 11; lmYear--; }
-            if(txDate.getMonth() === lmMonth && txDate.getFullYear() === lmYear) {
-                lastMonthCount++;
-            }
-
-            // Last Year check
-            if(txDate.getFullYear() === (now.getFullYear() - 1)) {
-                lastYearCount++;
-            }
-        });
-
-        if(document.getElementById('stats-cust-today')) document.getElementById('stats-cust-today').textContent = todayCount;
-        if(document.getElementById('stats-cust-month')) document.getElementById('stats-cust-month').textContent = lastMonthCount;
-        if(document.getElementById('stats-cust-year')) document.getElementById('stats-cust-year').textContent = lastYearCount;
-    },
-
-    renderHistoryTable: function() {
-        const tbody = document.getElementById('analytics-history-tbody');
-        if(!tbody) return;
-        tbody.innerHTML = "";
-
-        const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-        const searchVal = document.getElementById('analytics-search-input').value.toLowerCase().trim();
-
-        const filtered = universalLedger.filter(item => {
-            const nameMatch = item.name && item.name.toLowerCase().includes(searchVal);
-            const phoneMatch = item.phone && item.phone.includes(searchVal);
-            return !searchVal || nameMatch || phoneMatch;
-        });
-
-        if(filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No customer transaction records found.</td></tr>`;
-            return;
-        }
-
-        // Display newest records first
-        filtered.reverse().forEach((item, globalIndex) => {
-            const dateStr = item.formattedDate || new Date(item.timestamp).toLocaleDateString('en-IN');
-            
-            let itemsText = "";
-            if(item.itemsBreakdown && item.itemsBreakdown.length > 0) {
-                itemsText = item.itemsBreakdown.map(i => `• ${i.name} (₹${i.mrp})`).join('<br>');
-            } else {
-                itemsText = `<small style="color:#94a3b8;">Direct Settlement</small>`;
-            }
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><small>${dateStr}</small><br><b>${item.id || 'POS'}</b></td>
-                <td><b>${item.name}</b><br><small>Ph: ${item.phone}</small></td>
-                <td><span style="color:#4f46e5; font-weight:600;">${item.referDoc || 'Direct Walk-in'}</span></td>
-                <td style="font-size:0.85rem; line-height:1.3;">${itemsText}</td>
-                <td style="font-weight:bold; color:var(--success);">₹${parseFloat(item.finalPrice || 0).toFixed(2)}</td>
-                <td>
-                    <button onclick="window.StaffDashboard.deleteHistoryRecord(${item.timestamp})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Wipe 🗑️</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    },
-
-    deleteHistoryRecord: function(timestampIdentifier) {
-        if(confirm("Are you sure you want to permanently delete this customer record from history? This action cannot be undone.")) {
-            let universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-            universalLedger = universalLedger.filter(item => item.timestamp !== timestampIdentifier);
-            localStorage.setItem('ndh_universal_ledger', JSON.stringify(universalLedger));
-            
-            this.updateCustomerFigures();
-            this.renderHistoryTable();
-            this.calculateRevenueLedger();
-        }
-    },
-
-    generateSystemUpiQr: function(amount, memo) {
-        const merchantUpi = "hussain.abidur@ybl";
-        const cleanMemo = memo.split('\n')[0].replace(/[^a-zA-Z0-9 ]/g, "");
-        const rawString = `upi://pay?pa=${merchantUpi}&pn=NamtiDrugHouse&am=${amount}&cu=INR&tn=${encodeURIComponent(cleanMemo)}`;
-        const finalQrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(rawString)}`;
-
-        document.getElementById('qr-modal-details').textContent = `${memo}\n\nGrand Total Due: ₹${amount.toFixed(2)}`;
-        document.getElementById('qr-image-container').innerHTML = `<img src="${finalQrEndpoint}" alt="UPI QR" style="display:block; margin:0 auto; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.15);">`;
-        document.getElementById('qr-modal-overlay').style.display = 'flex';
-    },
-
-    closeQrModal: function() {
-        document.getElementById('qr-modal-overlay').style.display = 'none';
-    },
-
-    viewPrescriptionImage: function(blobString) {
-        if(!blobString) { alert("No attachment."); return; }
-        document.getElementById('modal-rx-img-render').src = blobString;
-        document.getElementById('prescription-photo-modal').style.display = 'flex';
-    },
-
-    logRevenueTransaction: function(amount) {
-        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
-        ledger.push({ amount: amount, dateString: new Date().toDateString(), timestamp: Date.now() });
-        localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
-        this.calculateRevenueLedger();
-    },
-
-    calculateRevenueLedger: function() {
-        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
-        const todayStr = new Date().toDateString();
-        const now = new Date();
-        
-        let todaySum = 0, lastMonthSum = 0, grandTotal = 0;
-
-        ledger.forEach(tx => {
-            grandTotal += tx.amount;
-            if (tx.dateString === todayStr) todaySum += tx.amount;
-            
-            const txDate = new Date(tx.timestamp);
-            let targetMonth = now.getMonth() - 1;
-            let targetYear = now.getFullYear();
-            if (targetMonth < 0) { targetMonth = 11; targetYear--; }
-            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
-                lastMonthSum += tx.amount;
-            }
-        });
-
-        if(document.getElementById('rev-today')) document.getElementById('rev-today').textContent = `₹ ${todaySum.toFixed(2)}`;
-        if(document.getElementById('rev-month')) document.getElementById('rev-month').textContent = `₹ ${lastMonthSum.toFixed(2)}`;
-        if(document.getElementById('rev-total')) document.getElementById('rev-total').textContent = `₹ ${grandTotal.toFixed(2)}`;
-    },
-
-    clearRevenueMetrics: function() {
-        if(confirm("Wipe all active analytics ledger memory?")) {
-            localStorage.setItem('ndh_revenue_ledger', '[]');
-            this.calculateRevenueLedger();
-        }
-    },
-
-    deletePermanentItem: function(type, itemId) {
-        if (confirm("Delete this queue record?")) {
-            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
-            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            localStorage.setItem(storageKey, JSON.stringify(dataset.filter(item => item.id !== itemId)));
-            this.loadRxQueue();
-            this.loadOnlineOrdersQueue();
-        }
-    }
-};
-
-// ========================================================
-// 6. AUTOMATED MONTHLY CRM PROMOTIONAL SMS ENGINE
-// ========================================================
-window.PromotionalSMS = {
-    checkAndTriggerSMS: function() {
-        const now = new Date();
-        const currentDay = now.getDate();
-        const currentMonthYear = now.getMonth() + "-" + now.getFullYear();
-        
-        // Strictly trigger only on 3rd of the month
-        if (currentDay !== 3) {
-            return;
-        }
-
-        // Check if already dispatched for this specific month cycle
-        if (localStorage.getItem('ndh_sms_last_dispatched_m') === currentMonthYear) {
-            console.log("Promotional campaign already successfully executed for this month cycle.");
-            return;
-        }
-
-        const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
-        if (universalLedger.length === 0) return;
-
-        // Collect unique active numbers
-        const uniqueContacts = {};
-        universalLedger.forEach(entry => {
-            if(entry.phone && entry.phone !== "0000000000") {
-                uniqueContacts[entry.phone] = entry.name || "Valued Customer";
-            }
-        });
-
-        const contactNumbers = Object.keys(uniqueContacts);
-        if(contactNumbers.length === 0) return;
-
-        console.log(`============= DYNAMIC CRM SMS DISPATCH LOGS (${now.toLocaleDateString()}) =============`);
-        contactNumbers.forEach(phone => {
-            const customerName = uniqueContacts[phone];
-            const smsText = `Hello ${customerName}, Thank you for choosing Namti Drug House! We deeply appreciate your trust in us for your healthcare requirements. As a token of gratitude, we invite you to buy your routine medicines again this week and enjoy a flat 10% discount on your next order! Visit us or order online. T&C apply.`;
-            
-            // Outputting live visual execution log payload simulated inside environment console terminal
-            console.log(`[SMS Gateway Broadcast] Sent to: ${phone} | Content: ${smsText}`);
-        });
-        
-        // Show status bar in front-end UI
-        const infoBar = document.getElementById('sms-notification-bar');
-        if(infoBar) {
-            infoBar.textContent = `📢 Monthly CRM Promo Campaign Dispatched successfully to ${contactNumbers.length} registered customer contacts!`;
-            infoBar.style.display = 'block';
-            setTimeout(() => { infoBar.style.display = 'none'; }, 10000);
-        }
-
-        // Lock execution for the month
-        localStorage.setItem('ndh_sms_last_dispatched_m', currentMonthYear);
-    }
-};
+                <td><b>${item.id}</b><br>${item.name} (${item.age}y / ${item.sex})<br><small>${item.formatte
