@@ -792,4 +792,24 @@ window.PromotionalSMS = {
         const contactNumbers = Object.keys(uniqueContacts);
         if(contactNumbers.length === 0) return;
 
-        console.log(`============= DYNAMIC CRM SMS DISPATCH LOGS (${now.toLocaleDateString()}) ======
+        console.log(`============= DYNAMIC CRM SMS DISPATCH LOGS (${now.toLocaleDateString()}) =============`);
+        contactNumbers.forEach(phone => {
+            const customerName = uniqueContacts[phone];
+            const smsText = `Hello ${customerName}, Thank you for choosing Namti Drug House! We deeply appreciate your trust in us for your healthcare requirements. As a token of gratitude, we invite you to buy your routine medicines again this week and enjoy a flat 10% discount on your next order! Visit us or order online. T&C apply.`;
+            
+            // Outputting live visual execution log payload simulated inside environment console terminal
+            console.log(`[SMS Gateway Broadcast] Sent to: ${phone} | Content: ${smsText}`);
+        });
+        
+        // Show status bar in front-end UI
+        const infoBar = document.getElementById('sms-notification-bar');
+        if(infoBar) {
+            infoBar.textContent = `📢 Monthly CRM Promo Campaign Dispatched successfully to ${contactNumbers.length} registered customer contacts!`;
+            infoBar.style.display = 'block';
+            setTimeout(() => { infoBar.style.display = 'none'; }, 10000);
+        }
+
+        // Lock execution for the month
+        localStorage.setItem('ndh_sms_last_dispatched_m', currentMonthYear);
+    }
+};
