@@ -416,4 +416,248 @@ window.StaffDashboard = {
                             <input type="number" class="rx-med-mrp-${item.id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
                         </div>
                     </div>
-                    <button type="button" onclick="window.StaffDashboard.addRxRow('${item.id}')" style="margin-top:4px; padding:2px 6px; fo
+                    <button type="button" onclick="window.StaffDashboard.addRxRow('${item.id}')" style="margin-top:4px; padding:2px 6px; font-size:0.75rem;">+ Add Row</button>
+                </td>
+                <td>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <input type="text" id="rx-phone-field-${item.id}" placeholder="Cust Phone *" style="padding:6px; margin:0; font-size:0.85rem;" required>
+                        <div style="display:flex; gap:4px;">
+                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Collect Cash</button>
+                            <button onclick="window.StaffDashboard.billingAction('Rx', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
+                        </div>
+                        <button onclick="window.StaffDashboard.printRxMedicalPdf('${item.id}')" style="background:#475569; color:white; border:none; padding:6px; border-radius:4px; font-size:0.8rem; cursor:pointer;">Print Pure Rx 🖨️</button>
+                        <button onclick="window.StaffDashboard.deletePermanentItem('Rx', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer;">Delete 🗑️</button>
+                    </div>
+                </td>
+            `;
+            target.appendChild(tr);
+        });
+    },
+
+    addRxRow: function(id) {
+        const container = document.getElementById(`rx-breakdown-container-${id}`);
+        const row = document.createElement('div');
+        row.className = 'dynamic-item-row';
+        row.style.marginTop = '4px';
+        row.innerHTML = `
+            <input type="text" class="rx-med-name-${id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
+            <input type="number" class="rx-med-mrp-${id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
+        `;
+        container.appendChild(row);
+    },
+
+    loadOnlineOrdersQueue: function() {
+        const target = document.getElementById('live-online-orders-queue');
+        if (!target) return; target.innerHTML = "";
+        const orders = JSON.parse(localStorage.getItem('ndh_longterm_orders') || '[]');
+        let baseOrders = orders.filter(item => item.isPOS !== true);
+
+        if (baseOrders.length === 0) {
+            target.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No custom online customer desk requests listed.</td></tr>`;
+            return;
+        }
+
+        baseOrders.forEach((item) => {
+            const displayDate = item.formattedDate || new Date(item.timestamp).toLocaleDateString('en-IN');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${item.id}</b><br>${item.name}<br><small>Ph: ${item.phone}</small><br><span style="background:#fef3c7; padding:2px 6px; border-radius:4px; font-size:0.75rem; display:inline-block; margin-top:4px;">⏰ ${displayDate}</span></td>
+                <td><small><b>Note:</b> ${item.meds}</small><br>
+                    <button onclick="window.StaffDashboard.viewPrescriptionImage('${item.imgData}')" style="background:#e2e8f0; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-top:5px;">👁️ View Attachment</button>
+                </td>
+                <td>
+                    <div id="order-breakdown-container-${item.id}">
+                        <div class="dynamic-item-row">
+                            <input type="text" class="order-med-name-${item.id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
+                            <input type="number" class="order-med-mrp-${item.id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.StaffDashboard.addOrderRow('${item.id}')" style="margin-top:4px; padding:2px 6px; font-size:0.75rem;">+ Add Row</button>
+                </td>
+                <td>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; gap:4px;">
+                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'Cash')" class="btn-action btn-success" style="padding:6px; font-size:0.8rem; flex:1;">Cash</button>
+                            <button onclick="window.StaffDashboard.billingAction('Order', '${item.id}', 'QR')" class="btn-action" style="padding:6px; background:#0284c7; font-size:0.8rem; flex:1;">UPI QR</button>
+                        </div>
+                        <button onclick="window.StaffDashboard.deletePermanentItem('Order', '${item.id}')" style="background:#ef4444; color:white; border:none; padding:4px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:bold;">Delete 🗑️</button>
+                    </div>
+                </td>
+            `;
+            target.appendChild(tr);
+        });
+    },
+
+    addOrderRow: function(id) {
+        const container = document.getElementById(`order-breakdown-container-${id}`);
+        const row = document.createElement('div');
+        row.className = 'dynamic-item-row';
+        row.style.marginTop = '4px';
+        row.innerHTML = `
+            <input type="text" class="order-med-name-${id}" placeholder="Med Name" style="padding:6px; margin:0; font-size:0.8rem;">
+            <input type="number" class="order-med-mrp-${id}" placeholder="MRP" style="padding:6px; margin:0; font-size:0.8rem; width:80px;">
+        `;
+        container.appendChild(row);
+    },
+
+    billingAction: function(type, itemId, mode) {
+        const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+        const dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const activeItem = dataset.find(item => item.id === itemId);
+
+        if(!activeItem) return;
+
+        let phoneValue = activeItem.phone;
+        if(type === 'Rx') {
+            phoneValue = document.getElementById(`rx-phone-field-${itemId}`).value.trim();
+            if(!phoneValue) { alert("Please input active Customer Phone number to bind secure fetch keys!"); return; }
+        }
+
+        // Parse individual items & calculate aggregate bill sum
+        let itemsBreakdown = [];
+        let grandTotal = 0;
+
+        const selectorPrefix = (type === 'Rx') ? `.rx-med-name-${itemId}` : `.order-med-name-${itemId}`;
+        const pricePrefix = (type === 'Rx') ? `.rx-med-mrp-${itemId}` : `.order-med-mrp-${itemId}`;
+
+        const itemNames = document.querySelectorAll(selectorPrefix);
+        const itemPrices = document.querySelectorAll(pricePrefix);
+
+        itemNames.forEach((el, index) => {
+            const name = el.value.trim();
+            const mrp = parseFloat(itemPrices[index].value) || 0;
+            if(name) {
+                itemsBreakdown.push({ name: name, mrp: mrp });
+                grandTotal += mrp;
+            }
+        });
+
+        if(itemsBreakdown.length === 0 || grandTotal <= 0) {
+            alert("❌ Operational Error: Enter at least one medicine item and individual price row!");
+            return;
+        }
+
+        // Compose Unified Ledger Object
+        const finalizedTransaction = {
+            ...activeItem,
+            phone: phoneValue,
+            itemsBreakdown: itemsBreakdown,
+            finalPrice: grandTotal,
+            timestamp: new Date().getTime()
+        };
+
+        const universalLedger = JSON.parse(localStorage.getItem('ndh_universal_ledger') || '[]');
+        universalLedger.push(finalizedTransaction);
+        localStorage.setItem('ndh_universal_ledger', JSON.stringify(universalLedger));
+
+        this.logRevenueTransaction(grandTotal);
+
+        // Splice from temporary workflow pipeline queues
+        const filteredTemp = dataset.filter(i => i.id !== itemId);
+        localStorage.setItem(storageKey, JSON.stringify(filteredTemp));
+
+        if(mode === 'Cash') {
+            alert(`💵 Bill Settled and fully backed up! Collected ₹${grandTotal.toFixed(2)} in Cash.`);
+            this.loadRxQueue();
+            this.loadOnlineOrdersQueue();
+        } else {
+            let itemSummary = itemsBreakdown.map(i => `${i.name}: ₹${i.mrp}`).join('\n');
+            this.generateSystemUpiQr(grandTotal, `Settlement: ${activeItem.name}\n${itemSummary}`);
+            this.loadRxQueue();
+            this.loadOnlineOrdersQueue();
+        }
+    },
+
+    generateSystemUpiQr: function(amount, memo) {
+        const merchantUpi = "hussain.abidur@ybl";
+        const cleanMemo = memo.split('\n')[0].replace(/[^a-zA-Z0-9 ]/g, "");
+        const rawString = `upi://pay?pa=${merchantUpi}&pn=NamtiDrugHouse&am=${amount}&cu=INR&tn=${encodeURIComponent(cleanMemo)}`;
+        const finalQrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(rawString)}`;
+
+        document.getElementById('qr-modal-details').textContent = `${memo}\n\nGrand Total Due: ₹${amount.toFixed(2)}`;
+        document.getElementById('qr-image-container').innerHTML = `<img src="${finalQrEndpoint}" alt="UPI Dynamic QR Engine" style="display:block; margin:0 auto; border:3px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.15);">`;
+        document.getElementById('qr-modal-overlay').style.display = 'flex';
+    },
+
+    closeQrModal: function() {
+        document.getElementById('qr-modal-overlay').style.display = 'none';
+    },
+
+    viewPrescriptionImage: function(blobString) {
+        if(!blobString) { alert("No attachment provided."); return; }
+        document.getElementById('modal-rx-img-render').src = blobString;
+        document.getElementById('prescription-photo-modal').style.display = 'flex';
+    },
+
+    logRevenueTransaction: function(amount) {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
+        ledger.push({ amount: amount, dateString: new Date().toDateString(), timestamp: Date.now() });
+        localStorage.setItem('ndh_revenue_ledger', JSON.stringify(ledger));
+        this.calculateRevenueLedger();
+    },
+
+    calculateRevenueLedger: function() {
+        const ledger = JSON.parse(localStorage.getItem('ndh_revenue_ledger') || '[]');
+        const todayStr = new Date().toDateString();
+        const now = new Date();
+        
+        let todaySum = 0, lastMonthSum = 0, grandTotal = 0;
+
+        ledger.forEach(tx => {
+            grandTotal += tx.amount;
+            if (tx.dateString === todayStr) todaySum += tx.amount;
+            
+            const txDate = new Date(tx.timestamp);
+            let targetMonth = now.getMonth() - 1;
+            let targetYear = now.getFullYear();
+            if (targetMonth < 0) { targetMonth = 11; targetYear--; }
+            if (txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear) {
+                lastMonthSum += tx.amount;
+            }
+        });
+
+        if(document.getElementById('rev-today')) document.getElementById('rev-today').textContent = `₹ ${todaySum.toFixed(2)}`;
+        if(document.getElementById('rev-month')) document.getElementById('rev-month').textContent = `₹ ${lastMonthSum.toFixed(2)}`;
+        if(document.getElementById('rev-total')) document.getElementById('rev-total').textContent = `₹ ${grandTotal.toFixed(2)}`;
+    },
+
+    clearRevenueMetrics: function() {
+        if(confirm("Wipe all revenue ledger data memory?")) {
+            localStorage.setItem('ndh_revenue_ledger', '[]');
+            this.calculateRevenueLedger();
+        }
+    },
+
+    printRxMedicalPdf: function(itemId) {
+        const rxData = JSON.parse(localStorage.getItem('ndh_longterm_rx') || '[]');
+        const rx = rxData.find(item => item.id === itemId);
+        if (!rx) return;
+
+        const oldFrame = document.getElementById('ndh-print-frame');
+        if (oldFrame) oldFrame.remove();
+
+        const iframe = document.createElement('iframe');
+        iframe.id = 'ndh-print-frame';
+        iframe.style.position = 'fixed';
+        iframe.style.bottom = '0';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        iframe.style.opacity = '0.01';
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`<html><body onload="window.print()"><h3>${rx.id} - ${rx.name}</h3><pre>${rx.rx}</pre></body></html>`);
+        doc.close();
+    },
+
+    deletePermanentItem: function(type, itemId) {
+        if (confirm("Delete this queue record?")) {
+            const storageKey = (type === 'Rx') ? 'ndh_longterm_rx' : 'ndh_longterm_orders';
+            let dataset = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            localStorage.setItem(storageKey, JSON.stringify(dataset.filter(item => item.id !== itemId)));
+            this.loadRxQueue();
+            this.loadOnlineOrdersQueue();
+        }
+    }
+};
